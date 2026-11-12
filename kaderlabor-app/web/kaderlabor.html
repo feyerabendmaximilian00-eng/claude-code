@@ -2089,7 +2089,7 @@ drop.addEventListener("drop", e => setShots(e.dataTransfer.files));
 document.addEventListener("paste", e => { const files = [...(e.clipboardData?.files || [])]; if (files.length){ selectTab("shot"); setShots(files); } });
 
 const ERR = {not_granted:"Claude wurde für diese Seite nicht erlaubt.", rate_limited:"Gerade zu viele Anfragen. Versuch es in einer Minute noch einmal.",
-  image_rejected:"Ein Bild konnte nicht gelesen werden. Nutze PNG oder JPG unter 20 MB.", invalid_json:"Die Antwort ließ sich nicht auswerten. Versuch es noch einmal, ggf. mit weniger Bildern.",
+  image_rejected:"Ein Bild konnte nicht gelesen werden. Nutze PNG oder JPG unter 20 MB.", invalid_json:"Claudes Antwort ließ sich nicht auswerten. Versuch es noch einmal oder füge weniger Zeilen auf einmal ein.",
   refused:"Claude hat die Anfrage abgelehnt.", session_expired:"Bitte melde dich erneut an.", images_unavailable:"In dieser Ansicht können keine Bilder an Claude gesendet werden."};
 const errText = e => ERR[e?.code] || "Etwas ist schiefgelaufen. Versuch es noch einmal.";
 
@@ -2105,8 +2105,7 @@ $("#btn-read-shots").addEventListener("click", async () => {
   const btn = $("#btn-read-shots"); btn.disabled = true;
   shotStatus.className = "status"; shotStatus.textContent = "Claude liest die Screenshots… (dauert meist 20–60 Sekunden)";
   try {
-    const data = await sample.json(SHOT_PROMPT, {images: shotFiles});
-    const arr = (Array.isArray(data) ? data : (data && Array.isArray(data.players) ? data.players : [])).filter(o => o && o.name);
+    const arr = await extractImagesWithClaude(shotFiles, (k, n) => { shotStatus.textContent = `Claude liest Bild ${k} von ${n} … (je Bild meist 15–40 Sekunden)`; });
     if (!arr.length){ shotStatus.className = "status err"; shotStatus.textContent = "Auf den Bildern wurden keine Spieler erkannt. Nimm die Kaderansicht mit Namen und Werten."; return; }
     const list = arr.map(normalizePlayer);
     const append = $("#shot-append").checked && !state.isSample;
@@ -2371,14 +2370,19 @@ $("#btn-db-add").addEventListener("click", async () => {
   btn.disabled = true;
   try {
     let rows = parseRows(txt).filter(r => toInt(r.ovr) != null && r.pos);
-    if (!rows.length && sample){
-      st.textContent = "Format nicht direkt erkannt, Claude liest die Tabelle…";
-      const data = await sample.json(CMT_PROMPT + txt.slice(0, 60000));
-      rows = (Array.isArray(data) ? data : []).filter(o => o && o.name && toInt(o.ovr) != null);
+    if (!rowsLookValid(rows)){
+      if (sample){
+        st.textContent = "Claude liest die Tabelle …";
+        rows = await extractTableWithClaude(txt, (k, n) => { st.textContent = n > 1 ? `Claude liest die Tabelle … Teil ${k} von ${n}` : "Claude liest die Tabelle …"; });
+      } else rows = rows.filter(r => normPos(String(r.pos).split(/[\/,| ]+/)[0]));
     }
     if (!rows.length){ st.className = "status err"; st.textContent = "Keine Spieler mit Position und GES erkannt. Kopiere die Tabelle inklusive Kopfzeile."; return; }
     const r = dbAdd(rows, $("#db-league").value);
-    if (r.added + r.updated){ st.textContent = `${r.added} neu, ${r.updated} aktualisiert (${$("#db-league").value}). Datenbank: ${DB.length} Spieler.`; $("#db-in").value = ""; }
+    if (r.added + r.updated){
+      const names = rows.slice(0, 4).map(o => String(o.name)).join(", ");
+      st.textContent = `${r.added} neu, ${r.updated} aktualisiert (${$("#db-league").value}): ${names}${rows.length > 4 ? " …" : ""} · Datenbank: ${DB.length} Spieler.`;
+      $("#db-in").value = "";
+    }
     renderDB();
   } catch(e){ st.className = "status err"; st.textContent = errText(e); }
   finally { btn.disabled = false; }
@@ -2479,6 +2483,56 @@ $("#qdb-status").addEventListener("click", e => {
 });
 $("#btn-add-db").addEventListener("click", () => { selectTab("db"); reveal("#import", {behavior: "smooth", block: "start"}); $("#qdb").focus(); });
 
+
+/* ---------- Robustes Auslesen mit Claude (Tabellen in Teilen, Screenshots einzeln) ---------- */
+// Claude liefert mal ein Array, mal {players:[...]} – beides annehmen
+const asPlayerArray = d => Array.isArray(d) ? d : (d && typeof d === "object" ? (Object.values(d).find(Array.isArray) || []) : []);
+// Passt das direkte Einlesen? Sonst liest Claude die Tabelle.
+function rowsLookValid(rows){
+  if (!rows.length) return false;
+  const ok = rows.filter(r => {
+    const ovr = toInt(r.ovr), age = r.age == null ? null : toInt(r.age);
+    return normPos(String(r.pos || "").split(/[\/,| ]+/)[0]) && ovr != null && ovr >= 40 && ovr <= 99
+      && /[A-Za-zÀ-ž]{2}/.test(String(r.name || "")) && (age == null || (age >= 15 && age <= 45));
+  }).length;
+  return ok / rows.length >= 0.8;
+}
+function mergePlayers(list){
+  const map = new Map();
+  list.filter(o => o && o.name && toInt(o.ovr) != null).forEach(o => {
+    const k = (String(o.name).trim() + "|" + String(o.club || "").trim()).toLowerCase();
+    const prev = map.get(k);
+    map.set(k, prev ? {...prev, ...Object.fromEntries(Object.entries(o).filter(([, v]) => v != null && v !== ""))} : o);
+  });
+  return [...map.values()];
+}
+async function extractTableWithClaude(txt, progress){
+  const lines = txt.split(/\r?\n/).filter(l => l.trim());
+  const head = lines[0] || "";
+  // Teile von ca. 5000 Zeichen an Zeilengrenzen, mit etwas Überlappung, damit kein Spieler zerschnitten wird
+  const chunks = []; let cur = [], len = 0;
+  lines.forEach((l, i) => {
+    cur.push(l); len += l.length + 1;
+    if (len >= 5000 && i < lines.length - 1){ chunks.push(cur); cur = cur.slice(-12); len = cur.reduce((a, x) => a + x.length + 1, 0); }
+  });
+  if (cur.length) chunks.push(cur);
+  const out = [];
+  for (let k = 0; k < chunks.length; k++){
+    progress && progress(k + 1, chunks.length);
+    const body = (k > 0 ? "Kopfzeile der Tabelle (nur zur Orientierung): " + head + "\n\nAusschnitt " + (k + 1) + " von " + chunks.length + ":\n" : "") + chunks[k].join("\n");
+    const prompt = CMT_PROMPT + body + "\n\nWichtig: Lies JEDEN vollständigen Spieler in diesem Text aus. Spieler, die am Anfang oder Ende abgeschnitten sind, weglassen.";
+    out.push(...asPlayerArray(await sample.json(prompt, {cache: false})));
+  }
+  return mergePlayers(out);
+}
+async function extractImagesWithClaude(files, progress){
+  const out = [];
+  for (let k = 0; k < files.length; k++){
+    progress && progress(k + 1, files.length);
+    out.push(...asPlayerArray(await sample.json(SHOT_PROMPT + "\nDas ist Bild " + (k + 1) + " von " + files.length + ". Lies alle Spieler auf diesem Bild aus.", {images: [files[k]], cache: false})));
+  }
+  return mergePlayers(out);
+}
 /* CMTracker-Tabelle einfügen */
 const CMT_PROMPT = `Der folgende Text wurde aus einer Spielersuche (EA SPORTS FC 27 Karrieremodus, z. B. CMTracker) kopiert.
 Extrahiere jeden Spieler. Antworte nur mit einem JSON-Array:
@@ -2496,10 +2550,11 @@ $("#btn-cmt").addEventListener("click", async () => {
   btn.disabled = true;
   try {
     let rows = parseRows(txt).filter(r => toInt(r.ovr) != null && r.pos);
-    if (!rows.length && sample){
-      st.textContent = "Format nicht direkt erkannt, Claude liest die Tabelle…";
-      const data = await sample.json(CMT_PROMPT + txt.slice(0, 60000));
-      rows = (Array.isArray(data) ? data : []).filter(o => o && o.name && toInt(o.ovr) != null);
+    if (!rowsLookValid(rows)){
+      if (sample){
+        st.textContent = "Claude liest die Tabelle …";
+        rows = await extractTableWithClaude(txt, (k, n) => { st.textContent = n > 1 ? `Claude liest die Tabelle … Teil ${k} von ${n}` : "Claude liest die Tabelle …"; });
+      } else rows = rows.filter(r => normPos(String(r.pos).split(/[\/,| ]+/)[0]));
     }
     if (!rows.length){ st.className = "status err"; st.textContent = "Keine Spieler mit Position und GES erkannt. Kopiere die Tabelle inklusive Kopfzeile."; return; }
     dbAdd(rows, ""); renderDB();
