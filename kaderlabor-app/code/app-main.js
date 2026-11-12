@@ -119,7 +119,11 @@ const DEFAULT_ONLINE_URL = "https://claude.ai/artifact/PiYEDgbLVD4chvUDf6XESH";
 const IN_APP_HOSTS = [/(^|\.)claude\.ai$/i, /(^|\.)anthropic\.com$/i, /^accounts\.google\.com$/i, /(^|\.)googleusercontent\.com$/i, /^appleid\.apple\.com$/i, /(^|\.)claudeusercontent\.com$/i];
 const hostOf = url => { try { return new URL(url).hostname; } catch { return ""; } };
 const isInApp = url => url.startsWith("file://") || (/^https:\/\//i.test(url) && IN_APP_HOSTS.some(r => r.test(hostOf(url))));
-function mode() { return readSettings().mode === "local" ? "local" : "online"; }
+function mode() {
+  const s = readSettings();
+  if (!s.appUiDefault) { s.mode = "local"; s.appUiDefault = true; writeSettings(s); }
+  return s.mode === "online" ? "online" : "local";
+}
 function onlineUrl() { return readSettings().onlineUrl || DEFAULT_ONLINE_URL; }
 
 function openExternalSafely(url) {
@@ -145,7 +149,7 @@ function createMainWindow() {
   const s = readSettings();
   mainWindow = new BrowserWindow({
     width: 1440, height: 920, minWidth: 420, minHeight: 600, show: false,
-    backgroundColor: "#0b3035",
+    backgroundColor: "#072830",
     title: "Kaderlabor",
     icon: path.join(CODE, "app", "icon.png"),
     autoHideMenuBar: true, // Menü mit Alt einblenden
@@ -154,8 +158,9 @@ function createMainWindow() {
   mainWindow.setMenuBarVisibility(false);
   hardenNavigation(mainWindow);
   mainWindow.once("ready-to-show", () => {
+    // immer randlos im Vollbild starten (F11 schaltet nur für diese Sitzung um)
     mainWindow.maximize();
-    if (s.fullscreen !== false) mainWindow.setFullScreen(true);
+    mainWindow.setFullScreen(true);
     mainWindow.show();
   });
   mainWindow.on("enter-full-screen", () => { const t = readSettings(); t.fullscreen = true; writeSettings(t); buildMenu(); });
@@ -230,8 +235,8 @@ function buildMenu() {
       { label: "Vergrößern", role: "zoomIn" }, { label: "Verkleinern", role: "zoomOut" }, { label: "Originalgröße", role: "resetZoom" },
     ] },
     { label: "Verbindung", submenu: [
-      { label: "Mit claude.ai verbinden (empfohlen)", type: "radio", checked: online, click: () => setMode("online") },
-      { label: "Lokale Version (eigener API-Schlüssel)", type: "radio", checked: !online, click: () => setMode("local") },
+      { label: "App-Oberfläche (empfohlen)", type: "radio", checked: !online, click: () => setMode("local") },
+      { label: "claude.ai-Ansicht (Browser)", type: "radio", checked: online, click: () => setMode("online") },
       { type: "separator" },
       { label: "Bei claude.ai anmelden …", enabled: online, click: () => mainWindow && mainWindow.loadURL("https://claude.ai/login") },
       { label: "Zurück zum Kaderlabor", enabled: online, click: () => mainWindow && mainWindow.loadURL(onlineUrl()) },
@@ -246,7 +251,7 @@ function buildMenu() {
       { label: "Nach Updates suchen …", click: () => ctx.checkForUpdates({ interactive: true, win: mainWindow }) },
       { type: "separator" },
       { label: "Über Kaderlabor", click: () => dialog.showMessageBox(mainWindow, { type: "info", title: "Über Kaderlabor", message: `Kaderlabor ${ctx.codeVersion}`,
-        detail: "Kaderanalyse für den FC-27-Karrieremodus.\nKein offizielles Produkt von EA SPORTS.\n\nMit claude.ai verbunden: Anmeldung mit deinem Claude-Konto, Claude-Funktionen über dein Abo, Daten in deinem Konto-Browserprofil.\nLokale Version: Daten auf diesem PC, Claude über einen eigenen API-Schlüssel.\n\nF11 = Vollbild an/aus, Alt = Menü anzeigen." }) },
+        detail: "Kaderanalyse für den FC-27-Karrieremodus.\nKein offizielles Produkt von EA SPORTS.\n\nDie App läuft mit eigener Oberfläche und spricht im Hintergrund über die Claude-API mit Claude (eigener API-Schlüssel). Deine Daten liegen auf diesem PC.\n\nF11 = Vollbild an/aus, Alt = Menü anzeigen." }) },
     ] },
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
@@ -262,6 +267,10 @@ else {
   app.whenReady().then(() => {
     buildMenu(); createMainWindow();
     if (!readSettings().shortcutCreated) createShortcuts(false);
+    if (mode() === "local" && !getApiKey() && !readSettings().keyPrompted) {
+      const st = readSettings(); st.keyPrompted = true; writeSettings(st);
+      mainWindow.webContents.once("did-finish-load", () => setTimeout(openSettings, 600));
+    }
     setTimeout(() => ctx.checkForUpdates({ interactive: false, win: mainWindow }), 4000);
   });
   app.on("window-all-closed", () => app.quit());

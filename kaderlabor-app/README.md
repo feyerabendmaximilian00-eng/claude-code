@@ -20,12 +20,9 @@ Die App startet im Vollbild. **F11** schaltet zwischen Vollbild und Fenster um, 
 
 ## Verbindung mit Claude
 
-Im Menü **Verbindung** (Alt drücken) gibt es zwei Wege:
+Die App öffnet immer ihre eigene Oberfläche (randlos im Vollbild) und spricht im Hintergrund über die Claude-API mit Claude. Dafür braucht sie einen eigenen Anthropic-API-Schlüssel: Beim ersten Start fragt sie danach, später unter **Alt → Verbindung → API-Schlüssel festlegen …**. Der Schlüssel wird mit der Windows-Verschlüsselung (DPAPI) gespeichert, nur an die Claude-API gesendet und über dein Anthropic-Konto abgerechnet. Ohne Schlüssel funktioniert alles außer den Claude-Funktionen.
 
-- **Mit claude.ai verbinden (empfohlen, Standard):** Die App öffnet das Kaderlabor auf claude.ai. Beim ersten Start meldest du dich mit deinem Claude-Konto an (Verbindung → Bei claude.ai anmelden …, danach „Zurück zum Kaderlabor“). Die Claude-Funktionen (Screenshot-Import, Transfervorschläge, Scoutbericht, Taktik-Beratung) laufen dann über dein Claude-Abo, ohne API-Schlüssel. Die Anmeldung bleibt gespeichert.
-- **Lokale Version (eigener API-Schlüssel):** Die mitgelieferte Seite läuft ohne Internet. Für Claude-Funktionen trägst du unter Verbindung → API-Schlüssel festlegen … einen Anthropic-API-Schlüssel ein. Er wird mit der Windows-Verschlüsselung (DPAPI) gespeichert, nur an die Claude-API gesendet und über dein Anthropic-Konto abgerechnet.
-
-Ohne Internet wechselt die App automatisch auf die lokale Version. Hinweis: Kader und Datenbank werden je Modus getrennt gespeichert.
+Unter **Verbindung → claude.ai-Ansicht (Browser)** lässt sich die Web-Version weiterhin öffnen, zum Beispiel um dort gespeicherte Daten per „Sicherung herunterladen“ in die App zu holen.
 
 ## Updates
 

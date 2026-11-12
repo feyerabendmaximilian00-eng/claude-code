@@ -1,8 +1,8 @@
 {
-  "version": "1.3.2",
+  "version": "1.4.0",
   "minLauncher": "1",
-  "released": "2026-11-12T14:14:55.353Z",
-  "notes": "Desktop-Verknüpfung: Kaderlabor legt jetzt automatisch eine Verknüpfung auf dem Desktop und im Startmenü an (auch über Datei → Desktop-Verknüpfung erstellen).",
+  "released": "2026-11-12T14:33:20.508Z",
+  "notes": "Die App öffnet jetzt ihre eigene Oberfläche randlos im Vollbild statt claude.ai und spricht im Hintergrund über die Claude-API mit Claude. Beim ersten Start fragt sie einmal nach deinem API-Schlüssel.",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "a7b8b03272c218ee80208d2d9aafddbb53282ec0098d6ce21dd29884b199682d",
-      "size": 247983
+      "sha256": "b5b2f88567fb18ca547431ce73ae3277a0403b668c0fa8ed54283ace7cda03e3",
+      "size": 248027
     },
     {
       "path": "app/settings.html",
@@ -31,8 +31,8 @@
     },
     {
       "path": "app-main.js",
-      "sha256": "d90e309f660420c7efcd1e8887f5ca11771bb7972d009576f71d24325fffe0c9",
-      "size": 15387
+      "sha256": "735f1f831d7f3e3fd9998f275ee39bea3325809506408484dfa20502bc1d9e49",
+      "size": 15720
     },
     {
       "path": "preload.js",
@@ -41,7 +41,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "9f9c674696844b17a0b065f2799a655552a34fc9b8f64d45257217e6e78a6c2a",
+      "sha256": "601d72ee0786aab31d94e76b2476cc481408d50b92094067da906ff716d3e737",
       "size": 23
     }
   ]
