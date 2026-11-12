@@ -186,6 +186,32 @@ function openSettings() {
   settingsWindow.loadFile(path.join(CODE, "app", "settings.html"));
   settingsWindow.on("closed", () => { settingsWindow = null; });
 }
+/* ---------- Desktop-Verknüpfung (nur Windows) ---------- */
+function createShortcuts(interactive) {
+  if (process.platform !== "win32") {
+    if (interactive) dialog.showMessageBox(mainWindow, { type: "info", title: "Verknüpfung", message: "Verknüpfungen gibt es nur unter Windows." });
+    return;
+  }
+  try {
+    // Symbol an einen festen Ort kopieren, damit die Verknüpfung auch nach Updates ein Symbol hat
+    const icon = path.join(app.getPath("userData"), "kaderlabor.ico");
+    fs.copyFileSync(path.join(CODE, "app", "icon.ico"), icon);
+    const opts = { target: process.execPath, cwd: path.dirname(process.execPath), description: "Kaderlabor – Kaderanalyse für den FC-27-Karrieremodus", icon, iconIndex: 0, appUserModelId: "Kaderlabor" };
+    const targets = [
+      path.join(app.getPath("desktop"), "Kaderlabor.lnk"),
+      path.join(app.getPath("appData"), "Microsoft", "Windows", "Start Menu", "Programs", "Kaderlabor.lnk"),
+    ];
+    let ok = 0;
+    for (const t of targets) {
+      fs.mkdirSync(path.dirname(t), { recursive: true });
+      if (shell.writeShortcutLink(t, fs.existsSync(t) ? "replace" : "create", opts)) ok++;
+    }
+    const st = readSettings(); st.shortcutCreated = true; writeSettings(st);
+    if (interactive) dialog.showMessageBox(mainWindow, { type: "info", title: "Verknüpfung", message: ok ? "Desktop-Verknüpfung und Startmenü-Eintrag sind angelegt." : "Die Verknüpfung konnte nicht angelegt werden." });
+  } catch (err) {
+    if (interactive) dialog.showMessageBox(mainWindow, { type: "warning", title: "Verknüpfung", message: "Die Verknüpfung konnte nicht angelegt werden.", detail: String(err && err.message || err) });
+  }
+}
 function setMode(m) { const s = readSettings(); s.mode = m; writeSettings(s); loadContent(); }
 
 function buildMenu() {
@@ -194,6 +220,7 @@ function buildMenu() {
   const template = [
     { label: "Datei", submenu: [
       { label: "Neu laden", accelerator: "F5", click: () => mainWindow && mainWindow.reload() },
+      { label: "Desktop-Verknüpfung erstellen", click: () => createShortcuts(true) },
       { type: "separator" },
       { label: "Beenden", role: "quit" },
     ] },
@@ -234,6 +261,7 @@ else {
   app.on("second-instance", () => { if (mainWindow) { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.focus(); } });
   app.whenReady().then(() => {
     buildMenu(); createMainWindow();
+    if (!readSettings().shortcutCreated) createShortcuts(false);
     setTimeout(() => ctx.checkForUpdates({ interactive: false, win: mainWindow }), 4000);
   });
   app.on("window-all-closed", () => app.quit());

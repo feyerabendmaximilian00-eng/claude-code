@@ -1,13 +1,18 @@
 {
-  "version": "1.3.1",
+  "version": "1.3.2",
   "minLauncher": "1",
-  "released": "2026-11-12T14:12:46.431Z",
-  "notes": "Datenbank-Import repariert: Claude liest jetzt auch beim zweiten und jedem weiteren Mal zuverlässig, große Tabellen werden in Teilen gelesen, Screenshots einzeln.",
+  "released": "2026-11-12T14:14:55.353Z",
+  "notes": "Desktop-Verknüpfung: Kaderlabor legt jetzt automatisch eine Verknüpfung auf dem Desktop und im Startmenü an (auch über Datei → Desktop-Verknüpfung erstellen).",
   "files": [
     {
       "path": "app/claude-shim.js",
       "sha256": "b12b04d6e0e2e5571b5131e1190ae05cf90b3c644e3b83dc7c1118a6b9972bfa",
       "size": 2979
+    },
+    {
+      "path": "app/icon.ico",
+      "sha256": "a5155ed83a0bc114330490d9fce5e342067a45f082f8ba34a112234652ee5c27",
+      "size": 15764
     },
     {
       "path": "app/icon.png",
@@ -26,8 +31,8 @@
     },
     {
       "path": "app-main.js",
-      "sha256": "58b7243a85b6a11c846f0029f6ff9680dc68e7465a6f6d2d0798ce64a8caf8e9",
-      "size": 13552
+      "sha256": "d90e309f660420c7efcd1e8887f5ca11771bb7972d009576f71d24325fffe0c9",
+      "size": 15387
     },
     {
       "path": "preload.js",
@@ -36,7 +41,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "25cf86a48c8c07069660428ace1eb035df4f4589fa03e57a49a9ee45a83484c0",
+      "sha256": "9f9c674696844b17a0b065f2799a655552a34fc9b8f64d45257217e6e78a6c2a",
       "size": 23
     }
   ]
