@@ -127,7 +127,7 @@ function createMainWindow() {
     title: "Kaderlabor",
     icon: path.join(__dirname, "app", "icon.png"),
     autoHideMenuBar: true, // Menü mit Alt einblenden
-    webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, nodeIntegration: false, sandbox: true, partition: "persist:kaderlabor" },
+    webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, nodeIntegration: false, sandbox: true },
   });
   mainWindow.setMenuBarVisibility(false);
   hardenNavigation(mainWindow);
