@@ -48,7 +48,9 @@ function toMessages(input, images) {
   return msgs;
 }
 
+const fromLocalPage = (e) => { try { return String(e.senderFrame && e.senderFrame.url || "").startsWith("file://"); } catch { return false; } };
 ipcMain.handle("claude:sample", async (_e, payload) => {
+  if (!fromLocalPage(_e)) return { ok: false, code: "not_granted", message: "Nicht erlaubt." };
   const apiKey = getApiKey();
   if (!apiKey) return { ok: false, code: "not_granted", message: "Kein API-Schlüssel hinterlegt." };
   const client = new Anthropic({ apiKey });
@@ -77,8 +79,9 @@ ipcMain.handle("claude:sample", async (_e, payload) => {
     return { ok: false, code: "upstream_error", message: String(err && err.message || err) };
   }
 });
-ipcMain.handle("settings:hasKey", () => !!getApiKey());
+ipcMain.handle("settings:hasKey", (e) => fromLocalPage(e) && !!getApiKey());
 ipcMain.handle("settings:setKey", (_e, key) => {
+  if (!fromLocalPage(_e)) return { ok: false, message: "Nicht erlaubt." };
   const k = String(key || "").trim();
   if (k && !/^sk-ant-/.test(k)) return { ok: false, message: "Das sieht nicht wie ein Anthropic-API-Schlüssel aus (beginnt mit sk-ant-)." };
   setApiKey(k || null);
@@ -88,26 +91,65 @@ ipcMain.handle("settings:setKey", (_e, key) => {
 });
 
 /* ---------- Fenster ---------- */
+// Online-Modus: die Web-Version auf claude.ai. Dort meldest du dich mit deinem Claude-Konto an,
+// und die Claude-Funktionen laufen über dein Abo – ohne API-Schlüssel.
+const DEFAULT_ONLINE_URL = "https://claude.ai/artifact/PiYEDgbLVD4chvUDf6XESH";
+const IN_APP_HOSTS = [/(^|\.)claude\.ai$/i, /(^|\.)anthropic\.com$/i, /^accounts\.google\.com$/i, /(^|\.)googleusercontent\.com$/i, /^appleid\.apple\.com$/i, /(^|\.)claudeusercontent\.com$/i];
+const hostOf = url => { try { return new URL(url).hostname; } catch { return ""; } };
+const isInApp = url => url.startsWith("file://") || (/^https:\/\//i.test(url) && IN_APP_HOSTS.some(r => r.test(hostOf(url))));
+function mode() { return readSettings().mode === "local" ? "local" : "online"; }
+function onlineUrl() { return readSettings().onlineUrl || DEFAULT_ONLINE_URL; }
+
 function openExternalSafely(url) {
   if (/^https?:\/\//i.test(url)) shell.openExternal(url);
 }
 function hardenNavigation(win) {
-  win.webContents.setWindowOpenHandler(({ url }) => { openExternalSafely(url); return { action: "deny" }; });
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    // Anmeldefenster (z. B. Google) dürfen in der App aufgehen, alles andere öffnet im Standardbrowser
+    if (isInApp(url) && !url.startsWith("file://")) return { action: "allow", overrideBrowserWindowOptions: { width: 520, height: 720, parent: win, autoHideMenuBar: true, backgroundColor: "#ffffff" } };
+    openExternalSafely(url); return { action: "deny" };
+  });
   win.webContents.on("will-navigate", (e, url) => {
-    if (!url.startsWith("file://")) { e.preventDefault(); openExternalSafely(url); }
+    if (!isInApp(url)) { e.preventDefault(); openExternalSafely(url); }
   });
 }
+function loadContent() {
+  if (!mainWindow) return;
+  if (mode() === "online") mainWindow.loadURL(onlineUrl());
+  else mainWindow.loadFile(path.join(__dirname, "app", "index.html"));
+  buildMenu();
+}
 function createMainWindow() {
+  const s = readSettings();
   mainWindow = new BrowserWindow({
-    width: 1440, height: 920, minWidth: 420, minHeight: 600,
+    width: 1440, height: 920, minWidth: 420, minHeight: 600, show: false,
     backgroundColor: "#0b3035",
     title: "Kaderlabor",
     icon: path.join(__dirname, "app", "icon.png"),
-    autoHideMenuBar: false,
-    webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, nodeIntegration: false, sandbox: true },
+    autoHideMenuBar: true, // Menü mit Alt einblenden
+    webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, nodeIntegration: false, sandbox: true, partition: "persist:kaderlabor" },
   });
+  mainWindow.setMenuBarVisibility(false);
   hardenNavigation(mainWindow);
-  mainWindow.loadFile(path.join(__dirname, "app", "index.html"));
+  mainWindow.once("ready-to-show", () => {
+    mainWindow.maximize();
+    if (s.fullscreen !== false) mainWindow.setFullScreen(true);
+    mainWindow.show();
+  });
+  mainWindow.on("enter-full-screen", () => { const t = readSettings(); t.fullscreen = true; writeSettings(t); buildMenu(); });
+  mainWindow.on("leave-full-screen", () => { const t = readSettings(); t.fullscreen = false; writeSettings(t); buildMenu(); });
+  // Esc verlässt den Vollbildmodus, F11 schaltet ihn um
+  mainWindow.webContents.on("before-input-event", (e, input) => {
+    if (input.type !== "keyDown") return;
+    if (input.key === "F11") { e.preventDefault(); mainWindow.setFullScreen(!mainWindow.isFullScreen()); }
+  });
+  // Ohne Internet: automatisch auf die lokale Version wechseln
+  mainWindow.webContents.on("did-fail-load", (_e, code, desc, url, isMainFrame) => {
+    if (!isMainFrame || mode() !== "online" || code === -3) return;
+    mainWindow.loadFile(path.join(__dirname, "app", "index.html"));
+    dialog.showMessageBox(mainWindow, { type: "warning", title: "Keine Verbindung", message: "claude.ai ist gerade nicht erreichbar.", detail: `Die App nutzt jetzt die lokale Version (${desc}). Sobald du wieder online bist: Verbindung → Mit claude.ai verbinden.` });
+  });
+  loadContent();
 }
 function openSettings() {
   if (settingsWindow) { settingsWindow.focus(); return; }
@@ -122,8 +164,11 @@ function openSettings() {
   settingsWindow.loadFile(path.join(__dirname, "app", "settings.html"));
   settingsWindow.on("closed", () => { settingsWindow = null; });
 }
+function setMode(m) { const s = readSettings(); s.mode = m; writeSettings(s); loadContent(); }
 
 function buildMenu() {
+  const online = mode() === "online";
+  const fs = !!(mainWindow && mainWindow.isFullScreen());
   const template = [
     { label: "Datei", submenu: [
       { label: "Neu laden", accelerator: "F5", click: () => mainWindow && mainWindow.reload() },
@@ -131,10 +176,17 @@ function buildMenu() {
       { label: "Beenden", role: "quit" },
     ] },
     { label: "Ansicht", submenu: [
+      { label: "Vollbild", type: "checkbox", checked: fs, accelerator: "F11", click: () => mainWindow && mainWindow.setFullScreen(!mainWindow.isFullScreen()) },
+      { type: "separator" },
       { label: "Vergrößern", role: "zoomIn" }, { label: "Verkleinern", role: "zoomOut" }, { label: "Originalgröße", role: "resetZoom" },
-      { type: "separator" }, { label: "Vollbild", role: "togglefullscreen" },
     ] },
-    { label: "Claude", submenu: [
+    { label: "Verbindung", submenu: [
+      { label: "Mit claude.ai verbinden (empfohlen)", type: "radio", checked: online, click: () => setMode("online") },
+      { label: "Lokale Version (eigener API-Schlüssel)", type: "radio", checked: !online, click: () => setMode("local") },
+      { type: "separator" },
+      { label: "Bei claude.ai anmelden …", enabled: online, click: () => mainWindow && mainWindow.loadURL("https://claude.ai/login") },
+      { label: "Zurück zum Kaderlabor", enabled: online, click: () => mainWindow && mainWindow.loadURL(onlineUrl()) },
+      { type: "separator" },
       { label: "API-Schlüssel festlegen …", click: openSettings },
       { label: "API-Schlüssel entfernen", click: async () => {
         const r = await dialog.showMessageBox(mainWindow, { type: "question", buttons: ["Entfernen", "Abbrechen"], defaultId: 1, cancelId: 1, title: "API-Schlüssel entfernen", message: "Gespeicherten API-Schlüssel wirklich entfernen?" });
@@ -142,11 +194,15 @@ function buildMenu() {
       } },
     ] },
     { label: "Hilfe", submenu: [
-      { label: "Über Kaderlabor", click: () => dialog.showMessageBox(mainWindow, { type: "info", title: "Über Kaderlabor", message: `Kaderlabor ${app.getVersion()}`, detail: "Kaderanalyse für den FC-27-Karrieremodus.\nKein offizielles Produkt von EA SPORTS.\n\nDaten werden lokal auf diesem PC gespeichert." }) },
+      { label: "Über Kaderlabor", click: () => dialog.showMessageBox(mainWindow, { type: "info", title: "Über Kaderlabor", message: `Kaderlabor ${app.getVersion()}`,
+        detail: "Kaderanalyse für den FC-27-Karrieremodus.\nKein offizielles Produkt von EA SPORTS.\n\nMit claude.ai verbunden: Anmeldung mit deinem Claude-Konto, Claude-Funktionen über dein Abo, Daten in deinem Konto-Browserprofil.\nLokale Version: Daten auf diesem PC, Claude über einen eigenen API-Schlüssel.\n\nF11 = Vollbild an/aus, Alt = Menü anzeigen." }) },
     ] },
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
+
+// Normaler Chrome-Kennung ohne Electron-Zusatz, damit Anmeldeseiten die App wie einen Browser behandeln
+app.userAgentFallback = app.userAgentFallback.replace(/\sElectron\/\S+/i, "").replace(/\sKaderlabor\/\S+/i, "");
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) app.quit();

@@ -10,14 +10,18 @@ Kaderanalyse für den Karrieremodus von EA SPORTS FC 27 als eigenständiges Wind
 
 Dein Kader, deine Spielerdatenbank, Rollen und Einstellungen werden dauerhaft auf dem PC gespeichert (`%APPDATA%\Kaderlabor`).
 
-## Claude-Funktionen
+## Vollbild
 
-Screenshot-Import, Transfervorschläge, Scoutbericht und Taktik-Beratung brauchen einen eigenen Anthropic-API-Schlüssel:
+Die App startet im Vollbild. **F11** schaltet zwischen Vollbild und Fenster um, **Alt** blendet das Menü ein. Die App merkt sich deine Wahl.
 
-1. Schlüssel in der Anthropic Console unter „API Keys“ erstellen.
-2. In der App **Claude → API-Schlüssel festlegen …** wählen und einfügen.
+## Verbindung mit Claude
 
-Der Schlüssel wird mit der Windows-Verschlüsselung (DPAPI) gespeichert und nur an die Claude-API gesendet. Die Nutzung wird über dein Anthropic-Konto abgerechnet. Ohne Schlüssel funktioniert alles andere ganz normal; die Claude-Bereiche sind dann ausgeblendet.
+Im Menü **Verbindung** (Alt drücken) gibt es zwei Wege:
+
+- **Mit claude.ai verbinden (empfohlen, Standard):** Die App öffnet das Kaderlabor auf claude.ai. Beim ersten Start meldest du dich mit deinem Claude-Konto an (Verbindung → Bei claude.ai anmelden …, danach „Zurück zum Kaderlabor“). Die Claude-Funktionen (Screenshot-Import, Transfervorschläge, Scoutbericht, Taktik-Beratung) laufen dann über dein Claude-Abo, ohne API-Schlüssel. Die Anmeldung bleibt gespeichert.
+- **Lokale Version (eigener API-Schlüssel):** Die mitgelieferte Seite läuft ohne Internet. Für Claude-Funktionen trägst du unter Verbindung → API-Schlüssel festlegen … einen Anthropic-API-Schlüssel ein. Er wird mit der Windows-Verschlüsselung (DPAPI) gespeichert, nur an die Claude-API gesendet und über dein Anthropic-Konto abgerechnet.
+
+Ohne Internet wechselt die App automatisch auf die lokale Version. Hinweis: Kader und Datenbank werden je Modus getrennt gespeichert.
 
 ## Selbst bauen
 
