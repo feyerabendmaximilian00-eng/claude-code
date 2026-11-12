@@ -1,8 +1,8 @@
 {
-  "version": "1.4.1",
+  "version": "1.4.2",
   "minLauncher": "1",
-  "released": "2026-11-12T14:43:03.740Z",
-  "notes": "Datenbank: Kader hochladen. Screenshots, CSV-/Textdateien oder Sicherungen in die Datenbank ziehen, die Spieler werden automatisch hinzugefügt. Dazu: eigenen Kader mit einem Klick übernehmen.",
+  "released": "2026-11-12T15:54:08.588Z",
+  "notes": "Datenbank: Liga aus hochgeladenen Dateien wird übernommen, Liga-Filter zeigt alle vorhandenen Ligen.",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "6c6d7f2e4f9483aace1ed808c5eb70145394203ce51c03444dcc86d7d56719f8",
-      "size": 252530
+      "sha256": "7c8d2c90cc9f77b76757dc2bbc92acb2992c5ff19d0ac2ed63b80348a6303873",
+      "size": 253322
     },
     {
       "path": "app/settings.html",
@@ -41,7 +41,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "c4d22ae46c709a1a2afbbc4db443e9aa78f32ac731bc4cfdac57ce00e749dfe1",
+      "sha256": "efa1eada09e05d23c18119d3b3d3093b6394e02cb85b3fe4cb50123ff478abd7",
       "size": 23
     }
   ]

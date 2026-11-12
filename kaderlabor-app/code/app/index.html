@@ -2031,7 +2031,7 @@ const HEAD = {name:["name","spieler","player","spielername"],pos:["pos","positio
   age:["alter","age","jahre"],ovr:["ges","ovr","gesamt","rating","overall","gesamtwert"],pot:["pot","potenzial","potential","pt"],
   foot:["fuß","fuss","foot","starkerfuß","starkerfuss","bevorzugterfuß","preferredfoot"],nat:["nation","nat","land","nationalität","nationalitaet","nationality"],
   pac:["tem","tempo","pac","pace","geschwindigkeit"],sho:["sch","schuss","sho","shooting","abschluss"],pas:["pas","pass","passen","passing"],
-  dri:["dri","dribbling","drib"],def:["def","ver","verteidigung","defending","abwehr"],phy:["phy","phys","physis","kör","körper","physical"],club:["club","team","verein","mannschaft"],dyn:["dyn","dynamic","dynamicovr","dynovr","dynges","dynamischerges","dynamischesovr","form","aktuell","aktuellerges"],value:["value","marktwert","wert€","mw","valuation"]};
+  dri:["dri","dribbling","drib"],def:["def","ver","verteidigung","defending","abwehr"],phy:["phy","phys","physis","kör","körper","physical"],club:["club","team","verein","mannschaft"],league:["liga","league","wettbewerb","competition"],dyn:["dyn","dynamic","dynamicovr","dynovr","dynges","dynamischerges","dynamischesovr","form","aktuell","aktuellerges"],value:["value","marktwert","wert€","mw","valuation"]};
 function parseCSV(text){ return parseRows(text).map(normalizePlayer); }
 function parseRows(text){
   const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
@@ -2331,7 +2331,7 @@ function dbAdd(rows, league){
   const idx = new Map(DB.map((x,i) => [dbKey(x), i]));
   rows.forEach(o => {
     const p = normalizePlayer({...o, id: undefined});
-    const e = {...p, id: "d" + Date.now().toString(36) + (uid++), club: String(o.club || "").slice(0, 40), value: parseMoney(o.value ?? o.value_m), league: league || o.league || ""};
+    const e = {...p, id: "d" + Date.now().toString(36) + (uid++), club: String(o.club || "").slice(0, 40), value: parseMoney(o.value ?? o.value_m), league: String(o.league || league || "").slice(0, 60)};
     const k = dbKey(e);
     if (idx.has(k)){ const i = idx.get(k); e.id = DB[i].id; if (!league && DB[i].league) e.league = DB[i].league; DB[i] = e; updated++; }
     else { idx.set(k, DB.length); DB.push(e); added++; }
@@ -2354,7 +2354,17 @@ function dbFiltered(){
     && (age == null || e.age <= age) && (min == null || e.ovr >= min)
     && (!Number.isFinite(val) || (e.value != null && e.value <= val)) && !own.has(e.name.toLowerCase()));
 }
+function refreshLeagueFilter(){
+  const sel = $("#db-fl"); if (!sel) return;
+  const cur = sel.value;
+  const prio = ["Bundesliga", "2. Bundesliga", "3. Liga"];
+  const all = [...new Set(DB.map(e => e.league).filter(Boolean))];
+  const list = [...prio.filter(x => all.includes(x)), ...all.filter(x => !prio.includes(x)).sort((a,b) => a.localeCompare(b, "de"))];
+  const html = `<option value="">Alle</option>` + list.map(l => `<option ${l === cur ? "selected" : ""}>${esc(l)}</option>`).join("");
+  if (sel.dataset.sig !== html){ sel.innerHTML = html; sel.dataset.sig = html; }
+}
 function renderDB(){
+  refreshLeagueFilter();
   const counts = {};
   DB.forEach(e => counts[e.league || "Ohne Liga"] = (counts[e.league || "Ohne Liga"] || 0) + 1);
   $("#db-sum").innerHTML = DB.length ? `<span><b>${DB.length}</b> Spieler</span>` + Object.entries(counts).map(([l,n]) => `<span>${esc(l)}: ${n}</span>`).join("") : "";
@@ -2597,7 +2607,8 @@ async function dbUpload(files){
     const res = dbAdd(rows, league);
     renderDB();
     const names = rows.slice(0, 4).map(o => String(o.name)).join(", ");
-    dbUpMsg(`${res.added} neu, ${res.updated} aktualisiert (${league}${club ? ", " + club : ""}): ${names}${rows.length > 4 ? " …" : ""} · Datenbank: ${DB.length} Spieler${skipped.length ? " · nicht lesbar: " + skipped.join(", ") : ""}`);
+    const lgs = [...new Set(rows.map(o => o.league || league))];
+    dbUpMsg(`${res.added} neu, ${res.updated} aktualisiert (${lgs.length > 3 ? lgs.length + " Ligen" : lgs.join(", ")}${club ? ", " + club : ""}): ${names}${rows.length > 4 ? " …" : ""} · Datenbank: ${DB.length} Spieler${skipped.length ? " · nicht lesbar: " + skipped.join(", ") : ""}`);
   } catch(e){ dbUpMsg(errText(e), true); }
 }
 $("#db-files").addEventListener("change", e => { const f = e.target.files; dbUpload(f).finally(() => { e.target.value = ""; }); });
