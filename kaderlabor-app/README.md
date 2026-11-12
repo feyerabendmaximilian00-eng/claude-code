@@ -27,6 +27,12 @@ Im Menü **Verbindung** (Alt drücken) gibt es zwei Wege:
 
 Ohne Internet wechselt die App automatisch auf die lokale Version. Hinweis: Kader und Datenbank werden je Modus getrennt gespeichert.
 
+## Updates
+
+Ab Version 1.3.0 aktualisiert sich die App selbst: Beim Start prüft sie im Hintergrund, ob es eine neue Version gibt, lädt sie herunter, prüft jede Datei per SHA-256 und fragt dann, ob sie neu starten soll. Unter **Hilfe → Nach Updates suchen …** geht das auch von Hand. Deine Daten bleiben dabei unverändert. Heruntergeladene Versionen liegen unter `%APPDATA%\Kaderlabor\code`.
+
+Ein neues Update veröffentlichen: Dateien in `code/` ändern (die Seite in `web/kaderlabor.html`), Version in `code/version.json` erhöhen, `npm run release:update -- "Was ist neu"` ausführen, committen und pushen.
+
 ## Selbst bauen
 
 Voraussetzung: Node.js 20 oder neuer.
@@ -37,4 +43,4 @@ npm start          # App starten (auf dem aktuellen Betriebssystem)
 npm run pack:win   # Windows-x64-Version nach dist/Kaderlabor-win32-x64 bauen
 ```
 
-Die Seite selbst liegt in `web/kaderlabor.html` (identisch mit der Web-Version). `npm run build:page` erzeugt daraus `app/index.html` mit dem Claude-Adapter (`app/claude-shim.js`).
+Die Seite selbst liegt in `web/kaderlabor.html` (identisch mit der Web-Version). `npm run build:page` erzeugt daraus `code/app/index.html` mit dem Claude-Adapter (`code/app/claude-shim.js`). `main.js` ist der feste Starter mit dem Updater, der eigentliche Programmcode liegt in `code/`.
