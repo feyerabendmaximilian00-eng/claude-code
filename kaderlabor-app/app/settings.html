@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'">
+<title>Claude-API-Schlüssel</title>
+<style>
+  :root{--bg:#0e151d;--surface:#0a1016;--line:#1d2a36;--ink:#f1f5f9;--ink-2:#97a6b6;--accent:#c6ff2e;--accent-ink:#071006;--bad:#ff5d6c}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:24px}
+  h1{font:italic 800 24px/1.1 "Arial Narrow",system-ui,sans-serif;text-transform:uppercase;margin:0 0 6px}
+  p{color:var(--ink-2);margin:0 0 14px}
+  label{display:block;font-weight:600;margin:14px 0 6px}
+  input{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:3px;color:var(--ink);padding:10px 12px;font:14px ui-monospace,Consolas,monospace}
+  input:focus{outline:none;border-color:var(--accent)}
+  .row{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  button{font:700 14px system-ui,sans-serif;text-transform:uppercase;letter-spacing:.05em;border-radius:3px;padding:9px 16px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+  button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .status{margin-top:12px;font-size:13px;color:var(--ink-2);min-height:18px}
+  .status.err{color:var(--bad)}
+  .bar{width:56px;height:3px;background:linear-gradient(115deg,#c6ff2e,#18e0c0);margin-bottom:14px}
+</style>
+</head>
+<body>
+  <div class="bar"></div>
+  <h1>Claude anbinden</h1>
+  <p>Für Screenshot-Import, Transfervorschläge, Scoutbericht und Taktik-Beratung braucht die App einen eigenen Anthropic-API-Schlüssel. Er wird verschlüsselt auf diesem PC gespeichert und nur an die Claude-API gesendet. Die Nutzung wird über dein Anthropic-Konto abgerechnet.</p>
+  <form id="f">
+    <label for="key">API-Schlüssel</label>
+    <input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…">
+    <div class="row">
+      <button class="primary" type="submit">Speichern</button>
+      <button type="button" id="remove">Schlüssel entfernen</button>
+      <button type="button" id="cancel">Abbrechen</button>
+    </div>
+    <div class="status" id="status"></div>
+  </form>
+  <p style="margin-top:16px;font-size:13px">Einen Schlüssel erstellst du in der Anthropic Console unter „API Keys“.</p>
+<script>
+  const st = document.getElementById("status");
+  window.kaderlaborNative.hasKey().then(has => { if (has) st.textContent = "Ein Schlüssel ist bereits gespeichert. Ein neuer ersetzt ihn."; });
+  document.getElementById("f").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const v = document.getElementById("key").value.trim();
+    if (!v){ st.className = "status err"; st.textContent = "Bitte einen Schlüssel eintragen."; return; }
+    const r = await window.kaderlaborNative.setKey(v);
+    if (!r.ok){ st.className = "status err"; st.textContent = r.message; }
+  });
+  document.getElementById("remove").addEventListener("click", () => window.kaderlaborNative.setKey(""));
+  document.getElementById("cancel").addEventListener("click", () => window.close());
+</script>
+</body>
+</html>
