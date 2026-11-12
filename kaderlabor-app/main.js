@@ -100,7 +100,7 @@ function hardenNavigation(win) {
 function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1440, height: 920, minWidth: 420, minHeight: 600,
-    backgroundColor: "#06090d",
+    backgroundColor: "#8BA6C1",
     title: "Kaderlabor",
     icon: path.join(__dirname, "app", "icon.png"),
     autoHideMenuBar: false,
@@ -113,7 +113,7 @@ function openSettings() {
   if (settingsWindow) { settingsWindow.focus(); return; }
   settingsWindow = new BrowserWindow({
     width: 560, height: 430, parent: mainWindow, modal: true, resizable: false, minimizable: false, maximizable: false,
-    backgroundColor: "#0e151d", title: "Claude-API-Schlüssel",
+    backgroundColor: "#161D26", title: "Claude-API-Schlüssel",
     icon: path.join(__dirname, "app", "icon.png"),
     webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, nodeIntegration: false, sandbox: true },
   });
