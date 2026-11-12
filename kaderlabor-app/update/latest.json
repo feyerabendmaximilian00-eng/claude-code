@@ -1,0 +1,43 @@
+{
+  "version": "1.3.0",
+  "minLauncher": "1",
+  "released": "2026-11-12T14:04:02.738Z",
+  "notes": "Selbst-Update eingebaut: Die App aktualisiert sich ab jetzt beim Start automatisch.",
+  "files": [
+    {
+      "path": "app/claude-shim.js",
+      "sha256": "b12b04d6e0e2e5571b5131e1190ae05cf90b3c644e3b83dc7c1118a6b9972bfa",
+      "size": 2979
+    },
+    {
+      "path": "app/icon.png",
+      "sha256": "7bdb86f4cc01f4437f5f0b1d1ef86b54d4a6961b00df56d6630b20152887634c",
+      "size": 15742
+    },
+    {
+      "path": "app/index.html",
+      "sha256": "0c1936b0027b3311a344ec016e3635c228c22130f1075885fc31979930e8adb1",
+      "size": 245006
+    },
+    {
+      "path": "app/settings.html",
+      "sha256": "645c67da632a495cc720e7c47e19038f22e6ae474465420ea4832bebbb817620",
+      "size": 3290
+    },
+    {
+      "path": "app-main.js",
+      "sha256": "58b7243a85b6a11c846f0029f6ff9680dc68e7465a6f6d2d0798ce64a8caf8e9",
+      "size": 13552
+    },
+    {
+      "path": "preload.js",
+      "sha256": "625769887840a1304e7c59f6c004ce5127bde4e3bcfa3f59f9a03fca67489a87",
+      "size": 665
+    },
+    {
+      "path": "version.json",
+      "sha256": "95b960d12ef2e2722946881cb95401468db2dee9eb7f5b23f43a79d4a9bc9252",
+      "size": 23
+    }
+  ]
+}

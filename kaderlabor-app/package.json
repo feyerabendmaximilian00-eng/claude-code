@@ -1,14 +1,15 @@
 {
   "name": "kaderlabor",
   "productName": "Kaderlabor",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Kaderanalyse für den FC-27-Karrieremodus als Windows-App",
   "main": "main.js",
   "private": true,
   "scripts": {
     "build:page": "node scripts/build-page.js",
     "start": "npm run build:page && electron .",
-    "pack:win": "npm run build:page && electron-packager . Kaderlabor --platform=win32 --arch=x64 --out=dist --overwrite --asar --prune=true --ignore=^/dist --ignore=^/web --ignore=^/scripts --ignore=^/build"
+    "release:update": "npm run build:page && node scripts/make-update.js",
+    "pack:win": "npm run build:page && electron-packager . Kaderlabor --platform=win32 --arch=x64 --out=dist --overwrite --asar --prune=true --ignore=^/dist --ignore=^/web --ignore=^/scripts --ignore=^/build --ignore=^/update"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.3.0"

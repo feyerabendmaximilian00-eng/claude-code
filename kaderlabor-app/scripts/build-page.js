@@ -20,5 +20,5 @@ ${src}
 </body>
 </html>
 `;
-fs.writeFileSync(path.join(root, "app", "index.html"), doc);
+fs.writeFileSync(path.join(root, "code", "app", "index.html"), doc);
 console.log("app/index.html erstellt (" + Math.round(doc.length / 1024) + " KB)");
