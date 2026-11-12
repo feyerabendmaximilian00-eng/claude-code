@@ -1,8 +1,8 @@
 {
-  "version": "1.4.0",
+  "version": "1.4.1",
   "minLauncher": "1",
-  "released": "2026-11-12T14:33:20.508Z",
-  "notes": "Die App öffnet jetzt ihre eigene Oberfläche randlos im Vollbild statt claude.ai und spricht im Hintergrund über die Claude-API mit Claude. Beim ersten Start fragt sie einmal nach deinem API-Schlüssel.",
+  "released": "2026-11-12T14:43:03.740Z",
+  "notes": "Datenbank: Kader hochladen. Screenshots, CSV-/Textdateien oder Sicherungen in die Datenbank ziehen, die Spieler werden automatisch hinzugefügt. Dazu: eigenen Kader mit einem Klick übernehmen.",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "b5b2f88567fb18ca547431ce73ae3277a0403b668c0fa8ed54283ace7cda03e3",
-      "size": 248027
+      "sha256": "6c6d7f2e4f9483aace1ed808c5eb70145394203ce51c03444dcc86d7d56719f8",
+      "size": 252530
     },
     {
       "path": "app/settings.html",
@@ -41,7 +41,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "601d72ee0786aab31d94e76b2476cc481408d50b92094067da906ff716d3e737",
+      "sha256": "c4d22ae46c709a1a2afbbc4db443e9aa78f32ac731bc4cfdac57ce00e749dfe1",
       "size": 23
     }
   ]

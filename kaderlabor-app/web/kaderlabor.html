@@ -978,7 +978,21 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
           <label for="db-league">Liga dieser Spieler
             <select id="db-league"><option>Bundesliga</option><option>2. Bundesliga</option><option>3. Liga</option><option>Andere</option></select>
           </label>
+          <label for="db-club">Verein (optional)
+            <input id="db-club" type="text" maxlength="40" placeholder="wird ergänzt, wo keiner erkannt wird" autocomplete="off">
+          </label>
         </div>
+        <div class="drop" id="db-drop" style="margin-top:12px">
+          <strong>Kader hochladen: Screenshots oder Dateien hierher ziehen</strong>
+          <span class="small muted">Screenshots einer Kaderansicht (PNG, JPG) liest Claude aus. CSV-, Text- und Kaderlabor-Sicherungsdateien werden direkt eingelesen. Alle Spieler landen automatisch in der Datenbank.</span>
+          <div class="row" style="justify-content:center">
+            <label class="btn primary" for="db-files">Dateien auswählen</label>
+            <input type="file" id="db-files" multiple accept="image/png,image/jpeg,image/webp,.csv,.tsv,.txt,.json,text/csv,text/plain,application/json" hidden>
+            <button class="btn" id="btn-db-own" type="button">Meinen Kader übernehmen</button>
+          </div>
+          <span class="status" id="db-up-status" aria-live="polite"></span>
+        </div>
+        <p class="small muted" style="margin:12px 0 4px">Oder die Tabelle als Text einfügen:</p>
         <textarea id="db-in" spellcheck="false" style="margin-top:10px" placeholder="Name	Age	OVR	POT	Position	Team	Value
 ..."></textarea>
         <div class="row" style="margin-top:10px">
@@ -2533,6 +2547,62 @@ async function extractImagesWithClaude(files, progress){
   }
   return mergePlayers(out);
 }
+
+/* ---------- Kader in die Datenbank hochladen ---------- */
+const dbUpStatus = $("#db-up-status");
+function dbUpMsg(text, err){ dbUpStatus.className = "status" + (err ? " err" : ""); dbUpStatus.textContent = text; }
+async function dbUpload(files){
+  files = [...files];
+  if (!files.length) return;
+  const league = $("#db-league").value, club = $("#db-club").value.trim();
+  const images = files.filter(f => /^image\//.test(f.type));
+  const texts = files.filter(f => !/^image\//.test(f.type));
+  let rows = [], skipped = [];
+  try {
+    for (const f of texts){
+      const txt = await f.text();
+      if (/\.json$/i.test(f.name) || f.type === "application/json"){
+        try {
+          const obj = JSON.parse(txt);
+          const arr = Array.isArray(obj) ? obj : (Array.isArray(obj.db) ? obj.db : []).concat(obj.state && Array.isArray(obj.state.players) ? obj.state.players : []);
+          rows.push(...arr.filter(o => o && o.name));
+        } catch(e){ skipped.push(f.name); }
+        continue;
+      }
+      let r = parseRows(txt).filter(x => toInt(x.ovr) != null && x.pos);
+      if (!rowsLookValid(r) && sample){
+        dbUpMsg(`Claude liest ${f.name} …`);
+        r = await extractTableWithClaude(txt, (k, n) => dbUpMsg(n > 1 ? `Claude liest ${f.name} … Teil ${k} von ${n}` : `Claude liest ${f.name} …`));
+      }
+      if (r.length) rows.push(...r); else skipped.push(f.name);
+    }
+    if (images.length){
+      if (!sample){ dbUpMsg("Screenshots kann nur Claude auslesen. In der App: API-Schlüssel unter Alt → Verbindung festlegen.", true); if (!rows.length) return; }
+      else {
+        const r = await extractImagesWithClaude(images, (k, n) => dbUpMsg(`Claude liest Screenshot ${k} von ${n} … (je Bild meist 15–40 Sekunden)`));
+        rows.push(...r);
+      }
+    }
+    rows = mergePlayers(rows.map(o => ({...o, club: o.club || club})));
+    if (!rows.length){ dbUpMsg("Keine Spieler erkannt. Nimm die Kaderansicht mit Namen, Position und GES.", true); return; }
+    const res = dbAdd(rows, league);
+    renderDB();
+    const names = rows.slice(0, 4).map(o => String(o.name)).join(", ");
+    dbUpMsg(`${res.added} neu, ${res.updated} aktualisiert (${league}${club ? ", " + club : ""}): ${names}${rows.length > 4 ? " …" : ""} · Datenbank: ${DB.length} Spieler${skipped.length ? " · nicht lesbar: " + skipped.join(", ") : ""}`);
+  } catch(e){ dbUpMsg(errText(e), true); }
+}
+$("#db-files").addEventListener("change", e => { const f = e.target.files; dbUpload(f).finally(() => { e.target.value = ""; }); });
+const dbDrop = $("#db-drop");
+["dragenter","dragover"].forEach(ev => dbDrop.addEventListener(ev, e => { e.preventDefault(); dbDrop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev => dbDrop.addEventListener(ev, e => { e.preventDefault(); dbDrop.classList.remove("over"); }));
+dbDrop.addEventListener("drop", e => dbUpload(e.dataTransfer.files));
+$("#btn-db-own").addEventListener("click", () => {
+  if (!state.players.length){ dbUpMsg("Dein Kader ist leer.", true); return; }
+  const club = $("#db-club").value.trim() || "Mein Verein";
+  const res = dbAdd(state.players.map(p => ({...p, id: undefined, club})), $("#db-league").value);
+  renderDB();
+  dbUpMsg(`${res.added} neu, ${res.updated} aktualisiert aus deinem Kader (${club}) · Datenbank: ${DB.length} Spieler`);
+});
 /* CMTracker-Tabelle einfügen */
 const CMT_PROMPT = `Der folgende Text wurde aus einer Spielersuche (EA SPORTS FC 27 Karrieremodus, z. B. CMTracker) kopiert.
 Extrahiere jeden Spieler. Antworte nur mit einem JSON-Array:
