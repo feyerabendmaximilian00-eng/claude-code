@@ -5,30 +5,33 @@
 <style>
 /* Layout: Taktikbrett-Werkbank. Oben Import, dann Spielfeld + Kennzahlen nebeneinander, darunter Analyse-Raster und Kadertabelle. */
 :root{
-  /* Glass & Bento über kühlem Himmel. Glasflächen schweben als Overlay über einer entsättigten Landschaft. */
-  --bg:#8BA6C1; --sky-top:#B8CBE0; --sky-bottom:#8BA6C1;
-  --surface:rgba(22,29,38,.70); --surface-hi:rgba(30,38,49,.70); --surface-2:rgba(255,255,255,.06);
-  --solid:#1a222d; --line:rgba(255,255,255,.12); --line-strong:rgba(255,255,255,.22);
-  --ink:#FFFFFF; --ink-2:#9BA5B1; --ink-3:#7c8794;
-  --accent:#EF5327; --accent-ink:#FFFFFF; --accent-soft:rgba(239,83,39,.18);
-  --gold:#BAA46A; --gold-soft:rgba(186,164,106,.18);
-  --pitch:#2f4d42; --pitch-2:#2b473d; --chalk:rgba(255,255,255,.42);
-  --good:#2E7D5B; --good-ink:#6fc39c; --good-soft:rgba(46,125,91,.28);
-  --warn:#BAA46A; --warn-soft:rgba(186,164,106,.22);
-  --bad:#C93B3B; --bad-ink:#ee7b7b; --bad-soft:rgba(201,59,59,.26);
-  --shadow:0 18px 44px -12px rgba(16,28,44,.45),0 2px 6px rgba(16,28,44,.18);
+  /* Management-Ansicht: Glas-Panels auf tiefem Petrol, Mint als Akzent */
+  --bg:#0b3035;
+  --surface:rgba(9,36,42,.72); --surface-hi:rgba(15,52,58,.72); --surface-2:rgba(255,255,255,.055);
+  --solid:#0e3238; --line:rgba(255,255,255,.12); --line-strong:rgba(255,255,255,.24);
+  --ink:#FFFFFF; --ink-2:#a3bcbd; --ink-3:#7c9697;
+  --accent:#3fe0a0; --accent-ink:#04261c; --accent-soft:rgba(63,224,160,.16);
+  --gold:#d6c27e; --gold-soft:rgba(214,194,126,.18);
+  --pitch:rgba(46,138,104,.55); --pitch-2:rgba(40,126,95,.55); --chalk:rgba(255,255,255,.5);
+  --good:#2f9e6c; --good-ink:#6fe0aa; --good-soft:rgba(47,158,108,.26);
+  --warn:#d6c27e; --warn-soft:rgba(214,194,126,.2);
+  --bad:#cf4747; --bad-ink:#f08a8a; --bad-soft:rgba(207,71,71,.26);
+  --shadow:0 18px 44px -14px rgba(0,12,16,.6),0 2px 6px rgba(0,12,16,.25);
   --blur:blur(16px) saturate(130%);
   --font-display:"Oswald","Arial Narrow",Impact,sans-serif;
   --font-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --r:18px;
+  --r:16px;
   color-scheme:dark;
 }
 :root[data-theme="light"]{
-  --surface:rgba(255,255,255,.58); --surface-hi:rgba(255,255,255,.66); --surface-2:rgba(255,255,255,.45);
-  --solid:#eef3f8; --line:rgba(255,255,255,.55); --line-strong:rgba(255,255,255,.8);
-  --ink:#121a24; --ink-2:#4a5664; --ink-3:#66717e;
-  --accent-soft:rgba(239,83,39,.14); --good-ink:#2E7D5B; --bad-ink:#C93B3B;
-  --shadow:0 18px 44px -14px rgba(30,50,75,.35),0 2px 6px rgba(30,50,75,.12);
+  --bg:#d5e6e4;
+  --surface:rgba(255,255,255,.62); --surface-hi:rgba(255,255,255,.7); --surface-2:rgba(255,255,255,.5);
+  --solid:#eef6f5; --line:rgba(255,255,255,.6); --line-strong:rgba(255,255,255,.85);
+  --ink:#0d2629; --ink-2:#47615f; --ink-3:#647c7a;
+  --accent:#119a68; --accent-ink:#ffffff; --accent-soft:rgba(17,154,104,.14);
+  --gold:#9a7f2e; --good-ink:#1f7a52; --bad-ink:#b83434;
+  --pitch:rgba(46,138,104,.75); --pitch-2:rgba(40,126,95,.75);
+  --shadow:0 18px 44px -14px rgba(20,60,60,.3),0 2px 6px rgba(20,60,60,.12);
   color-scheme:light;
 }
 *{box-sizing:border-box}
@@ -462,6 +465,91 @@ code{background:rgba(255,255,255,.08);border:1px solid var(--line)}
 .status.err{color:var(--bad-ink)} .saved-note{color:var(--good-ink)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.panel,.mainnav,.pop,.banner{background:#1b232e}}
+
+/* ===== Management-Ansicht (Petrol & Mint) ===== */
+.sky{background:
+  repeating-linear-gradient(115deg,rgba(255,255,255,.022) 0 2px,transparent 2px 150px),
+  radial-gradient(1100px 650px at 78% -12%,rgba(120,235,205,.30),transparent 62%),
+  radial-gradient(900px 600px at -5% 105%,rgba(16,96,112,.65),transparent 60%),
+  linear-gradient(160deg,#105054 0%,#0b373c 45%,#072830 100%)}
+.sky::after{content:none}
+:root[data-theme="light"] .sky{background:radial-gradient(1100px 650px at 78% -12%,rgba(255,255,255,.7),transparent 62%),linear-gradient(160deg,#cfe6e2,#b9d7d4 60%,#a9cbc9)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 8px 20px -10px rgba(63,224,160,.8)}
+.btn.primary:hover{background:color-mix(in srgb,var(--accent) 88%,#fff);color:var(--accent-ink);box-shadow:0 10px 24px -10px rgba(63,224,160,.9)}
+a.btn.primary,header.top .btn.primary{color:var(--accent-ink);background:var(--accent)}
+.score.hero{background:linear-gradient(150deg,rgba(63,224,160,.95),rgba(24,160,140,.95));color:var(--accent-ink);box-shadow:0 14px 30px -12px rgba(63,224,160,.6)}
+.score.hero .eyebrow{color:rgba(4,38,28,.7)} .score.hero b{color:var(--accent-ink)}
+.bar>span{background:linear-gradient(90deg,#1fb98a,var(--accent))}
+.nb.bad{background:var(--bad);color:#fff}
+.navin a[aria-selected="true"] .nb{background:var(--accent);color:var(--accent-ink)}
+.chips button[aria-pressed="true"],.qdb-list .acts button.add{color:var(--accent-ink)}
+.brand h1 span{color:var(--accent)}
+/* Hauptlayout: Feld links breit, Details rechts */
+.main{grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);gap:16px}
+@media (max-width:1000px){.main{grid-template-columns:1fr}}
+#v-aufstellung .pitchbox{max-width:none}
+#v-aufstellung .pitch{aspect-ratio:16/11;max-width:none;border-radius:14px}
+@media (max-width:640px){#v-aufstellung .pitch{aspect-ratio:68/100}}
+#tk-pitch{aspect-ratio:68/100}
+/* Spielerkarten auf dem Feld */
+.chip.pc{width:auto;gap:3px}
+.pc-av{position:relative;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-display);font-weight:600;font-size:15px;letter-spacing:.02em;color:#fff;
+  background:linear-gradient(160deg,#2f5d66,#173a42);border:2px solid var(--good-ink);box-shadow:0 6px 14px -6px rgba(0,0,0,.6)}
+.chip.warn .pc-av{border-color:var(--gold)} .chip.bad .pc-av{border-color:var(--bad-ink)}
+.chip.empty .pc-av{background:rgba(255,255,255,.12);border:2px dashed rgba(255,255,255,.7);color:#fff}
+.pc-ovr{position:absolute;top:-7px;right:-16px;min-width:26px;padding:1px 5px;border-radius:7px;background:#fff;color:#0b2a2f;font-family:var(--font-display);font-size:14px;font-weight:600;line-height:1.25;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.pc-nm{display:flex;gap:5px;align-items:center;max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11.5px;font-weight:600;color:#fff;
+  background:rgba(6,26,30,.78);border:1px solid rgba(255,255,255,.14);border-radius:6px;padding:1px 7px}
+.pc-nm i{font-style:normal;font-family:var(--font-display);font-weight:500;font-size:10.5px;letter-spacing:.06em;color:var(--accent)}
+.chip.pc.sel .pc-av{box-shadow:0 0 0 3px var(--accent),0 0 22px rgba(63,224,160,.6)}
+.chip.pc.sel .pc-nm{background:var(--accent);color:var(--accent-ink)} .chip.pc.sel .pc-nm i{color:var(--accent-ink)}
+.chip.pc:hover .pc-av{transform:translateY(-2px)}
+@media (prefers-reduced-motion:no-preference){.pc-av{transition:transform .15s ease,box-shadow .15s ease}}
+@media (max-width:480px){.pc-av{width:34px;height:34px;font-size:12.5px}.pc-ovr{font-size:12px;right:-14px}.pc-nm{font-size:10px;max-width:78px}}
+/* Ersatzbank */
+.bench{margin-top:14px;padding:12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.bench-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.bench-h h3{font-size:15px;color:var(--accent)}
+.bench-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+.bc{flex:none;width:86px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer}
+.bc:hover{border-color:var(--line-strong)}
+.bc.sel{border-color:var(--accent);background:var(--accent-soft)}
+.bc .pc-av{width:36px;height:36px;font-size:13px;border-color:rgba(255,255,255,.35)}
+.bc-top{display:flex;justify-content:space-between;width:100%;font-size:11px}
+.bc-top i{font-style:normal;color:var(--ink-2);font-family:var(--font-display);letter-spacing:.05em}
+.bc-top b{font-family:var(--font-display);font-weight:600;font-size:15px}
+.bc-nm{font-size:11.5px;font-weight:600;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Spielerdetails */
+.pdetail{display:flex;flex-direction:column;gap:12px}
+.pd-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center}
+.pd-av{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-display);font-size:24px;font-weight:600;color:#fff;background:linear-gradient(160deg,#2f6a72,#123238);border:2px solid var(--line-strong)}
+.pd-pos{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--ink-2);text-transform:uppercase}
+.pd-name{font-size:28px;line-height:1.05;margin:2px 0;overflow-wrap:anywhere}
+.pd-meta{font-size:13px;color:var(--ink-2)} .pd-meta b{color:var(--ink);font-weight:600}
+.pd-badge{width:70px;height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(160deg,rgba(63,224,160,.95),rgba(20,150,130,.95));color:var(--accent-ink);
+  clip-path:polygon(50% 0,100% 18%,100% 82%,50% 100%,0 82%,0 18%)}
+.pd-badge b{font-family:var(--font-display);font-size:32px;font-weight:600;line-height:1}
+.pd-badge span{font-family:var(--font-display);font-size:12px;letter-spacing:.08em}
+.pd-status{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pd-status>div{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;min-width:0}
+.pd-status span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.pd-status b{font-size:14.5px;font-weight:600} .pd-status b.up{color:var(--good-ink)} .pd-status b.down{color:var(--bad-ink)}
+.pd-status small{font-size:11.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pd-ready{text-align:center;font-weight:600;font-size:13px;padding:7px;border-radius:10px;background:var(--accent-soft);color:var(--good-ink);border:1px solid rgba(63,224,160,.3)}
+.pd-ready.bench{background:rgba(255,255,255,.06);color:var(--ink-2);border-color:var(--line)}
+.pd-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
+@media (max-width:420px){.pd-grid{grid-template-columns:1fr}.pd-status{grid-template-columns:1fr 1fr}}
+.pd-col{display:flex;flex-direction:column}
+.pd-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.pd-row span{color:var(--ink-2)} .pd-row b{font-weight:600;text-align:right} .pd-row b.est{color:var(--ink-3);font-style:italic}
+.pd-bar{grid-column:1/-1;height:3px;border-radius:2px;background:rgba(255,255,255,.08);display:block}
+.pd-bar>i{display:block;height:100%;border-radius:2px;background:linear-gradient(90deg,#1fb98a,var(--accent))}
+.pd-pp{color:var(--accent);font-size:11px;margin-left:2px}
+.pd-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.pd-nav{display:flex;justify-content:center;align-items:center;gap:10px}
+.pd-arrow{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-size:18px;line-height:1;cursor:pointer}
+.pd-arrow:hover{border-color:var(--accent)}
+.pd-dots{display:flex;gap:5px} .pd-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25)} .pd-dots i.on{background:var(--accent);width:16px;border-radius:3px}
 </style>
 
 <div class="sky" aria-hidden="true"></div>
@@ -517,7 +605,11 @@ code{background:rgba(255,255,255,.08);border:1px solid var(--line)}
           </div>
         </div>
         <div class="pitchbox" id="pitchbox"><div class="pitch" id="pitch"></div><div class="pop" id="pitch-pop" hidden role="dialog" aria-label="Spieler wählen"></div></div>
-        <p class="small muted" style="text-align:center;margin:8px 0 0" id="pitch-note">Tipp: Klick auf eine Position, um den Spieler zu tauschen.</p>
+        <p class="small muted" style="text-align:center;margin:8px 0 0" id="pitch-note">Tipp: Klick auf einen Spieler zeigt seine Details. Ein zweiter Klick öffnet den Tausch.</p>
+        <div class="bench" aria-labelledby="bench-h">
+          <div class="bench-h"><h3 id="bench-h">Ersatzbank</h3><span class="small muted" id="bench-count"></span></div>
+          <div class="bench-list" id="bench"></div>
+        </div>
         <div class="legend">
           <span><i style="background:#4fae84"></i>starke Verbindung</span>
           <span><i style="background:#BAA46A"></i>okay</span>
@@ -532,6 +624,7 @@ code{background:rgba(255,255,255,.08);border:1px solid var(--line)}
       </section>
 
       <div class="side">
+        <section class="panel pdetail" id="pdetail" aria-live="polite" aria-label="Spielerdetails"></section>
         <section class="panel" aria-labelledby="sc-h">
           <div class="eyebrow">Teamwerte</div>
           <h2 id="sc-h" style="margin-bottom:12px">Stärke der Startelf</h2>
@@ -1403,13 +1496,14 @@ function dynArrow(p){
   if (state.useDyn === false || p.dyn == null || p.dyn === p.ovr) return "";
   return p.dyn > p.ovr ? '<span class="dyn up" aria-label="Form steigend">▲</span>' : '<span class="dyn down" aria-label="Form fallend">▼</span>';
 }
+const PY = y => Math.round((5 + y * 0.88) * 10) / 10;
 function renderPitch(A){
   const lines = A.links.map(l => {
     const t = tone(l.score);
     const title = l.a.p && l.b.p ? `${l.a.p.name} – ${l.b.p.name}: ${l.score}/100` : "unbesetzt";
-    return `<line x1="${l.a.x}" y1="${l.a.y}" x2="${l.b.x}" y2="${l.b.y}" stroke="${LINKCOL[t]}" stroke-width="${t==="good"?3.5:3}" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity=".9"><title>${esc(title)}</title></line>`;
+    return `<line x1="${l.a.x}" y1="${PY(l.a.y)}" x2="${l.b.x}" y2="${PY(l.b.y)}" stroke="${LINKCOL[t]}" stroke-width="${t==="good"?3.5:3}" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity=".9"><title>${esc(title)}</title></line>`;
   }).join("");
-  const marks = `<svg viewBox="0 0 68 100" aria-hidden="true"><g fill="none" stroke="var(--chalk)" stroke-width=".35">
+  const marks = `<svg viewBox="0 0 68 100" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="var(--chalk)" stroke-width=".35">
     <rect x="2" y="2" width="64" height="96"/><line x1="2" y1="50" x2="66" y2="50"/><circle cx="34" cy="50" r="8.5"/>
     <rect x="15" y="2" width="38" height="15"/><rect x="25" y="2" width="18" height="5"/>
     <rect x="15" y="83" width="38" height="15"/><rect x="25" y="93" width="18" height="5"/>
@@ -1417,14 +1511,16 @@ function renderPitch(A){
     <g fill="var(--chalk)"><circle cx="34" cy="50" r=".6"/><circle cx="34" cy="12" r=".5"/><circle cx="34" cy="88" r=".5"/></g></svg>`;
   const linkSvg = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${lines}</svg>`;
   const chips = A.xi.map(s => {
-    if (!s.p) return `<button type="button" class="chip empty" data-slot="${s.i}" aria-haspopup="dialog" aria-expanded="false" aria-label="${DE[s.pos]} unbesetzt, Spieler wählen" style="left:${s.x}%;top:${s.y}%"><div class="disc">?</div><span class="ps">${DE[s.pos]}</span></button>`;
+    if (!s.p) return `<button type="button" class="chip pc empty" data-slot="${s.i}" aria-haspopup="dialog" aria-expanded="false" aria-label="${DE[s.pos]} unbesetzt, Spieler wählen" style="left:${s.x}%;top:${PY(s.y)}%"><span class="pc-av">+</span><span class="pc-nm"><i>${DE[s.pos]}</i>frei</span></button>`;
     const cls = s.pen <= 1 ? "" : s.pen <= 5 ? "warn" : "bad";
     const last = s.p.name.split(" ").slice(-1)[0];
-    return `<button type="button" class="chip ${cls}" data-slot="${s.i}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(s.p.name)} auf ${DE[s.pos]}, tauschen" style="left:${s.x}%;top:${s.y}%" title="${esc(s.p.name)} · ${DE[s.p.pos]} · GES ${s.p.ovr}${s.p.dyn != null ? " · Dynamic " + s.p.dyn : ""} · auf ${DE[s.pos]}: ${s.fit}"><div class="disc num">${s.fit}</div><span class="nm">${dynArrow(s.p)}${esc(last)}</span><span class="ps">${DE[s.pos]}</span></button>`;
+    const selc = sel && sel.slot === s.i ? " sel" : "";
+    return `<button type="button" class="chip pc ${cls}${selc}" data-slot="${s.i}" aria-pressed="${!!selc}" aria-label="${esc(s.p.name)} auf ${DE[s.pos]}, Details anzeigen (erneuter Klick: tauschen)" style="left:${s.x}%;top:${PY(s.y)}%" title="${esc(s.p.name)} · ${DE[s.p.pos]} · GES ${s.p.ovr}${s.p.dyn != null ? " · Dynamic " + s.p.dyn : ""} · auf ${DE[s.pos]}: ${s.fit}">
+      <span class="pc-av">${esc(initials(s.p.name))}<b class="pc-ovr num">${s.fit}</b></span><span class="pc-nm"><i>${DE[s.pos]}</i>${dynArrow(s.p)}${esc(last)}</span></button>`;
   }).join("");
   $("#pitch").innerHTML = marks + linkSvg + chips;
   const manual = Object.keys(state.overrides || {}).length > 0;
-  $("#pitch-note").innerHTML = manual ? 'Aufstellung von dir angepasst. <button type="button" class="linkbtn" id="pitch-auto">Wieder automatisch aufstellen</button>' : "Tipp: Klick auf eine Position, um den Spieler zu tauschen.";
+  $("#pitch-note").innerHTML = manual ? 'Aufstellung von dir angepasst. <button type="button" class="linkbtn" id="pitch-auto">Wieder automatisch aufstellen</button>' : "Tipp: Klick auf einen Spieler zeigt seine Details. Ein zweiter Klick öffnet den Tausch.";
 }
 
 function renderScores(A){
@@ -1542,7 +1638,9 @@ function renderAll(withTable = true){
   const A = analyze(); last = A;
   renderPitch(A); renderScores(A); renderFormRec(A); renderPoints(A); renderRadar(A); renderLinks(A); renderPlan(A); renderDepth(A); renderLineup(A);
   renderNav(A);
+  renderBench(A); renderDetail(A);
   if (typeof renderTaktik === "function") renderTaktik(A);
+  renderDetail(A);
   const nbT = document.getElementById("nb-taktik");
   if (nbT && A.tactic){ const mine = state.roles?.[state.formation] || {}; const c = roleRules(A, A.xi.map((s, i) => s.p ? (mine[i] || A.tactic.rec[i]?.id) : null)).cons.length; nbT.textContent = c ? String(c) : ""; nbT.className = "nb" + (c ? " bad" : ""); }
   if (withTable) renderTable(A);
@@ -2447,10 +2545,118 @@ document.addEventListener("keydown", e => {
   }
 });
 
+
+/* ---------- Spielerdetails & Ersatzbank (Aufstellung) ---------- */
+let sel = null; // {slot: i} für Startelf oder {id} für Bankspieler
+const initials = n => { const w = String(n).trim().split(/\s+/); return ((w[0] || "?")[0] + (w.length > 1 ? w[w.length - 1][0] : "")).toUpperCase(); };
+const STAT_LONG_D = {pac:"Tempo",sho:"Schuss",pas:"Passen",dri:"Dribbling",def:"Verteidigung",phy:"Physis"};
+function bestRoleFor(p, pos){
+  const ids = pos === "GK" ? ["gk","swk","bpk"] : rolesFor(pos);
+  return ids.map(id => ({id, sc: rs(p, id)})).sort((a,b) => b.sc - a.sc)[0];
+}
+function renderBench(A){
+  const list = [...A.bench].sort((a,b) => POS.indexOf(a.pos) - POS.indexOf(b.pos) || eff(b) - eff(a));
+  $("#bench-count").textContent = list.length ? `${list.length} Spieler` : "";
+  $("#bench").innerHTML = list.length ? list.map(p => `<button type="button" class="bc${sel && sel.id === p.id ? " sel" : ""}" data-bench="${p.id}" aria-pressed="${!!(sel && sel.id === p.id)}" title="${esc(p.name)}">
+      <span class="bc-top"><i>${DE[p.pos]}</i><b class="num">${eff(p)}</b></span><span class="pc-av">${esc(initials(p.name))}</span><span class="bc-nm">${dynArrow(p)}${esc(p.name.split(" ").slice(-1)[0])}</span></button>`).join("")
+    : `<p class="small muted" style="margin:6px 0">Keine Ersatzspieler im Kader.</p>`;
+}
+function renderDetail(A){
+  const box = $("#pdetail"); if (!box) return;
+  if (sel && sel.slot != null && !A.xi[sel.slot]?.p) sel = null;
+  if (sel && sel.id && !state.players.some(p => p.id === sel.id)) sel = null;
+  if (!sel){ const st = A.xi.filter(s => s.p).sort((a,b) => b.fit - a.fit)[0]; if (st) sel = {slot: st.i}; }
+  if (!sel){ box.innerHTML = `<p class="muted">Noch keine Spieler im Kader.</p>`; return; }
+  const slot = sel.slot != null ? A.xi[sel.slot] : null;
+  const p = slot ? slot.p : state.players.find(x => x.id === sel.id);
+  const posNow = slot ? slot.pos : p.pos;
+  const fit = fitAt(p, posNow);
+  const mine = state.roles?.[state.formation] || {};
+  const roleId = slot ? (mine[slot.i] || A.tactic?.rec?.[slot.i]?.id || bestRoleFor(p, posNow).id) : bestRoleFor(p, p.pos).id;
+  const role = ROLES[roleId];
+  const roleSc = posNow === "GK" ? eff(p) : rs(p, roleId);
+  const bestR = bestRoleFor(p, posNow);
+  const roleTag = posNow === "GK" ? "" : roleSc >= bestR.sc - 1 ? "++" : roleSc >= bestR.sc - 4 ? "+" : "";
+  const dd = p.dyn != null ? p.dyn - p.ovr : 0;
+  const ddTxt = `${dd > 0 ? "+" : dd < 0 ? "−" : "±"}${Math.abs(dd)} GES`;
+  const pen = famPen(p, posNow);
+  const posNote = posNow === "GK" ? "Torwart" : pen === 0 ? "Stammposition" : pen === 1 ? "Nebenposition" : pen <= 5 ? "ungewohnt" : "fremde Position";
+  const bestPos = POS.filter(x => (p.pos === "GK") === (x === "GK")).map(x => ({x, f: fitAt(p, x)})).sort((a,b) => b.f - a.f).slice(0, 3);
+  const statRows = p.pos === "GK" ? `<div class="pd-row"><span>Torwart</span><b class="num">${eff(p)}</b></div><p class="small muted" style="margin:6px 0 0">Für Torhüter zählt in der Analyse nur der Gesamtwert.</p>`
+    : STATS.map(k => `<div class="pd-row"><span>${STAT_LONG_D[k]}</span><b class="num${p.est.includes(k) ? " est" : ""}">${p[k]}</b><i class="pd-bar"><i style="width:${clamp(p[k], 0, 99)}%"></i></i></div>`).join("");
+  const xiOrder = A.xi.filter(s => s.p).map(s => s.i);
+  const k = slot ? xiOrder.indexOf(slot.i) : -1;
+  const swapTargets = !slot ? A.xi.filter(s => s.p).map(s => ({s, f: fitAt(p, s.pos)})).sort((a,b) => (b.f - b.s.fit) - (a.f - a.s.fit)) : [];
+  box.innerHTML = `
+    <div class="pd-head">
+      <span class="pd-av">${esc(initials(p.name))}</span>
+      <div class="pd-id">
+        <div class="pd-pos">${DE[p.pos]}${p.alt.length ? " · " + p.alt.map(x => DE[x]).join(" · ") : ""}</div>
+        <h2 class="pd-name">${esc(p.name)}</h2>
+        <div class="pd-meta">${p.nat ? esc(p.nat) + " · " : ""}Basis-GES <b class="num">${p.ovr}</b> · Potenzial <b class="num">${p.pot}</b></div>
+      </div>
+      <div class="pd-badge"><b class="num">${fit}</b><span>${DE[posNow]}</span></div>
+    </div>
+    <div class="pd-status">
+      <div><span>Form</span><b class="${dd > 0 ? "up" : dd < 0 ? "down" : ""}">${p.dyn != null ? ddTxt : "–"}</b><small>${p.dyn != null ? "Dynamic OVR " + p.dyn : "kein Dynamic OVR"}</small></div>
+      <div><span>Status</span><b>${slot ? "Startelf" : "Bank"}</b><small>${slot ? "auf " + DE[posNow] : "Ersatzspieler"}</small></div>
+      <div><span>Position</span><b>${posNote}</b><small>Wert hier ${fit}</small></div>
+    </div>
+    <div class="pd-ready ${slot ? "" : "bench"}">${slot ? (pen <= 1 ? "Bereit für die Startelf" : "Spielt aktuell außerhalb seiner Position") : "Auf der Ersatzbank"}</div>
+    <div class="pd-grid">
+      <div class="pd-col">${statRows}</div>
+      <div class="pd-col">
+        <div class="pd-row"><span>Alter</span><b class="num">${p.age}</b></div>
+        <div class="pd-row"><span>Starker Fuß</span><b>${p.foot === "L" ? "Links" : "Rechts"}</b></div>
+        <div class="pd-row"><span>Rolle</span><b>${role.n}${roleTag ? `<sup class="pd-pp">${roleTag}</sup>` : ""}</b></div>
+        <div class="pd-row"><span>Fokus</span><b>${role.foc}</b></div>
+        <div class="pd-row"><span>Rollenwert</span><b class="num">${roleSc}</b></div>
+        <div class="pd-row"><span>Beste Positionen</span><b>${bestPos.map(x => DE[x.x] + " " + x.f).join(" · ")}</b></div>
+      </div>
+    </div>
+    <div class="pd-actions">
+      ${slot ? `<button type="button" class="btn primary" id="pd-swap">Spieler tauschen</button>` :
+        `<label class="fld" for="pd-sub" style="flex:1;min-width:200px">Einwechseln für<select id="pd-sub"><option value="">Startspieler wählen …</option>${swapTargets.map(t => `<option value="${t.s.i}">${DE[t.s.pos]} · ${esc(t.s.p.name)} (${t.s.fit} → ${t.f})</option>`).join("")}</select></label>`}
+      <button type="button" class="btn" id="pd-edit">Werte bearbeiten</button>
+    </div>
+    ${slot ? `<div class="pd-nav"><button type="button" class="pd-arrow" id="pd-prev" aria-label="Vorheriger Spieler">‹</button>
+      <span class="pd-dots">${xiOrder.map((x, j) => `<i class="${j === k ? "on" : ""}"></i>`).join("")}</span>
+      <button type="button" class="pd-arrow" id="pd-next" aria-label="Nächster Spieler">›</button></div>` : ""}`;
+}
+function selectAndRender(next){ sel = next; if (last){ renderPitch(last); renderBench(last); renderDetail(last); } }
+$("#bench").addEventListener("click", e => { const b = e.target.closest("[data-bench]"); if (b) selectAndRender({id: b.dataset.bench}); });
+$("#pdetail").addEventListener("click", e => {
+  if (!last || !sel) return;
+  if (e.target.closest("#pd-swap") && sel.slot != null){ const chip = document.querySelector(`#pitch [data-slot="${sel.slot}"]`); if (chip) openSwap(sel.slot, chip); return; }
+  if (e.target.closest("#pd-edit")){ const p = sel.slot != null ? last.xi[sel.slot].p : state.players.find(x => x.id === sel.id); if (p) mLoad(p); return; }
+  const dir = e.target.closest("#pd-prev") ? -1 : e.target.closest("#pd-next") ? 1 : 0;
+  if (dir && sel.slot != null){ const order = last.xi.filter(s => s.p).map(s => s.i); const k = order.indexOf(sel.slot); selectAndRender({slot: order[(k + dir + order.length) % order.length]}); }
+});
+$("#pdetail").addEventListener("change", e => {
+  if (e.target.id !== "pd-sub" || !e.target.value || !sel?.id || !last) return;
+  const i = +e.target.value, out = last.xi[i].p;
+  Object.keys(state.overrides).forEach(k => { if (state.overrides[k] === sel.id) delete state.overrides[k]; });
+  last.xi.forEach(x => { if (x.p) state.overrides[x.i] = x.p.id; });
+  state.overrides[i] = sel.id;
+  sel = {slot: i};
+  renderAll(false);
+  $("#pitch-note").innerHTML = `${esc(state.players.find(p => p.id === state.overrides[i])?.name || "")} eingewechselt für ${esc(out?.name || "")}. <button type="button" class="linkbtn" id="pitch-auto">Wieder automatisch aufstellen</button>`;
+});
+document.addEventListener("keydown", e => {
+  if (!sel || sel.slot == null || !last || document.querySelector("#v-aufstellung")?.hidden) return;
+  if (e.target.closest("input,select,textarea") || popState) return;
+  if (e.key === "ArrowRight" || e.key === "ArrowLeft"){ const order = last.xi.filter(s => s.p).map(s => s.i); const k = order.indexOf(sel.slot); selectAndRender({slot: order[(k + (e.key === "ArrowRight" ? 1 : -1) + order.length) % order.length]}); }
+});
 /* Aufstellung: Klick auf Position -> Spieler tauschen */
 $("#pitch").addEventListener("click", e => {
   const chip = e.target.closest("[data-slot]"); if (!chip || !last) return;
-  const i = +chip.dataset.slot, s = last.xi[i];
+  const i = +chip.dataset.slot;
+  if (!last.xi[i].p || (sel && sel.slot === i)){ openSwap(i, chip); return; }
+  selectAndRender({slot: i});
+  document.querySelector(`#pitch [data-slot="${i}"]`)?.focus({preventScroll: true});
+});
+function openSwap(i, chip){
+  const s = last.xi[i];
   const where = new Map(last.xi.filter(x => x.p).map(x => [x.p.id, x]));
   const list = state.players.map(p => ({p, f: fitAt(p, s.pos), at: where.get(p.id)})).filter(x => !s.p || x.p.id !== s.p.id).sort((a,b) => b.f - a.f);
   const fmt = x => `<button type="button" class="opt" data-pick-player="${x.p.id}"><b>${esc(x.p.name)}</b><span class="v">${x.f}</span><small>${DE[x.p.pos]}${x.p.alt.length ? "/" + x.p.alt.map(a => DE[a]).join("/") : ""} · ${x.at ? "spielt " + DE[x.at.pos] + " → wird getauscht" : "Bank"}${s.p ? ` · ${x.f - s.fit >= 0 ? "+" : ""}${x.f - s.fit} ggü. ${esc(s.p.name.split(" ").slice(-1)[0])}` : ""}</small></button>`;
@@ -2469,10 +2675,10 @@ $("#pitch").addEventListener("click", e => {
     last.xi.forEach(x => { if (x.p) state.overrides[x.i] = x.p.id; });
     state.overrides[i] = id;
     if (other){ if (s.p) state.overrides[other.i] = s.p.id; else delete state.overrides[other.i]; }
+    sel = {slot: i};
     renderAll(false);
-    $("#xi-h").scrollIntoView({block: "nearest"});
   });
-});
+}
 
 $("#pitch-note").addEventListener("click", e => { if (e.target.closest("#pitch-auto")){ state.overrides = {}; renderAll(false); } });
 
