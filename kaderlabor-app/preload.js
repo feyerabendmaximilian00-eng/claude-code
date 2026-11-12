@@ -7,5 +7,7 @@ if (location.protocol === "file:") {
     sample: (payload) => ipcRenderer.invoke("claude:sample", payload),
     hasKey: () => ipcRenderer.invoke("settings:hasKey"),
     setKey: (key) => ipcRenderer.invoke("settings:setKey", key),
+    storeGet: () => ipcRenderer.invoke("store:get"),
+    storeSet: (data) => ipcRenderer.invoke("store:set", data),
   });
 }

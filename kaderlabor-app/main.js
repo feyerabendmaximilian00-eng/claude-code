@@ -79,6 +79,26 @@ ipcMain.handle("claude:sample", async (_e, payload) => {
     return { ok: false, code: "upstream_error", message: String(err && err.message || err) };
   }
 });
+/* ---------- Dauerhafte Datei-Speicherung für die lokale Version ---------- */
+const DATA_FILE = () => path.join(app.getPath("userData"), "kaderlabor-daten.json");
+ipcMain.handle("store:get", (e) => {
+  if (!fromLocalPage(e)) return null;
+  for (const f of [DATA_FILE(), DATA_FILE() + ".bak"]) {
+    try { return JSON.parse(fs.readFileSync(f, "utf8")); } catch { /* nächste Datei versuchen */ }
+  }
+  return null;
+});
+ipcMain.handle("store:set", (e, data) => {
+  if (!fromLocalPage(e)) return { ok: false, message: "Nicht erlaubt." };
+  try {
+    const file = DATA_FILE(), tmp = file + ".tmp";
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(tmp, JSON.stringify(data));
+    if (fs.existsSync(file)) fs.copyFileSync(file, file + ".bak");
+    fs.renameSync(tmp, file);
+    return { ok: true };
+  } catch (err) { return { ok: false, message: String(err && err.message || err) }; }
+});
 ipcMain.handle("settings:hasKey", (e) => fromLocalPage(e) && !!getApiKey());
 ipcMain.handle("settings:setKey", (_e, key) => {
   if (!fromLocalPage(_e)) return { ok: false, message: "Nicht erlaubt." };

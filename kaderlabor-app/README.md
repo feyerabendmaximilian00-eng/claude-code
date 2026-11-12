@@ -8,7 +8,11 @@ Kaderanalyse für den Karrieremodus von EA SPORTS FC 27 als eigenständiges Wind
 2. `Kaderlabor.exe` starten.
 3. Windows SmartScreen meldet beim ersten Start eventuell „Unbekannter Herausgeber“, weil die App nicht signiert ist. Dann auf **Weitere Informationen → Trotzdem ausführen** klicken.
 
-Dein Kader, deine Spielerdatenbank, Rollen und Einstellungen werden dauerhaft auf dem PC gespeichert (`%APPDATA%\Kaderlabor`).
+## Wo deine Daten gespeichert werden
+
+- **Mit claude.ai verbunden:** Kader, Datenbank, Rollen und Einstellungen liegen in deinem Claude-Konto, privat für dich. Sie sind auf jedem Gerät gleich, auch auf der Website, und bleiben erhalten, wenn du die App neu installierst.
+- **Lokale Version:** Alles liegt in `%APPDATA%\Kaderlabor\kaderlabor-daten.json` (mit automatischer Sicherungskopie `.bak`).
+- **Sicherung:** Unter Datenbank → „Sicherung herunterladen“ speicherst du alles als Datei; „Sicherung laden“ stellt sie wieder her, auch zwischen den beiden Modi.
 
 ## Vollbild
 

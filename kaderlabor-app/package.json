@@ -1,7 +1,7 @@
 {
   "name": "kaderlabor",
   "productName": "Kaderlabor",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Kaderanalyse für den FC-27-Karrieremodus als Windows-App",
   "main": "main.js",
   "private": true,

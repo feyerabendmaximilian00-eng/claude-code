@@ -557,6 +557,12 @@ a.btn.primary,header.top .btn.primary{color:var(--accent-ink);background:var(--a
 .pd-arrow{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-size:18px;line-height:1;cursor:pointer}
 .pd-arrow:hover{border-color:var(--accent)}
 .pd-dots{display:flex;gap:5px} .pd-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25)} .pd-dots i.on{background:var(--accent);width:16px;border-radius:3px}
+
+.savestate{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);white-space:nowrap}
+.savestate::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ink-3)}
+.savestate.ok::before{background:var(--good-ink)} .savestate.busy::before{background:var(--gold)} .savestate.warn::before{background:var(--bad-ink)}
+.savestate.warn{color:var(--bad-ink)}
+@media (max-width:900px){.savestate{font-size:0;gap:0}.savestate::before{width:10px;height:10px}}
 </style>
 
 <div class="sky" aria-hidden="true"></div>
@@ -583,6 +589,7 @@ a.btn.primary,header.top .btn.primary{color:var(--accent-ink);background:var(--a
       <a href="#bericht" data-nav="bericht" role="tab" id="nav-bericht" hidden>Scoutbericht</a>
     </div>
     <div class="navright">
+      <span class="savestate" id="savestate" aria-live="polite" title="Speicherstatus"></span>
       <span class="navsum num" id="navsum"></span>
       <button class="themebtn" id="theme-toggle" type="button" aria-label="Dunkles Design einschalten" title="Hell / Dunkel">
         <svg id="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -951,11 +958,15 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
           <h3 id="db-h">Spielerdatenbank</h3>
         </div>
         <div class="row">
+          <button class="btn" id="btn-backup-save" type="button">Sicherung herunterladen</button>
+          <label class="btn" for="backup-file" style="cursor:pointer">Sicherung laden</label>
+          <input type="file" id="backup-file" accept="application/json,.json" hidden>
           <button class="btn ghost" id="btn-db-clear" type="button">Datenbank leeren</button>
         </div>
       </div>
       <p class="small muted" style="margin:6px 0 0;max-width:80ch">Sammle hier Spieler aus Bundesliga, 2. Bundesliga und 3. Liga. Die Datenbank bleibt in diesem Browser gespeichert. Sobald sie gefüllt ist, wählt Claude Transfervorschläge nur noch aus diesen Spielern mit ihren echten FC-27-Werten aus.</p>
       <div class="dbsum" id="db-sum"></div>
+      <div class="row" style="margin-top:8px"><span class="status" id="backup-status" aria-live="polite"></span><button class="btn primary" id="btn-backup-apply" type="button" hidden>Jetzt wiederherstellen</button></div>
       <details id="db-addbox" style="margin-top:6px">
         <summary>Spieler aus CMTracker hinzufügen</summary>
         <ol class="small muted" style="margin:8px 0;padding-left:20px;max-width:75ch">
@@ -1321,7 +1332,18 @@ try {
       useDyn: saved.useDyn !== false, roles: saved.roles && typeof saved.roles === "object" ? saved.roles : {}, style: saved.style || "auto"};
   }
 } catch(e){}
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+var lastLocalState = null;
+function save(){
+  const str = JSON.stringify(state);
+  if (str === lastLocalState) return;
+  const first = lastLocalState === null;
+  lastLocalState = str;
+  try { localStorage.setItem(KEY, str); } catch(e){}
+  if (!first){ touchLocal(); if (typeof Persist !== "undefined" && Persist) Persist.schedule(); }
+}
+const TS_KEY = "kaderlabor.updated";
+function localTs(){ try { return +localStorage.getItem(TS_KEY) || 0; } catch(e){ return 0; } }
+function touchLocal(t){ try { localStorage.setItem(TS_KEY, String(t || Date.now())); } catch(e){} }
 
 /* ---------- Analyse ---------- */
 function analyze(){
@@ -2272,8 +2294,14 @@ let DB = [];
 try { const d = JSON.parse(localStorage.getItem(DBKEY) || "[]"); if (Array.isArray(d)) DB = d.filter(x => x && x.name).map(x => ({...normalizePlayer(x), club: x.club || "", value: x.value ?? null, league: x.league || ""})); } catch(e){}
 let dbLimit = 50, dbClearArmed = false;
 function saveDB(){
+  touchLocal();
+  if (typeof Persist !== "undefined" && Persist) Persist.schedule();
   try { localStorage.setItem(DBKEY, JSON.stringify(DB)); return true; }
-  catch(e){ $("#db-status").className = "status err"; $("#db-status").textContent = "Der Browser-Speicher ist voll. Lösche Spieler aus Ligen, die du nicht brauchst."; return false; }
+  catch(e){
+    // Browser-Speicher voll: die dauerhafte Sicherung (Konto oder Datei) läuft trotzdem weiter
+    if (!Persist || !Persist.kind){ $("#db-status").className = "status err"; $("#db-status").textContent = "Der Browser-Speicher ist voll. Lade eine Sicherung herunter, bevor du weitere Spieler hinzufügst."; return false; }
+    return true;
+  }
 }
 const dbKey = x => (x.name + "|" + (x.club || "")).toLowerCase();
 function dbAdd(rows, league){
@@ -2498,6 +2526,7 @@ $("#btn-cmt").addEventListener("click", async () => {
   $("#report-panel").hidden = !sample;
   $("#nav-bericht").hidden = !sample;
   $("#tk-ai-panel").hidden = !sample;
+  setTimeout(() => Persist.init(), 0);
   if (sample && last) renderAll(false);
   if (location.hash === "#bericht") showView("bericht", false);
   $("#transfer-panel").hidden = false;
@@ -3026,6 +3055,150 @@ Hinweise des Assistenten: ${[...T.warn, ...roleRules(last, last.xi.map((s, i) =>
   try { const {text} = await sample(prompt, {signal: tkCtl.signal, onText: ({text}) => { out.innerHTML = mdToHtml(text); }}); out.innerHTML = mdToHtml(text); }
   catch(e){ out.innerHTML = (e?.text ? mdToHtml(e.text) : "") + (e?.code === "cancelled" ? "" : `<p class="status err">${esc(errText(e))}</p>`); }
   finally { btn.disabled = false; btn.textContent = "Neue Beratung"; }
+});
+
+
+/* ---------- Dauerhafte Speicherung ----------
+   claude.ai: in deinem privaten Bereich des Artefakts (data/users/<deine-id>/), auf jedem Gerät gleich.
+   Windows-App (lokal): in einer Datei auf dem PC. Zusätzlich immer im Browser-Speicher als Zwischenstand. */
+function applyStored(st, dbArr){
+  if (st && Array.isArray(st.players)){
+    state = {players: st.players.map(normalizePlayer), formation: FORMATIONS[st.formation] ? st.formation : "4-3-3", overrides: st.overrides || {}, isSample: !!st.isSample,
+      useDyn: st.useDyn !== false, roles: st.roles && typeof st.roles === "object" ? st.roles : {}, style: st.style || "auto"};
+  }
+  if (Array.isArray(dbArr)) DB = dbArr.filter(x => x && x.name).map(x => ({...normalizePlayer(x), club: x.club || "", value: x.value ?? null, league: x.league || ""}));
+  try { localStorage.setItem(KEY, JSON.stringify(state)); localStorage.setItem(DBKEY, JSON.stringify(DB)); } catch(e){}
+  lastLocalState = JSON.stringify(state);
+  $("#use-dyn").checked = state.useDyn !== false;
+  sel = null;
+  renderAll();
+}
+var Persist = {
+  kind: null, db: null, uid: null, timer: null, busy: false, again: false,
+  remote: {state: null, chunks: []},
+  status(text, cls){ const el = $("#savestate"); if (el){ el.textContent = text; el.className = "savestate " + (cls || ""); } },
+  ref(id){ return this.db.doc("data/users/" + this.uid + "/" + id); },
+  async init(){
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e){}
+    const N = window.kaderlaborNative;
+    if (N && typeof N.storeGet === "function") this.kind = "file";
+    else if (window.claude){
+      try {
+        const db = await window.claude.use("db");
+        const user = db ? await window.claude.use("user") : null;
+        const uid = user ? await user.id() : null;
+        if (db && uid){ this.kind = "cloud"; this.db = db; this.uid = uid; }
+      } catch(e){}
+    }
+    if (!this.kind){ this.status("Nur in diesem Browser", "local"); return; }
+    this.status("Lade gespeicherte Daten …", "busy");
+    let remote = null;
+    try { remote = await this.read(); }
+    catch(e){ this.status("Konto nicht erreichbar · nur Browser", "warn"); this.kind = null; return; }
+    if (remote && remote.updated > localTs()){
+      applyStored(remote.state, remote.db);
+      touchLocal(remote.updated);
+      this.status(this.label(), "ok");
+    } else if (remote && remote.updated === localTs()){
+      this.status(this.label(), "ok");
+    } else {
+      if (!localTs()) touchLocal();
+      await this.flush(true);
+    }
+  },
+  label(){ return this.kind === "cloud" ? "Im Claude-Konto gespeichert" : "Auf diesem PC gespeichert"; },
+  async read(){
+    if (this.kind === "file"){
+      const r = await window.kaderlaborNative.storeGet();
+      return r && r.updated ? {updated: +r.updated, state: r.state || null, db: Array.isArray(r.db) ? r.db : []} : null;
+    }
+    const st = await this.ref("kl-state").get();
+    const meta = await this.ref("kl-dbmeta").get();
+    if (!st.exists && !meta.exists) return null;
+    const m = meta.exists ? meta.data() : {chunks: 0, updated: 0};
+    const chunks = [];
+    for (let k = 0; k < (+m.chunks || 0); k++){
+      const c = await this.ref("kl-db-" + k).get();
+      chunks.push(c.exists ? String(c.data().json || "[]") : "[]");
+    }
+    const sd = st.exists ? st.data() : {};
+    this.remote.state = st.exists ? String(sd.json || "") : null;
+    this.remote.chunks = chunks;
+    let parsed = null; try { parsed = this.remote.state ? JSON.parse(this.remote.state) : null; } catch(e){}
+    return {updated: Math.max(+sd.updated || 0, +m.updated || 0), state: parsed, db: chunks.flatMap(c => { try { return JSON.parse(c); } catch(e){ return []; } })};
+  },
+  schedule(){
+    if (!this.kind) return;
+    clearTimeout(this.timer);
+    this.status("Speichert …", "busy");
+    this.timer = setTimeout(() => this.flush(false), 1200);
+  },
+  async flush(force){
+    if (!this.kind) return;
+    if (this.busy){ this.again = true; return; }
+    this.busy = true;
+    const updated = localTs() || Date.now();
+    try {
+      if (this.kind === "file"){
+        const r = await window.kaderlaborNative.storeSet({updated, state, db: DB});
+        if (r && r.ok === false) throw {code: "file", message: r.message};
+      } else {
+        const sStr = JSON.stringify(state);
+        if (force || sStr !== this.remote.state){ await this.ref("kl-state").set({json: sStr, updated}); this.remote.state = sStr; }
+        const chunks = [];
+        for (let i = 0; i < DB.length; i += 150) chunks.push(JSON.stringify(DB.slice(i, i + 150)));
+        for (let k = 0; k < chunks.length; k++){ if (force || chunks[k] !== this.remote.chunks[k]) await this.ref("kl-db-" + k).set({json: chunks[k]}); }
+        for (let k = chunks.length; k < this.remote.chunks.length; k++) await this.ref("kl-db-" + k).delete();
+        this.remote.chunks = chunks;
+        await this.ref("kl-dbmeta").set({chunks: chunks.length, count: DB.length, updated});
+      }
+      this.status(this.label(), "ok");
+    } catch(e){
+      const code = e && e.code;
+      this.status(code === "quota_exceeded" ? "Speicher voll · Sicherung herunterladen!" : code === "revoked" || code === "not_granted" ? "Nur in diesem Browser" : "Speichern fehlgeschlagen · erneuter Versuch", "warn");
+      if (code !== "quota_exceeded" && code !== "revoked" && code !== "not_granted" && code !== "invalid_argument") setTimeout(() => this.schedule(), 8000);
+    } finally {
+      this.busy = false;
+      if (this.again){ this.again = false; this.flush(false); }
+    }
+  }
+};
+
+/* Sicherung herunterladen / laden */
+let pendingBackup = null;
+$("#btn-backup-save").addEventListener("click", async () => {
+  const st = $("#backup-status"); st.className = "status";
+  const data = JSON.stringify({app: "kaderlabor", version: 1, exported: new Date().toISOString(), state, db: DB});
+  const filename = "kaderlabor-sicherung-" + new Date().toISOString().slice(0, 10) + ".json";
+  try {
+    const dl = window.claude ? await window.claude.use("downloads") : null;
+    if (dl){ await dl.save({filename, data}); st.textContent = "Sicherung gespeichert."; return; }
+  } catch(e){ if (e && e.code === "cancelled"){ st.textContent = "Abgebrochen."; return; } }
+  try {
+    const url = URL.createObjectURL(new Blob([data], {type: "application/json"}));
+    const a = document.createElement("a"); a.href = url; a.download = filename; document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    st.textContent = "Sicherung heruntergeladen.";
+  } catch(e){ st.className = "status err"; st.textContent = "Download nicht möglich."; }
+});
+$("#backup-file").addEventListener("change", async e => {
+  const f = e.target.files && e.target.files[0]; const st = $("#backup-status"); st.className = "status";
+  e.target.value = "";
+  if (!f) return;
+  try {
+    const obj = JSON.parse(await f.text());
+    if (!obj || obj.app !== "kaderlabor" || !obj.state || !Array.isArray(obj.db)) throw 0;
+    pendingBackup = obj;
+    st.textContent = `Sicherung vom ${new Date(obj.exported).toLocaleString("de-DE")}: ${obj.state.players?.length || 0} Spieler im Kader, ${obj.db.length} in der Datenbank. Das ersetzt deinen aktuellen Stand.`;
+    $("#btn-backup-apply").hidden = false;
+  } catch(err){ st.className = "status err"; st.textContent = "Die Datei ist keine Kaderlabor-Sicherung."; }
+});
+$("#btn-backup-apply").addEventListener("click", () => {
+  if (!pendingBackup) return;
+  applyStored(pendingBackup.state, pendingBackup.db);
+  pendingBackup = null; $("#btn-backup-apply").hidden = true;
+  touchLocal(); Persist.schedule();
+  $("#backup-status").textContent = "Sicherung wiederhergestellt.";
 });
 
 $("#use-dyn").checked = state.useDyn !== false;
