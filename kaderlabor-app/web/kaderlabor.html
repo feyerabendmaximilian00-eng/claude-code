@@ -985,6 +985,7 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
           <label class="row" style="gap:6px"><input type="checkbox" id="fc-de"> Nur deutsche Ligen</label>
         </div>
         <div class="status" id="fc-status" aria-live="polite" style="margin-top:6px"></div>
+        <div class="row" style="margin-top:8px"><button class="btn" id="fc-take" type="button" hidden></button><span class="small muted" id="fc-take-note"></span></div>
       </div>
       <div class="dbsum" id="db-sum"></div>
       <div class="row" style="margin-top:8px"><span class="status" id="backup-status" aria-live="polite"></span><button class="btn primary" id="btn-backup-apply" type="button" hidden>Jetzt wiederherstellen</button></div>
@@ -1324,7 +1325,7 @@ function normalizePlayer(raw){
   const f = String(raw.foot || "").trim().toLowerCase();
   const p = {id: raw.id || ("p" + Date.now().toString(36) + (uid++)), name: String(raw.name || "Unbekannt").trim().slice(0, 40) || "Unbekannt",
     pos, alt, age: clamp(toInt(raw.age) ?? 25, 15, 45), ovr, pot, foot: (f.startsWith("l") ? "L" : "R"),
-    nat: String(raw.nat || "").trim().slice(0, 30), est: [], dyn: (() => { const d = toInt(raw.dyn); return d == null ? null : clamp(d, 30, 99); })()};
+    nat: String(raw.nat || "").trim().slice(0, 30), est: [], fcid: toInt(raw.fcid), dyn: (() => { const d = toInt(raw.dyn); return d == null ? null : clamp(d, 30, 99); })()};
   const tpl = TPL[ROLE[pos]];
   p.sub = {};
   const rs = (raw.sub && typeof raw.sub === "object") ? raw.sub : {};
@@ -3375,27 +3376,55 @@ function renderFc(st){
   if (st.busy){ fs.className = "status"; fs.textContent = "Lese Spielstand …"; }
   else if (st.error){ fs.className = "status err"; fs.textContent = st.error; }
 }
+let fcClubRows = null, fcClubName = "";
+const fcNorm = t => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
 function applyFcData(payload){
   const rows = payload.rows || [], meta = payload.meta || {};
   DB = rows.map(r => ({...normalizePlayer({...r, id: undefined}), club: r.club || "", value: null, league: r.league || ""}));
-  // eigener Kader: gleiche Namen mit den neuen Werten aktualisieren (Dynamic OVR und Rollen bleiben)
-  const byName = new Map();
-  rows.forEach(r => { const k = r.name.toLowerCase(); if (!byName.has(k)) byName.set(k, []); byName.get(k).push(r); });
-  let updated = 0;
+  // eigenen Kader zuordnen: zuerst über die FC-Spieler-ID, dann über den Namen (ohne Akzente, auch Teilnamen)
+  const byId = new Map(rows.map(r => [r.fcid, r]));
+  const byNorm = new Map();
+  rows.forEach(r => { const k = fcNorm(r.name); if (!byNorm.has(k)) byNorm.set(k, []); byNorm.get(k).push(r); });
+  const exact = p => (p.fcid && byId.get(p.fcid)) ? [byId.get(p.fcid)] : (byNorm.get(fcNorm(p.name)) || []);
+  // dein Verein = Verein mit den meisten eindeutigen Treffern
+  const clubCount = new Map();
+  state.players.forEach(p => { const c = exact(p); if (c.length === 1 && c[0].club) clubCount.set(c[0].club, (clubCount.get(c[0].club) || 0) + 1); });
+  const myClub = [...clubCount.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "";
+  const find = p => {
+    let c = exact(p);
+    if (c.length > 1 && myClub) c = c.filter(r => r.club === myClub);
+    if (!c.length){
+      const n = fcNorm(p.name), parts = n.split(" ").filter(w => w.length > 2);
+      const pool = myClub ? rows.filter(r => r.club === myClub) : rows;
+      c = pool.filter(r => { const rn = fcNorm(r.name); return rn.includes(n) || n.includes(rn) || (parts.length && parts.every(w => rn.includes(w))); });
+    }
+    if (!c.length && myClub){
+      // letzte Stufe: gleicher Nachname, eindeutig im eigenen Verein
+      const last = fcNorm(p.name).split(" ").pop();
+      if (last && last.length > 2) c = rows.filter(r => r.club === myClub && fcNorm(r.name).split(" ").pop() === last);
+    }
+    return c.length === 1 ? c[0] : null;
+  };
+  let updated = 0, missing = [];
   if (!state.isSample){
     state.players = state.players.map(p => {
-      const c = byName.get(p.name.toLowerCase());
-      if (!c || c.length !== 1) return p;
+      const r = find(p);
+      if (!r){ missing.push(p.name); return p; }
       updated++;
-      return {...normalizePlayer({...c[0], id: p.id}), dyn: p.dyn};
+      return {...normalizePlayer({...r, id: p.id}), dyn: p.dyn};
     });
   }
+  fcClubName = myClub;
+  fcClubRows = myClub ? rows.filter(r => r.club === myClub) : null;
   saveDB(); lastLocalState = null; save(); renderAll();
   const fs = $("#fc-status"); fs.className = "status";
-  fs.textContent = `Abgeglichen: ${DB.length.toLocaleString("de-DE")} Spieler aus ${meta.file || "dem Spielstand"} (Spieldatum ${meta.gameDate ? new Date(meta.gameDate).toLocaleDateString("de-DE") : "?"})`
-    + (updated ? `, ${updated} Spieler in deinem Kader aktualisiert.` : ".")
-    + (meta.named < meta.players ? ` ${(meta.players - meta.named).toLocaleString("de-DE")} ohne Namen.` : "");
+  fs.textContent = `Abgeglichen: ${DB.length.toLocaleString("de-DE")} Spieler aus ${meta.file || "dem Spielstand"} (Spieldatum ${meta.gameDate ? new Date(meta.gameDate).toLocaleDateString("de-DE") : "?"}).`
+    + (updated ? ` ${updated} Spieler in deinem Kader aktualisiert${myClub ? " (" + myClub + ")" : ""}.` : "")
+    + (missing.length ? ` Nicht gefunden: ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? " …" : ""}.` : "");
+  const btn = $("#fc-take");
+  if (fcClubRows && fcClubRows.length){ btn.hidden = false; btn.textContent = `Kader komplett aus Spielstand übernehmen (${fcClubName}, ${fcClubRows.length} Spieler)`; }
 }
+
 if (FC){
   $("#fc-box").hidden = false;
   FC.onStatus(renderFc);
@@ -3406,6 +3435,18 @@ if (FC){
   $("#fc-sync").addEventListener("click", () => { $("#fc-status").className = "status"; $("#fc-status").textContent = "Lese Spielstand …"; FC.syncNow(); });
   $("#fc-auto").addEventListener("change", e => FC.setOptions({auto: e.target.checked}).then(renderFc));
   $("#fc-de").addEventListener("change", e => FC.setOptions({germanOnly: e.target.checked}).then(renderFc));
+  let takeArmed = false;
+  $("#fc-take").addEventListener("click", () => {
+    if (!fcClubRows) return;
+    const b = $("#fc-take");
+    if (!takeArmed){ takeArmed = true; $("#fc-take-note").textContent = "Ersetzt deinen Kader. Nochmal klicken zum Bestätigen."; setTimeout(() => { takeArmed = false; $("#fc-take-note").textContent = ""; }, 4000); return; }
+    takeArmed = false;
+    const old = new Map(state.players.map(p => [p.fcid, p]));
+    state.players = fcClubRows.map(r => { const o = old.get(r.fcid); return {...normalizePlayer({...r, id: o ? o.id : undefined}), dyn: o ? o.dyn : null}; });
+    state.overrides = {}; state.isSample = false; sel = null;
+    lastLocalState = null; save(); renderAll();
+    $("#fc-take-note").textContent = `Kader ersetzt: ${state.players.length} Spieler von ${fcClubName}.`;
+  });
 }
 
 $("#use-dyn").checked = state.useDyn !== false;

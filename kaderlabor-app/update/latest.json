@@ -1,8 +1,8 @@
 {
-  "version": "1.5.2",
+  "version": "1.5.3",
   "minLauncher": "1",
-  "released": "2026-11-13T19:13:34.780Z",
-  "notes": "FC-27-Abgleich: Namen von Spielern, die erst im Karrieremodus entstanden sind oder umbenannt wurden, werden jetzt aus dem Spielstand gelesen. Damit haben alle Spieler einen Namen.",
+  "released": "2026-11-13T19:18:38.284Z",
+  "notes": "FC-27-Abgleich aktualisiert jetzt zuverlässig deinen Kader: Zuordnung über die Spieler-ID, Namen ohne Akzente, Teil- und Nachnamen innerhalb deines Vereins. Nach dem Update wird der Spielstand einmal neu eingelesen. Neu: Kader komplett aus dem Spielstand übernehmen.",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "ad4fbecc86c52f1f32270b9f51f77567bf01955cf8107fb0a7d92eca159d182e",
-      "size": 257911
+      "sha256": "93f4389ed3e643b7421236216438168607955ef9d7631949d9eb035e552eb737",
+      "size": 260710
     },
     {
       "path": "app/settings.html",
@@ -31,8 +31,8 @@
     },
     {
       "path": "app-main.js",
-      "sha256": "62b8f52ad365768a17c6d2e1813f45475e39ea3afc5072e8d5ad2547cffcd315",
-      "size": 23810
+      "sha256": "daa6f15b5136c43ea3a8c1a1f04d850f243420eb81d736dc98ee48183a5fcaa8",
+      "size": 24025
     },
     {
       "path": "fcsave.js",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "a3b6cd6f3c5632e05f8f6a71627a42cf576fd2b2cab5ef3363b3fd548a73b2de",
+      "sha256": "d4cecb8970f814ad330399329a104dc31856e1ffff59d1590e6db25895d32ac1",
       "size": 23
     }
   ]
