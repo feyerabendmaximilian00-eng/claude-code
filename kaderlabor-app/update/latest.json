@@ -1,8 +1,8 @@
 {
-  "version": "1.5.3",
+  "version": "1.5.4",
   "minLauncher": "1",
-  "released": "2026-11-13T19:18:38.284Z",
-  "notes": "FC-27-Abgleich aktualisiert jetzt zuverlässig deinen Kader: Zuordnung über die Spieler-ID, Namen ohne Akzente, Teil- und Nachnamen innerhalb deines Vereins. Nach dem Update wird der Spielstand einmal neu eingelesen. Neu: Kader komplett aus dem Spielstand übernehmen.",
+  "released": "2026-11-13T19:29:33.933Z",
+  "notes": "Neues Design nach taste-skill: Sora und Figtree, ruhige Grün-Schwarz-Palette mit einer Akzentfarbe, Haarlinien statt Glas, einheitliche Buttons",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "93f4389ed3e643b7421236216438168607955ef9d7631949d9eb035e552eb737",
-      "size": 260710
+      "sha256": "12550e9d437b54bfb76f876148ad908daeff587b659094ad8a32ea5bcb59230f",
+      "size": 274202
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "d4cecb8970f814ad330399329a104dc31856e1ffff59d1590e6db25895d32ac1",
+      "sha256": "d6d4da095df37e4eb6999076eff9a9afd4591ab6db7db9ba5f5be8c438983368",
       "size": 23
     }
   ]
