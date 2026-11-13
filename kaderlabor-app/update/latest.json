@@ -1,8 +1,8 @@
 {
-  "version": "1.4.2",
+  "version": "1.5.0",
   "minLauncher": "1",
-  "released": "2026-11-12T15:54:08.588Z",
-  "notes": "Datenbank: Liga aus hochgeladenen Dateien wird übernommen, Liga-Filter zeigt alle vorhandenen Ligen.",
+  "released": "2026-11-13T17:56:36.975Z",
+  "notes": "Neu: Abgleich mit FC 27. Die App liest deinen neuesten Karriere-Spielstand und übernimmt alle Spieler mit aktuellen Ratings, Vereinen und Ligen in die Datenbank, auf Wunsch automatisch nach jedem Speichern im Spiel.",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "7c8d2c90cc9f77b76757dc2bbc92acb2992c5ff19d0ac2ed63b80348a6303873",
-      "size": 253322
+      "sha256": "ad4fbecc86c52f1f32270b9f51f77567bf01955cf8107fb0a7d92eca159d182e",
+      "size": 257911
     },
     {
       "path": "app/settings.html",
@@ -31,17 +31,32 @@
     },
     {
       "path": "app-main.js",
-      "sha256": "735f1f831d7f3e3fd9998f275ee39bea3325809506408484dfa20502bc1d9e49",
-      "size": 15720
+      "sha256": "ec2bd3412be368590a101a293016b46d43efd30a959169d69cdd418845758b08",
+      "size": 21421
+    },
+    {
+      "path": "fcsave.js",
+      "sha256": "a4bb9dd8b4597012e0ebc03c8eed037b37369d64b7caef5221631a14f3301108",
+      "size": 12208
     },
     {
       "path": "preload.js",
-      "sha256": "625769887840a1304e7c59f6c004ce5127bde4e3bcfa3f59f9a03fca67489a87",
-      "size": 665
+      "sha256": "cd9696cde4d3ae94ec9f37f206b237729e4d850153f525e9a698941cb07e5609",
+      "size": 1419
+    },
+    {
+      "path": "vendor/fzstd-LICENSE.txt",
+      "sha256": "62249119bb7df6e54300f37a37145c26a6d4420410aac8881a119c5b427cf751",
+      "size": 1069
+    },
+    {
+      "path": "vendor/fzstd.js",
+      "sha256": "0405645033c87f066af0f5d549016660f422a60a7a1abd0fc116f2dc66dee95d",
+      "size": 24454
     },
     {
       "path": "version.json",
-      "sha256": "efa1eada09e05d23c18119d3b3d3093b6394e02cb85b3fe4cb50123ff478abd7",
+      "sha256": "c5c9fe01b4c1d3113ee9d39913af59606eac8dfe7c1b86b13114717bc5d8ea8b",
       "size": 23
     }
   ]

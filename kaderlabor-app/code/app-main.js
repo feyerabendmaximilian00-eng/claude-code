@@ -81,6 +81,89 @@ ipcMain.handle("claude:sample", async (_e, payload) => {
     return { ok: false, code: "upstream_error", message: String(err && err.message || err) };
   }
 });
+/* ---------- FC 27: Spielstände automatisch abgleichen (nur lesen) ---------- */
+const fcsave = require(path.join(CODE, "fcsave.js"));
+const NAMES_FILE = () => path.join(app.getPath("userData"), "playernames.txt");
+let fcWatcher = null, fcTimer = null, fcBusy = false, fcLast = null;
+function fcDefaultFolder() {
+  const local = process.env.LOCALAPPDATA || path.join(app.getPath("home"), "AppData", "Local");
+  for (const p of [path.join(local, "EA SPORTS FC 27", "settings"), path.join(local, "FC 27", "settings"),
+                   path.join(app.getPath("documents"), "EA SPORTS FC 27", "settings"), path.join(app.getPath("documents"), "FC 27", "settings")]) {
+    try { if (fs.statSync(p).isDirectory()) return p; } catch { /* nicht vorhanden */ }
+  }
+  return null;
+}
+function fcStatus() {
+  const s = readSettings();
+  return { folder: s.fcFolder || null, hasNames: fs.existsSync(NAMES_FILE()), auto: s.fcAuto !== false, germanOnly: !!s.fcGermanOnly,
+    last: fcLast || s.fcLastMeta || null, busy: fcBusy };
+}
+function fcSend(channel, data) { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send(channel, data); }
+async function fcSync(reason) {
+  const s = readSettings();
+  if (!s.fcFolder || fcBusy) return;
+  const newest = fcsave.newestSave(s.fcFolder);
+  if (!newest) { fcSend("fc:status", { ...fcStatus(), error: "Im Ordner liegt noch kein Karriere-Spielstand (CmMgr… oder Career…)." }); return; }
+  if (reason === "auto" && s.fcLastMtime && newest.mtimeMs <= s.fcLastMtime) return;
+  fcBusy = true; fcSend("fc:status", { ...fcStatus(), busy: true });
+  try {
+    const names = fcsave.loadNames(NAMES_FILE());
+    const { rows, meta } = fcsave.readSave(newest.file, names, { germanOnly: !!s.fcGermanOnly });
+    fcLast = meta;
+    const t = readSettings(); t.fcLastMtime = newest.mtimeMs; t.fcLastMeta = meta; writeSettings(t);
+    fcBusy = false;
+    fcSend("fc:data", { rows, meta });
+    fcSend("fc:status", fcStatus());
+  } catch (err) {
+    fcBusy = false;
+    fcSend("fc:status", { ...fcStatus(), error: String(err && err.message || err) });
+  }
+}
+function fcWatch() {
+  if (fcWatcher) { try { fcWatcher.close(); } catch {} fcWatcher = null; }
+  const s = readSettings();
+  if (!s.fcFolder || s.fcAuto === false) return;
+  try {
+    fcWatcher = fs.watch(s.fcFolder, (_ev, f) => {
+      if (f && !/^(CmMgr|Career)/i.test(String(f))) return;
+      clearTimeout(fcTimer);
+      fcTimer = setTimeout(() => fcSync("auto"), 6000); // warten, bis das Spiel fertig geschrieben hat
+    });
+  } catch (err) { fcSend("fc:status", { ...fcStatus(), error: "Ordner kann nicht beobachtet werden: " + err.message }); }
+}
+ipcMain.handle("fc:status", (e) => fromLocalPage(e) ? fcStatus() : null);
+ipcMain.handle("fc:chooseFolder", async (e) => {
+  if (!fromLocalPage(e)) return null;
+  const r = await dialog.showOpenDialog(mainWindow, { title: "Ordner mit deinen FC-27-Spielständen", defaultPath: readSettings().fcFolder || fcDefaultFolder() || app.getPath("documents"), properties: ["openDirectory"] });
+  if (r.canceled || !r.filePaths[0]) return fcStatus();
+  const s = readSettings(); s.fcFolder = r.filePaths[0]; delete s.fcLastMtime; writeSettings(s);
+  fcWatch(); setTimeout(() => fcSync("manual"), 200);
+  return fcStatus();
+});
+ipcMain.handle("fc:chooseNames", async (e) => {
+  if (!fromLocalPage(e)) return null;
+  const r = await dialog.showOpenDialog(mainWindow, { title: "Namensliste (playernames) wählen", properties: ["openFile"], filters: [{ name: "Text/CSV", extensions: ["txt", "csv", "tsv"] }] });
+  if (r.canceled || !r.filePaths[0]) return fcStatus();
+  try {
+    const names = fcsave.loadNames(r.filePaths[0]);
+    if (names.size < 1000) throw new Error("Die Datei enthält zu wenige Namen.");
+    fs.copyFileSync(r.filePaths[0], NAMES_FILE());
+    const s = readSettings(); delete s.fcLastMtime; writeSettings(s);
+    setTimeout(() => fcSync("manual"), 200);
+    return fcStatus();
+  } catch (err) { return { ...fcStatus(), error: String(err.message || err) }; }
+});
+ipcMain.handle("fc:syncNow", (e) => { if (fromLocalPage(e)) setTimeout(() => fcSync("manual"), 50); return true; });
+ipcMain.handle("fc:setOptions", (e, o) => {
+  if (!fromLocalPage(e)) return null;
+  const s = readSettings();
+  if (typeof o.auto === "boolean") s.fcAuto = o.auto;
+  if (typeof o.germanOnly === "boolean") { s.fcGermanOnly = o.germanOnly; delete s.fcLastMtime; }
+  writeSettings(s); fcWatch();
+  if (typeof o.germanOnly === "boolean") setTimeout(() => fcSync("manual"), 50);
+  return fcStatus();
+});
+
 /* ---------- Dauerhafte Datei-Speicherung für die lokale Version ---------- */
 const DATA_FILE = () => path.join(app.getPath("userData"), "kaderlabor-daten.json");
 ipcMain.handle("store:get", (e) => {
@@ -247,6 +330,14 @@ function buildMenu() {
         if (r.response === 0) { setApiKey(null); mainWindow && mainWindow.reload(); }
       } },
     ] },
+    { label: "FC 27", submenu: [
+      { label: "Jetzt mit Spielstand abgleichen", click: () => fcSync("manual") },
+      { label: "Spielstand-Ordner wählen …", click: async () => {
+        const r = await dialog.showOpenDialog(mainWindow, { title: "Ordner mit deinen FC-27-Spielständen", defaultPath: readSettings().fcFolder || fcDefaultFolder() || app.getPath("documents"), properties: ["openDirectory"] });
+        if (!r.canceled && r.filePaths[0]) { const s = readSettings(); s.fcFolder = r.filePaths[0]; delete s.fcLastMtime; writeSettings(s); fcWatch(); fcSync("manual"); }
+      } },
+      { label: "Automatisch abgleichen", type: "checkbox", checked: readSettings().fcAuto !== false, click: (it) => { const s = readSettings(); s.fcAuto = it.checked; writeSettings(s); fcWatch(); } },
+    ] },
     { label: "Hilfe", submenu: [
       { label: "Nach Updates suchen …", click: () => ctx.checkForUpdates({ interactive: true, win: mainWindow }) },
       { type: "separator" },
@@ -267,6 +358,10 @@ else {
   app.whenReady().then(() => {
     buildMenu(); createMainWindow();
     if (!readSettings().shortcutCreated) createShortcuts(false);
+    // FC 27: Ordner vorbelegen, beobachten und beim Start den neuesten Spielstand prüfen
+    { const s = readSettings(); if (!s.fcFolder && fcDefaultFolder()) { s.fcFolder = fcDefaultFolder(); writeSettings(s); } }
+    fcWatch();
+    mainWindow.webContents.on("did-finish-load", () => { if (mode() === "local") setTimeout(() => fcSync("auto"), 2500); });
     if (mode() === "local" && !getApiKey() && !readSettings().keyPrompted) {
       const st = readSettings(); st.keyPrompted = true; writeSettings(st);
       mainWindow.webContents.once("did-finish-load", () => setTimeout(openSettings, 600));

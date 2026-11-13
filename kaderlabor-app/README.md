@@ -24,6 +24,14 @@ Die App öffnet immer ihre eigene Oberfläche (randlos im Vollbild) und spricht 
 
 Unter **Verbindung → claude.ai-Ansicht (Browser)** lässt sich die Web-Version weiterhin öffnen, zum Beispiel um dort gespeicherte Daten per „Sicherung herunterladen“ in die App zu holen.
 
+## Abgleich mit FC 27
+
+Die App liest deinen neuesten Karriere-Spielstand (`CmMgr…`/`Career…`) und übernimmt alle Spieler mit aktuellen Ratings, Potenzial, Alter, Vereinen und Ligen in die Datenbank. Spieler in deinem Kader werden mit aktualisiert. Die Spielstände werden nur gelesen, nie verändert, und die App greift nicht auf das laufende Spiel zu.
+
+- Ordner: wird automatisch erkannt (`%LOCALAPPDATA%\EA SPORTS FC 27\settings`), sonst unter Datenbank → „Spielstand-Ordner …“ wählen.
+- Namensliste: Spielstände enthalten nur Namens-Nummern. Unter Datenbank → „Namensliste …“ einmal eine `playernames`-Tabelle (Spalten `nameid` und `name`) wählen; sie bleibt nur auf diesem PC.
+- „Nach jedem Speichern im Spiel automatisch“: Die App beobachtet den Ordner und gleicht wenige Sekunden nach dem Speichern ab. Menü **FC 27** bietet dasselbe.
+
 ## Updates
 
 Ab Version 1.3.0 aktualisiert sich die App selbst: Beim Start prüft sie im Hintergrund, ob es eine neue Version gibt, lädt sie herunter, prüft jede Datei per SHA-256 und fragt dann, ob sie neu starten soll. Unter **Hilfe → Nach Updates suchen …** geht das auch von Hand. Deine Daten bleiben dabei unverändert. Heruntergeladene Versionen liegen unter `%APPDATA%\Kaderlabor\code`.

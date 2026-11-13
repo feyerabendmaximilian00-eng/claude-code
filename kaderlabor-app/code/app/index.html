@@ -572,6 +572,9 @@ a.btn.primary,header.top .btn.primary{color:var(--accent-ink);background:var(--a
 .savestate.ok::before{background:var(--good-ink)} .savestate.busy::before{background:var(--gold)} .savestate.warn::before{background:var(--bad-ink)}
 .savestate.warn{color:var(--bad-ink)}
 @media (max-width:900px){.savestate{font-size:0;gap:0}.savestate::before{width:10px;height:10px}}
+
+.fcbox{margin-top:12px;padding:12px 14px;border-radius:14px;border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));background:var(--accent-soft)}
+.fc-title{font-family:var(--font-display);font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:15px}
 </style>
 
 <div class="sky" aria-hidden="true"></div>
@@ -974,6 +977,24 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
         </div>
       </div>
       <p class="small muted" style="margin:6px 0 0;max-width:80ch">Sammle hier Spieler aus Bundesliga, 2. Bundesliga und 3. Liga. Die Datenbank bleibt in diesem Browser gespeichert. Sobald sie gefüllt ist, wählt Claude Transfervorschläge nur noch aus diesen Spielern mit ihren echten FC-27-Werten aus.</p>
+      <div class="fcbox" id="fc-box" hidden>
+        <div class="row" style="justify-content:space-between;align-items:flex-start">
+          <div style="min-width:0">
+            <strong class="fc-title">Mit FC 27 abgleichen</strong>
+            <div class="small muted" id="fc-info">Die App liest deinen neuesten Karriere-Spielstand und übernimmt alle Spieler mit aktuellen Ratings, Vereinen und Ligen.</div>
+          </div>
+          <div class="row">
+            <button class="btn" id="fc-folder" type="button">Spielstand-Ordner …</button>
+            <button class="btn" id="fc-names" type="button">Namensliste …</button>
+            <button class="btn primary" id="fc-sync" type="button">Jetzt abgleichen</button>
+          </div>
+        </div>
+        <div class="row small" style="gap:16px;margin-top:8px">
+          <label class="row" style="gap:6px"><input type="checkbox" id="fc-auto"> Nach jedem Speichern im Spiel automatisch</label>
+          <label class="row" style="gap:6px"><input type="checkbox" id="fc-de"> Nur deutsche Ligen</label>
+        </div>
+        <div class="status" id="fc-status" aria-live="polite" style="margin-top:6px"></div>
+      </div>
       <div class="dbsum" id="db-sum"></div>
       <div class="row" style="margin-top:8px"><span class="status" id="backup-status" aria-live="polite"></span><button class="btn primary" id="btn-backup-apply" type="button" hidden>Jetzt wiederherstellen</button></div>
       <details id="db-addbox" style="margin-top:6px">
@@ -3345,6 +3366,56 @@ $("#btn-backup-apply").addEventListener("click", () => {
   touchLocal(); Persist.schedule();
   $("#backup-status").textContent = "Sicherung wiederhergestellt.";
 });
+
+
+/* ---------- FC 27: automatischer Abgleich (nur in der Windows-App) ---------- */
+const FC = window.kaderlaborNative && window.kaderlaborNative.fc;
+function fcDate(iso){ try { return new Date(iso).toLocaleString("de-DE", {day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit"}); } catch(e){ return iso; } }
+function renderFc(st){
+  if (!st) return;
+  const info = [];
+  info.push(st.folder ? `Ordner: ${st.folder}` : "Noch kein Spielstand-Ordner gewählt.");
+  if (!st.hasNames) info.push("Namensliste fehlt (playernames.txt), sonst stehen nur Nummern statt Namen.");
+  if (st.last) info.push(`Zuletzt abgeglichen: ${st.last.file} (gespeichert ${fcDate(st.last.saved)}, Spieldatum ${new Date(st.last.gameDate).toLocaleDateString("de-DE")}, ${st.last.players.toLocaleString("de-DE")} Spieler).`);
+  $("#fc-info").textContent = info.join(" ");
+  $("#fc-auto").checked = !!st.auto; $("#fc-de").checked = !!st.germanOnly;
+  $("#fc-sync").disabled = !!st.busy || !st.folder;
+  const fs = $("#fc-status");
+  if (st.busy){ fs.className = "status"; fs.textContent = "Lese Spielstand …"; }
+  else if (st.error){ fs.className = "status err"; fs.textContent = st.error; }
+}
+function applyFcData(payload){
+  const rows = payload.rows || [], meta = payload.meta || {};
+  DB = rows.map(r => ({...normalizePlayer({...r, id: undefined}), club: r.club || "", value: null, league: r.league || ""}));
+  // eigener Kader: gleiche Namen mit den neuen Werten aktualisieren (Dynamic OVR und Rollen bleiben)
+  const byName = new Map();
+  rows.forEach(r => { const k = r.name.toLowerCase(); if (!byName.has(k)) byName.set(k, []); byName.get(k).push(r); });
+  let updated = 0;
+  if (!state.isSample){
+    state.players = state.players.map(p => {
+      const c = byName.get(p.name.toLowerCase());
+      if (!c || c.length !== 1) return p;
+      updated++;
+      return {...normalizePlayer({...c[0], id: p.id}), dyn: p.dyn};
+    });
+  }
+  saveDB(); lastLocalState = null; save(); renderAll();
+  const fs = $("#fc-status"); fs.className = "status";
+  fs.textContent = `Abgeglichen: ${DB.length.toLocaleString("de-DE")} Spieler aus ${meta.file || "dem Spielstand"} (Spieldatum ${meta.gameDate ? new Date(meta.gameDate).toLocaleDateString("de-DE") : "?"})`
+    + (updated ? `, ${updated} Spieler in deinem Kader aktualisiert.` : ".")
+    + (meta.named < meta.players ? ` ${(meta.players - meta.named).toLocaleString("de-DE")} ohne Namen.` : "");
+}
+if (FC){
+  $("#fc-box").hidden = false;
+  FC.onStatus(renderFc);
+  FC.onData(applyFcData);
+  FC.status().then(renderFc).catch(() => {});
+  $("#fc-folder").addEventListener("click", () => FC.chooseFolder().then(renderFc));
+  $("#fc-names").addEventListener("click", () => FC.chooseNames().then(renderFc));
+  $("#fc-sync").addEventListener("click", () => { $("#fc-status").className = "status"; $("#fc-status").textContent = "Lese Spielstand …"; FC.syncNow(); });
+  $("#fc-auto").addEventListener("change", e => FC.setOptions({auto: e.target.checked}).then(renderFc));
+  $("#fc-de").addEventListener("change", e => FC.setOptions({germanOnly: e.target.checked}).then(renderFc));
+}
 
 $("#use-dyn").checked = state.useDyn !== false;
 showView(location.hash.slice(1) || "aufstellung", false);
