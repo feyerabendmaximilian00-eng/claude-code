@@ -1,8 +1,8 @@
 {
-  "version": "1.5.0",
+  "version": "1.5.1",
   "minLauncher": "1",
-  "released": "2026-11-13T17:56:36.975Z",
-  "notes": "Neu: Abgleich mit FC 27. Die App liest deinen neuesten Karriere-Spielstand und übernimmt alle Spieler mit aktuellen Ratings, Vereinen und Ligen in die Datenbank, auf Wunsch automatisch nach jedem Speichern im Spiel.",
+  "released": "2026-11-13T18:01:48.333Z",
+  "notes": "Spielernamen beim FC-27-Abgleich: Die App sucht die Namensliste (playernames.txt) jetzt selbst in Downloads, Desktop, Dokumente und im Spielstand-Ordner. Findet sie keine, fragt sie direkt danach. Danach wird der Spielstand sofort mit Namen neu abgeglichen.",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -31,8 +31,8 @@
     },
     {
       "path": "app-main.js",
-      "sha256": "ec2bd3412be368590a101a293016b46d43efd30a959169d69cdd418845758b08",
-      "size": 21421
+      "sha256": "62b8f52ad365768a17c6d2e1813f45475e39ea3afc5072e8d5ad2547cffcd315",
+      "size": 23810
     },
     {
       "path": "fcsave.js",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "c5c9fe01b4c1d3113ee9d39913af59606eac8dfe7c1b86b13114717bc5d8ea8b",
+      "sha256": "6abbd79d3b3f273e61ed1ab7b8e4379aa109bdc863d24f6780769008b95a3989",
       "size": 23
     }
   ]

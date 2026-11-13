@@ -93,6 +93,43 @@ function fcDefaultFolder() {
   }
   return null;
 }
+// Namensliste automatisch finden (Downloads, Desktop, Dokumente, Spielstand-Ordner)
+function fcFindNames() {
+  const dirs = [app.getPath("downloads"), app.getPath("desktop"), app.getPath("documents"), readSettings().fcFolder].filter(Boolean);
+  let best = null;
+  for (const dir of dirs) {
+    let list = [];
+    try { list = fs.readdirSync(dir); } catch { continue; }
+    for (const f of list) {
+      if (!/playernames.*\.(txt|csv|tsv)$/i.test(f)) continue;
+      const full = path.join(dir, f);
+      try { const st = fs.statSync(full); if (st.isFile() && (!best || st.mtimeMs > best.mtimeMs)) best = { full, mtimeMs: st.mtimeMs }; } catch {}
+    }
+  }
+  return best && best.full;
+}
+function fcInstallNames(file) {
+  const names = fcsave.loadNames(file);
+  if (names.size < 1000) throw new Error("Die Datei enthält zu wenige Namen (gefunden: " + names.size + ").");
+  fs.copyFileSync(file, NAMES_FILE());
+  return names.size;
+}
+let fcNamesPrompted = false;
+async function fcEnsureNames() {
+  if (fs.existsSync(NAMES_FILE())) return true;
+  const found = fcFindNames();
+  if (found) { try { fcInstallNames(found); return true; } catch { /* weiter zum Dialog */ } }
+  if (fcNamesPrompted || !mainWindow) return false;
+  fcNamesPrompted = true;
+  const r = await dialog.showMessageBox(mainWindow, { type: "question", buttons: ["Namensliste wählen …", "Später"], defaultId: 0, cancelId: 1, title: "Spielernamen",
+    message: "Für die Spielernamen braucht die App einmal deine Namensliste.",
+    detail: "Der Spielstand enthält statt Namen nur Nummern. Wähle die Datei playernames.txt (Spalten nameid und name), die du aus dem Spiel exportiert hast. Sie bleibt nur auf diesem PC." });
+  if (r.response !== 0) return false;
+  const o = await dialog.showOpenDialog(mainWindow, { title: "Namensliste (playernames) wählen", properties: ["openFile"], filters: [{ name: "Text/CSV", extensions: ["txt", "csv", "tsv"] }] });
+  if (o.canceled || !o.filePaths[0]) return false;
+  try { fcInstallNames(o.filePaths[0]); return true; }
+  catch (err) { dialog.showMessageBox(mainWindow, { type: "warning", title: "Namensliste", message: "Die Datei passt nicht.", detail: String(err.message || err) }); return false; }
+}
 function fcStatus() {
   const s = readSettings();
   return { folder: s.fcFolder || null, hasNames: fs.existsSync(NAMES_FILE()), auto: s.fcAuto !== false, germanOnly: !!s.fcGermanOnly,
@@ -104,7 +141,11 @@ async function fcSync(reason) {
   if (!s.fcFolder || fcBusy) return;
   const newest = fcsave.newestSave(s.fcFolder);
   if (!newest) { fcSend("fc:status", { ...fcStatus(), error: "Im Ordner liegt noch kein Karriere-Spielstand (CmMgr… oder Career…)." }); return; }
-  if (reason === "auto" && s.fcLastMtime && newest.mtimeMs <= s.fcLastMtime) return;
+  const hadNames = fs.existsSync(NAMES_FILE());
+  const namesNow = await fcEnsureNames();
+  // gleicher Spielstand wird übersprungen – außer die Namen fehlten beim letzten Mal
+  const lastNamed = s.fcLastMeta ? s.fcLastMeta.named / Math.max(1, s.fcLastMeta.players) : 1;
+  if (reason === "auto" && s.fcLastMtime && newest.mtimeMs <= s.fcLastMtime && !(namesNow && (!hadNames || lastNamed < 0.5))) return;
   fcBusy = true; fcSend("fc:status", { ...fcStatus(), busy: true });
   try {
     const names = fcsave.loadNames(NAMES_FILE());
@@ -145,9 +186,7 @@ ipcMain.handle("fc:chooseNames", async (e) => {
   const r = await dialog.showOpenDialog(mainWindow, { title: "Namensliste (playernames) wählen", properties: ["openFile"], filters: [{ name: "Text/CSV", extensions: ["txt", "csv", "tsv"] }] });
   if (r.canceled || !r.filePaths[0]) return fcStatus();
   try {
-    const names = fcsave.loadNames(r.filePaths[0]);
-    if (names.size < 1000) throw new Error("Die Datei enthält zu wenige Namen.");
-    fs.copyFileSync(r.filePaths[0], NAMES_FILE());
+    fcInstallNames(r.filePaths[0]);
     const s = readSettings(); delete s.fcLastMtime; writeSettings(s);
     setTimeout(() => fcSync("manual"), 200);
     return fcStatus();
