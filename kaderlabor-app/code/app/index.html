@@ -714,6 +714,22 @@ tr.inxi td:first-child{box-shadow:inset 2px 0 0 var(--accent)}
 .drop.over{border-color:var(--accent);background:var(--accent-soft)}
 .statrow div{font-size:13px;font-family:var(--font-body);font-weight:500}
 .dline,.links,.plan-list li{font-size:14px} .plan-list small,.links em{font-size:13px}
+
+/* Transfer-Rechner */
+.calc-list{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.ccard{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:16px;align-items:start;padding:16px 20px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md)}
+.ccard.best{border-color:var(--accent)}
+.ccard .rk{font-family:var(--font-display);font-size:28px;line-height:1.1;color:var(--ink-3)}
+.ccard .nm{font-size:18px;font-weight:500;line-height:1.3}
+.ccard .meta{font-size:13px;color:var(--ink-3);margin-top:2px}
+.ccard ul{margin:12px 0 0;padding-left:18px;font-size:14px;color:var(--ink-2);line-height:1.6}
+.ccard .sc{text-align:right} .ccard .sc b{display:block;font-family:var(--font-display);font-weight:400;font-size:38px;line-height:1;letter-spacing:-.03em}
+.ccard.best .sc b{color:var(--accent)} .ccard .sc span{font-size:13px;color:var(--ink-3)}
+.cbars{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:12px}
+.cbars div{font-size:13px;color:var(--ink-2)} .cbars span{color:var(--ink)}
+.cbars i{display:block;height:4px;border-radius:999px;background:var(--line);margin-top:4px;overflow:hidden} .cbars u{display:block;height:100%;background:var(--accent)}
+.ccard .delta.up{color:var(--good-ink)} .ccard .delta.down{color:var(--bad-ink)}
+@media (max-width:640px){.ccard{grid-template-columns:minmax(0,1fr) auto;padding:16px}.ccard .rk{display:none}.cbars{grid-template-columns:repeat(2,minmax(0,1fr))}}
 /* Gewichte: nur 400 und 500 */
 b,strong,label,select,legend,summary,.points li b,.tkcard b,.pd-name,.pc-nm,.bc-nm,.tcard b,.qdb-list b,.banner strong{font-weight:500}
 h1,h2,h3,h4{font-weight:400}
@@ -1057,18 +1073,15 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
           </div>
         </div>
       </section>
-    <section class="panel" style="margin-top:20px" aria-labelledby="tf-h" id="transfer-panel" hidden>
+    <section class="panel" style="margin-top:20px" aria-labelledby="calc-h" id="calc-panel">
       <div class="row" style="justify-content:space-between">
         <div>
-          <div class="eyebrow">Claude als Scout</div>
-          <h3 id="tf-h">Transfervorschläge</h3>
+          <div class="eyebrow">Berechnet aus deiner Datenbank</div>
+          <h3 id="calc-h">Transfer-Rechner</h3>
         </div>
-        <div class="row">
-          <button class="btn primary" id="btn-tf" type="button">Vorschläge holen</button>
-          <button class="btn" id="btn-tf-stop" type="button" hidden>Stopp</button>
-        </div>
+        <button class="btn primary" id="btn-calc" type="button">Besten Transfer berechnen</button>
       </div>
-      <p class="small muted" style="margin:6px 0 0">Claude sucht echte Spieler, die zu deinem Transferbedarf, deiner Formation und deinem Budget passen. Für jeden Vorschlag rechnet das Labor aus, wie stark sich deine Startelf verändern würde.</p>
+      <p class="small muted" style="margin:8px 0 0;max-width:75ch">Der Rechner spielt jeden passenden Spieler deiner Datenbank in deinem Kader durch und bewertet fünf Dinge: Wirkung auf die Startelf, Transferbedarf, Entwicklung in zwei Jahren, Preis-Leistung und Wiederverkaufswert. Wie stark jedes zählt, hängt vom Fokus ab. Fehlt ein Marktwert, schätzt der Rechner ihn aus GES, POT, Alter und Position.</p>
       <form class="tfilters" id="tf-form">
         <label for="tf-pos">Position
           <select id="tf-pos"><option value="auto">Automatisch (Transferbedarf)</option></select>
@@ -1091,6 +1104,21 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
           <input id="tf-league" type="text" placeholder="z. B. Bundesliga" maxlength="40">
         </label>
       </form>
+      <div class="row" style="margin-top:12px"><span class="status" id="calc-status" aria-live="polite"></span></div>
+      <div class="calc-list" id="calc-results"></div>
+    </section>
+    <section class="panel" style="margin-top:20px" aria-labelledby="tf-h" id="transfer-panel" hidden>
+      <div class="row" style="justify-content:space-between">
+        <div>
+          <div class="eyebrow">Claude als Scout</div>
+          <h3 id="tf-h">Transfervorschläge</h3>
+        </div>
+        <div class="row">
+          <button class="btn" id="btn-tf" type="button">Vorschläge holen</button>
+          <button class="btn" id="btn-tf-stop" type="button" hidden>Stopp</button>
+        </div>
+      </div>
+      <p class="small muted" style="margin:6px 0 0">Claude sucht mit den Filtern aus dem Transfer-Rechner echte Spieler, die zu deinem Bedarf, deiner Formation und deinem Budget passen. Für jeden Vorschlag rechnet das Labor aus, wie stark sich deine Startelf verändern würde.</p>
       <div class="row" style="margin-top:10px"><span class="status" id="tf-status"></span></div>
       <details id="cmt-box" style="margin-top:4px">
         <summary>Kandidaten aus CMTracker bewerten (echte FC-27-Werte)</summary>
@@ -1800,7 +1828,7 @@ function renderLinks(A){
 
 function renderPlan(A){
   const P = A.plan;
-  $("#needs").innerHTML = P.needs.length ? P.needs.map(n => `<li><div><strong>${DE[n.pos]}</strong> · Ziel GES ${n.target}+<small>${esc(n.why)}</small><small>${esc(n.hint)}</small>${sample ? `<button type="button" class="findbtn" data-find="${n.pos}">Passende Spieler finden</button>` : ""}</div></li>`).join("")
+  $("#needs").innerHTML = P.needs.length ? P.needs.map(n => `<li><div><strong>${DE[n.pos]}</strong> · Ziel GES ${n.target}+<small>${esc(n.why)}</small><small>${esc(n.hint)}</small><button type="button" class="findbtn" data-find="${n.pos}">Besten Transfer berechnen</button></div></li>`).join("")
     : `<li class="muted">Kein dringender Bedarf. Die Startelf ist ausgeglichen.</li>`;
   $("#talents").innerHTML = P.talents.length ? P.talents.map(t => `<li><div>${esc(t.p.name)} <span class="small muted">${DE[t.p.pos]} · ${t.p.age} J.</span><small>${esc(t.why)}</small></div><span class="num"><b>${t.p.ovr}</b> → ${t.p.pot}</span></li>`).join("")
     : `<li class="muted">Keine Talente mit großem Potenzial im Kader.</li>`;
@@ -2464,12 +2492,12 @@ async function fetchTransfers(){
 }
 $("#btn-tf").addEventListener("click", fetchTransfers);
 $("#btn-tf-stop").addEventListener("click", () => tfCtl?.abort());
-$("#tf-form").addEventListener("submit", e => { e.preventDefault(); fetchTransfers(); });
+$("#tf-form").addEventListener("submit", e => { e.preventDefault(); runCalc(); });
 $("#needs").addEventListener("click", e => {
   const b = e.target.closest("button[data-find]"); if (!b) return;
   $("#tf-pos").value = b.dataset.find;
-  reveal("#transfer-panel", {behavior:"smooth", block:"start"});
-  fetchTransfers();
+  runCalc();
+  reveal("#calc-panel", {behavior:"smooth", block:"start"});
 });
 $("#tf-results").addEventListener("click", e => {
   const b = e.target.closest("button[data-addcand]"); if (!b) return;
@@ -2480,6 +2508,118 @@ $("#tf-results").addEventListener("click", e => {
   $("#tf-status").className = "status"; $("#tf-status").textContent = `${c.p.name} wurde zum Kader hinzugefügt. Die Analyse ist aktualisiert.`;
 });
 
+
+/* ---------- Transfer-Rechner: Algorithmus ohne Claude ---------- */
+const POS_VALUE = {GK:.7, CB:.9, LB:.85, RB:.85, LWB:.85, RWB:.85, CDM:.95, CM:1, CAM:1.05, LM:1, RM:1, LW:1.1, RW:1.1, CF:1.1, ST:1.15};
+// Marktwert-Schätzung in Mio. €: exponentiell mit GES, Aufschlag für junge Spieler mit Potenzial, Abschlag ab 30
+function estValue(p){
+  const gap = Math.max(0, (p.pot || p.ovr) - p.ovr), a = p.age;
+  const ageF = a <= 21 ? 1 + Math.min(gap, 15) * .05 : a <= 23 ? 1.1 + Math.min(gap, 10) * .03 : a <= 26 ? 1.1 : a <= 29 ? 1 : a === 30 ? .75 : a === 31 ? .6 : a === 32 ? .45 : .3;
+  const v = .6 * Math.exp((p.ovr - 60) * .2) * ageF * (POS_VALUE[p.pos] ?? 1);
+  return v >= 10 ? Math.round(v * 2) / 2 : Math.max(.1, Math.round(v * 10) / 10);
+}
+// erwarteter GES nach n Saisons (Wachstum bis zum POT, Abbau ab 30)
+function projOvr(p, yrs = 2){
+  let o = p.ovr;
+  for (let y = 0, a = p.age; y < yrs; y++, a++){
+    const g = a <= 21 ? 4 : a <= 24 ? 2.5 : a <= 27 ? 1 : a <= 29 ? 0 : a <= 31 ? -1.5 : -3;
+    o = g > 0 ? Math.min(Math.max(p.pot || o, o), o + g) : o + g;
+  }
+  return Math.round(o);
+}
+const CALC_W = {
+  now:     {now:.45, need:.2,  future:.1,  value:.15, resale:.1},
+  talent:  {now:.1,  need:.1,  future:.45, value:.1,  resale:.25},
+  bargain: {now:.25, need:.15, future:.1,  value:.4,  resale:.1},
+  free:    {now:.2,  need:.15, future:.05, value:.5,  resale:.1}
+};
+const CALC_LBL = {now:"Startelf", need:"Bedarf", future:"Zukunft", value:"Preis-Leistung", resale:"Wiederverkauf"};
+const fmtMio = v => (v >= 10 ? r1(v).replace(/\.0$/, "") : String(v).replace(".", ",")) + " Mio. €";
+let calcRes = [];
+function runCalc(){
+  const st = $("#calc-status"), out = $("#calc-results");
+  if (!last) return;
+  if (!DB.length){ st.className = "status err"; st.textContent = "Deine Datenbank ist leer. Gleiche unter Datenbank mit FC 27 ab oder lade Spieler hoch."; out.innerHTML = ""; calcRes = []; return; }
+  const t0 = performance.now();
+  const posSel = $("#tf-pos").value, focus = $("#tf-focus").value, W = CALC_W[focus] || CALC_W.now;
+  const bIn = parseFloat($("#tf-budget").value), B = Number.isFinite(bIn) && bIn > 0 ? bIn : 40;
+  const maxAge = toInt($("#tf-age").value) ?? 40, league = $("#tf-league").value.trim().toLowerCase();
+  const ov = last.overall || 70;
+  const needPos = posSel !== "auto" ? [posSel] : last.plan.needs.map(n => n.pos);
+  const pool = [];
+  for (const e of DB){
+    if (e.age > maxAge || inSquadName(e.name)) continue;
+    if (league && !(String(e.league) + " " + String(e.club)).toLowerCase().includes(league)) continue;
+    if (posSel !== "auto" && fitAt(e, posSel) < e.ovr - 3) continue;
+    const est = estValue(e), price = e.value != null ? e.value : est;
+    if (price > B) continue;
+    const q = posSel !== "auto"
+      ? (s => ({d: fitAt(e, posSel) - (s && s.p ? s.fit : 40), pos: posSel}))(last.xi.filter(x => x.pos === posSel).sort((a, b) => a.fit - b.fit)[0])
+      : quickImpact(e);
+    const pre = Math.max(q.d, 0) * 2 * (W.now + W.need) * 3 + (projOvr(e) - ov) * W.future * 3 - price / B * W.value * 12 + (needPos.includes(q.pos) ? 4 * W.need * 5 : 0);
+    pool.push({e, est, price, pre});
+  }
+  if (!pool.length){ st.className = "status err"; st.textContent = "Niemand in deiner Datenbank passt zu Budget, Alter, Liga und Position. Lockere die Filter."; out.innerHTML = ""; calcRes = []; return; }
+  pool.sort((a, b) => b.pre - a.pre);
+  const c01 = v => clamp(v, 0, 1);
+  calcRes = pool.slice(0, 60).map(x => {
+    const e = x.e, im = impactOf({...e, id: "calc-" + e.id});
+    const slotPos = im.slot ? im.slot.pos : null, proj = projOvr(e), a = e.age;
+    const s = {
+      now: c01(im.dOverall / 1.2) * 75 + c01(im.dDepth / 6) * 25,
+      need: slotPos && needPos.includes(slotPos) ? 100 : slotPos ? 55 : needPos.some(np => fitAt(e, np) >= ov - 4) ? 35 : 0,
+      future: c01((proj - ov + 6) / 12) * 100,
+      value: c01((x.est / Math.max(x.price, .1) - .5)) * 50 + c01(1 - x.price / B) * 50,
+      resale: a <= 21 ? 100 : a <= 23 ? 85 : a <= 25 ? 70 : a <= 27 ? 50 : a <= 29 ? 30 : a <= 31 ? 12 : 0
+    };
+    const total = Object.keys(W).reduce((t, k) => t + W[k] * s[k], 0);
+    return {e, im, s, total, proj, est: x.est, price: x.price, slotPos};
+  }).sort((a, b) => b.total - a.total).slice(0, 10);
+  st.className = "status";
+  st.textContent = `${pool.length} Spieler im Budget durchgerechnet, die besten 60 im kompletten Kader simuliert (${Math.round(performance.now() - t0)} ms).`;
+  renderCalc();
+}
+function calcReasons(r){
+  const e = r.e, im = r.im, out = [];
+  if (im.slot && im.dOverall > .05) out.push(`Startelf-Schnitt ${im.dOverall >= 0 ? "+" : ""}${r1(im.dOverall)} als ${DE[im.slot.pos]} (Positionswert ${im.slot.fit})`);
+  else if (im.slot) out.push(`Würde als ${DE[im.slot.pos]} starten, Schnitt fast unverändert`);
+  else out.push(`Kein Stammplatz, Kadertiefe ${im.dDepth >= 0 ? "+" : ""}${r0(im.dDepth)}`);
+  if (r.slotPos && r.s.need === 100) out.push(`Deckt deinen Transferbedarf auf ${DE[r.slotPos]}`);
+  out.push(r.proj > e.ovr ? `In zwei Jahren etwa GES ${r.proj} (POT ${e.pot})` : r.proj < e.ovr ? `In zwei Jahren etwa GES ${r.proj}, baut altersbedingt ab` : `Hält sein Niveau von GES ${e.ovr}`);
+  out.push(e.value != null
+    ? `Marktwert ${fmtMio(e.value)}, fair wären etwa ${fmtMio(r.est)}${e.value < r.est * .85 ? ", also günstig" : e.value > r.est * 1.2 ? ", also teuer" : ""}`
+    : `Geschätzter Marktwert ${fmtMio(r.est)}`);
+  return out;
+}
+function renderCalc(){
+  const out = $("#calc-results");
+  if (!calcRes.length){ out.innerHTML = ""; return; }
+  out.innerHTML = calcRes.map((r, i) => {
+    const e = r.e, d = r.im.dOverall, cls = d > .05 ? "up" : d < -.05 ? "down" : "flat";
+    return `<article class="ccard${i === 0 ? " best" : ""}">
+      <div class="rk num">${i + 1}</div>
+      <div style="min-width:0">
+        ${i === 0 ? '<div class="eyebrow" style="color:var(--accent)">Sinnvollster Transfer</div>' : ""}
+        <div class="nm">${esc(e.name)}</div>
+        <div class="meta">${DE[e.pos]}${e.alt.length ? "/" + e.alt.map(x => DE[x]).join("/") : ""} · ${e.age} J. · GES ${e.ovr} · POT ${e.pot}${e.club ? " · " + esc(e.club) : ""}${e.league ? " · " + esc(e.league) : ""}</div>
+        <ul>${calcReasons(r).map(t => `<li>${esc(t)}</li>`).join("")}</ul>
+        <div class="cbars">${Object.keys(CALC_LBL).map(k => `<div>${CALC_LBL[k]} <span class="num">${r0(r.s[k])}</span><i><u style="width:${clamp(r.s[k], 0, 100)}%"></u></i></div>`).join("")}</div>
+        <div class="row" style="margin-top:12px;gap:12px"><button class="btn" type="button" data-calcadd="${esc(e.id)}">Zum Kader hinzufügen</button>
+          <span class="small"><span class="delta num ${cls}">${d >= 0 ? "+" : ""}${r1(d)}</span> Gesamt · ${e.value != null ? "" : "≈ "}${fmtMio(r.price)}</span></div>
+      </div>
+      <div class="sc"><b class="num">${r0(r.total)}</b><span>von 100</span></div>
+    </article>`;
+  }).join("");
+}
+$("#btn-calc").addEventListener("click", runCalc);
+$("#calc-results").addEventListener("click", e => {
+  const b = e.target.closest("button[data-calcadd]"); if (!b) return;
+  const en = DB.find(x => x.id === b.dataset.calcadd); if (!en) return;
+  const r = addFromDb(en);
+  runCalc();
+  const st = $("#calc-status"); st.className = "status";
+  st.textContent = r ? `${en.name} ist jetzt in deinem Kader. Die Rangliste ist neu berechnet.` : `${en.name} ist schon in deinem Kader.`;
+});
 /* ---------- Spielerdatenbank ---------- */
 const DBKEY = "kaderlabor.db.v1";
 let DB = [];
@@ -2845,7 +2985,7 @@ $("#btn-cmt").addEventListener("click", async () => {
   if (sample && last) renderAll(false);
   if (location.hash === "#bericht") showView("bericht", false);
   $("#transfer-panel").hidden = false;
-  if (!sample){ $("#btn-tf").hidden = true; $("#tf-form").hidden = true; $("#cmt-box").open = true; }
+  if (!sample){ $("#btn-tf").hidden = true; $("#cmt-box").open = true; }
   if (!imgs){
     $("#tab-shot").hidden = true; $("#pane-shot").hidden = true;
     if ($("#tab-shot").getAttribute("aria-selected") === "true") selectTab("csv");

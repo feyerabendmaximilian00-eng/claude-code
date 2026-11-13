@@ -1,8 +1,8 @@
 {
-  "version": "1.5.4",
+  "version": "1.5.5",
   "minLauncher": "1",
-  "released": "2026-11-13T19:29:33.933Z",
-  "notes": "Neues Design nach taste-skill: Sora und Figtree, ruhige Grün-Schwarz-Palette mit einer Akzentfarbe, Haarlinien statt Glas, einheitliche Buttons",
+  "released": "2026-11-13T21:49:01.909Z",
+  "notes": "Transfer-Rechner: berechnet aus der Datenbank den sinnvollsten Transfer nach Startelf-Wirkung, Bedarf, Entwicklung, Marktwert und Wiederverkaufswert",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "12550e9d437b54bfb76f876148ad908daeff587b659094ad8a32ea5bcb59230f",
-      "size": 274202
+      "sha256": "6c0ecc51583bac5cc784fccce321223a64b2ff4f5cdba79c889573818a5e5029",
+      "size": 284072
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "d6d4da095df37e4eb6999076eff9a9afd4591ab6db7db9ba5f5be8c438983368",
+      "sha256": "72232ce1d43e562f975bf769ea50b8cceb07926cf1b53115ed654a1816e9c8df",
       "size": 23
     }
   ]
