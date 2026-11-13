@@ -1,0 +1,63 @@
+{
+  "version": "1.5.5",
+  "minLauncher": "1",
+  "released": "2026-11-13T21:49:01.909Z",
+  "notes": "Transfer-Rechner: berechnet aus der Datenbank den sinnvollsten Transfer nach Startelf-Wirkung, Bedarf, Entwicklung, Marktwert und Wiederverkaufswert",
+  "files": [
+    {
+      "path": "app/claude-shim.js",
+      "sha256": "b12b04d6e0e2e5571b5131e1190ae05cf90b3c644e3b83dc7c1118a6b9972bfa",
+      "size": 2979
+    },
+    {
+      "path": "app/icon.ico",
+      "sha256": "a5155ed83a0bc114330490d9fce5e342067a45f082f8ba34a112234652ee5c27",
+      "size": 15764
+    },
+    {
+      "path": "app/icon.png",
+      "sha256": "7bdb86f4cc01f4437f5f0b1d1ef86b54d4a6961b00df56d6630b20152887634c",
+      "size": 15742
+    },
+    {
+      "path": "app/index.html",
+      "sha256": "6c0ecc51583bac5cc784fccce321223a64b2ff4f5cdba79c889573818a5e5029",
+      "size": 284072
+    },
+    {
+      "path": "app/settings.html",
+      "sha256": "645c67da632a495cc720e7c47e19038f22e6ae474465420ea4832bebbb817620",
+      "size": 3290
+    },
+    {
+      "path": "app-main.js",
+      "sha256": "daa6f15b5136c43ea3a8c1a1f04d850f243420eb81d736dc98ee48183a5fcaa8",
+      "size": 24025
+    },
+    {
+      "path": "fcsave.js",
+      "sha256": "23df41051471355e7b5c1efded18b948160af8da090e5d29c59451fe7d71d7cd",
+      "size": 13324
+    },
+    {
+      "path": "preload.js",
+      "sha256": "cd9696cde4d3ae94ec9f37f206b237729e4d850153f525e9a698941cb07e5609",
+      "size": 1419
+    },
+    {
+      "path": "vendor/fzstd-LICENSE.txt",
+      "sha256": "62249119bb7df6e54300f37a37145c26a6d4420410aac8881a119c5b427cf751",
+      "size": 1069
+    },
+    {
+      "path": "vendor/fzstd.js",
+      "sha256": "0405645033c87f066af0f5d549016660f422a60a7a1abd0fc116f2dc66dee95d",
+      "size": 24454
+    },
+    {
+      "path": "version.json",
+      "sha256": "72232ce1d43e562f975bf769ea50b8cceb07926cf1b53115ed654a1816e9c8df",
+      "size": 23
+    }
+  ]
+}
