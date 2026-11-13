@@ -92,7 +92,23 @@ function zstdFrameLength(buf, i) {
   if (checksum) p += 4;
   return p <= buf.length ? p - i : -1;
 }
+// Namen, die nur im Spielstand stehen (im Karrieremodus erzeugte oder umbenannte Spieler):
+// zusammenhängende Einträge [u32 nameid][0x01][u32 Länge][UTF-8-Text]
+function saveNames(buf) {
+  let best = [];
+  const valid = i => i + 9 <= buf.length && buf[i + 2] === 0 && buf[i + 3] === 0 && buf[i + 4] === 1 && buf[i + 5] > 0 && buf[i + 5] <= 80
+    && buf[i + 6] === 0 && buf[i + 7] === 0 && buf[i + 8] === 0 && i + 9 + buf[i + 5] <= buf.length;
+  for (let i = 0; i < buf.length - 9; i++) {
+    if (buf[i + 4] !== 1 || !valid(i)) continue;
+    const run = []; let p = i;
+    while (valid(p)) { const len = buf[p + 5]; run.push([buf.readUInt32LE(p), buf.toString("utf8", p + 9, p + 9 + len)]); p += 9 + len; }
+    if (run.length > best.length) best = run;
+    if (run.length > 20) i = p - 1;
+  }
+  return best.length >= 50 ? new Map(best.filter(([id, t]) => id > 0 && /^[\p{L}]/u.test(t))) : new Map();
+}
 function tablesOf(raw) {
+  const bufs = [raw];
   let tables = allDbs(raw);
   if (!tables.some(t => t.has("GEba") && t.has("UERs"))) {
     // Karriere-Spielstand: Datenbanken stecken in zstd-Rahmen
@@ -103,19 +119,22 @@ function tablesOf(raw) {
         const len = zstdFrameLength(raw, i);
         if (len <= 0) continue;
         const out = Buffer.from(fzstd.decompress(raw.subarray(i, i + len)));
+        bufs.push(out);
         tables = tables.concat(allDbs(out));
         if (tables.some(t => t.has("GEba") && t.has("UERs"))) break;
       } catch { /* Rahmen mit Wörterbuch o. Ä. überspringen */ }
     }
   }
-  return tables;
+  return { tables, bufs };
 }
 
 /* ---------- Spielstand → Datenbank-Zeilen für das Kaderlabor ---------- */
 function readSave(file, names, opts = {}) {
   const raw = fs.readFileSync(file);
   if (raw.toString("latin1", 0, 8) !== "FBCHUNKS") throw new Error("Keine FC-Speicherdatei (FBCHUNKS fehlt).");
-  const tables = tablesOf(raw);
+  const { tables, bufs } = tablesOf(raw);
+  const extra = new Map();
+  for (const b of bufs) for (const [k, v] of saveNames(b)) if (!extra.has(k)) extra.set(k, v);
   const pick = (test) => tables.filter(test).sort((a, b) => b.nvalid - a.nvalid)[0];
   const players = pick(t => t.has("GEba") && t.has("UERs") && t.has("WVIU"));
   if (!players) throw new Error("Spielertabelle nicht gefunden – unbekanntes Spielstandformat.");
@@ -139,7 +158,7 @@ function readSave(file, names, opts = {}) {
   }
   const epoch = Date.UTC(1582, 9, 14);
   const g = (i, col) => players.get(i, P[col][0]) + P[col][1];
-  const nm = id => (id && names && names.get(id)) || null;
+  const nm = id => (id && ((names && names.get(id)) || extra.get(id))) || null;
 
   const rows = [];
   for (let i = 0; i < players.nvalid; i++) {

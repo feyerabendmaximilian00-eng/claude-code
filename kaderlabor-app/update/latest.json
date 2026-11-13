@@ -1,8 +1,8 @@
 {
-  "version": "1.5.1",
+  "version": "1.5.2",
   "minLauncher": "1",
-  "released": "2026-11-13T18:01:48.333Z",
-  "notes": "Spielernamen beim FC-27-Abgleich: Die App sucht die Namensliste (playernames.txt) jetzt selbst in Downloads, Desktop, Dokumente und im Spielstand-Ordner. Findet sie keine, fragt sie direkt danach. Danach wird der Spielstand sofort mit Namen neu abgeglichen.",
+  "released": "2026-11-13T19:13:34.780Z",
+  "notes": "FC-27-Abgleich: Namen von Spielern, die erst im Karrieremodus entstanden sind oder umbenannt wurden, werden jetzt aus dem Spielstand gelesen. Damit haben alle Spieler einen Namen.",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -36,8 +36,8 @@
     },
     {
       "path": "fcsave.js",
-      "sha256": "a4bb9dd8b4597012e0ebc03c8eed037b37369d64b7caef5221631a14f3301108",
-      "size": 12208
+      "sha256": "23df41051471355e7b5c1efded18b948160af8da090e5d29c59451fe7d71d7cd",
+      "size": 13324
     },
     {
       "path": "preload.js",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "6abbd79d3b3f273e61ed1ab7b8e4379aa109bdc863d24f6780769008b95a3989",
+      "sha256": "a3b6cd6f3c5632e05f8f6a71627a42cf576fd2b2cab5ef3363b3fd548a73b2de",
       "size": 23
     }
   ]
