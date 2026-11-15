@@ -1,8 +1,8 @@
 {
-  "version": "1.8.1",
+  "version": "1.8.2",
   "minLauncher": "1",
-  "released": "2026-11-15T03:41:18.891Z",
-  "notes": "Budget: aktuelles Budget voreingestellt, mehr nur durch manuelles Erhöhen",
+  "released": "2026-11-15T03:44:51.197Z",
+  "notes": "Holzschreibtisch, Vereinslogo des 1. FCN und Stadionfoto auf dem Tisch",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "2be4841c506a704c174d04ea5f29c3c2e65280cdc9f016c4f412399743d293ff",
-      "size": 358214
+      "sha256": "2beabf07136a163abee5a607a6b0221897e0aa1b0e07d84b9f1d3c6965a0f5f9",
+      "size": 477230
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "e02fc0b9ed6d03142d8d6781463c9cb514aa7148112cb72ec45e97986fff7e8b",
+      "sha256": "f8b8cde64c4b5150514a08034ef2d34ae6b9ca553920c11bd0a83f39ec1006f0",
       "size": 23
     }
   ]
