@@ -1,8 +1,8 @@
 {
-  "version": "1.9.4",
+  "version": "1.9.5",
   "minLauncher": "1",
-  "released": "2026-11-15T04:32:49.415Z",
-  "notes": "Taskleisten-Symbol: FCN-Logo auch für angeheftete Verknüpfungen",
+  "released": "2026-11-15T04:38:51.893Z",
+  "notes": "Scouting achtet auf die A-Position; DNA-Skala angehoben, 100 erreichbar",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "297eb603c65d9003af4a77bb9bad455acbb29c4409b94cd2efa593e66ac9c1a6",
-      "size": 556597
+      "sha256": "7b69eb6a5b909a74918846d01e6a8a378d87cdb035dee710e62fb231970bc9a3",
+      "size": 557702
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "6be7debad9928ab56ed50ea91b7c70c4950a17104a980ba5ba3a573466589192",
+      "sha256": "16b80339a4a6d078c0b4f977c3f7b28cf3d8ba0156fe820e98650d53dc519121",
       "size": 23
     }
   ]

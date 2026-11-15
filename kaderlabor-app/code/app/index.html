@@ -3104,7 +3104,19 @@ function dnaOf(e, ctx, pos, x){
   const tw = ctx.phil && !ctx.noTalent ? ctx.phil.talent : 0, t = talentOf(e, x.price, ctx);
   const data = ctx.philKey === "fcn" ? t.talent * .6 + t.under * .4 : t.talent;
   const base = play * .3 + inten * .25 + culture * .25 + econ * .2;
-  return {dna: base * (1 - tw) + data * tw, play, inten, culture, econ, talent: t.talent, under: t.under, ls: t.ls, fut: t.fut};
+  // Skala kalibriert: unten etwas angehoben (×1,15), oben flacher, damit Spitzenwerte unterscheidbar bleiben.
+  // Rohwert 60 → 69, 75 → 81, 90 → 93, ab ~99 → 100.
+  const raw = base * (1 - tw) + data * tw;
+  return {dna: clamp(raw <= 60 ? raw * 1.15 : 69 + (raw - 60) * .8, 0, 100), raw, play, inten, culture, econ, talent: t.talent, under: t.under, ls: t.ls, fut: t.fut};
+}
+
+/* A-Position: Hauptposition des Spielers. Auf einer Nebenposition oder fremden Position zählt er weniger. */
+function posMatch(e, pos){
+  if (!pos || e.pos === pos) return {f: 1, t: "A"};
+  if (e.alt && e.alt[0] === pos) return {f: .9, t: "B"};
+  if (e.alt && e.alt.includes(pos)) return {f: .85, t: "C"};
+  if (ROLE[e.pos] === ROLE[pos]) return {f: .82, t: "R"};
+  return {f: .7, t: "X"};
 }
 let calcRes = [];
 function runCalc(){
@@ -3142,7 +3154,7 @@ function runCalc(){
       : quickImpact(e);
     const pcf = clubFit(e, ctx, q.pos || e.pos, true), pf = pcf.feas;
     const dna = dnaOf(e, ctx, q.pos || e.pos, {nat: pcf.nat, age: pcf.a, feas: pf, wage: pcf.w, price, B}).dna;
-    const pre = dna / 4 + (.4 + .6 * pf) * Math.max(q.d, 0) * 2 * (W.now + W.need) * 3 + (projOvr(e) - ov) * W.future * 3 - price / B * W.value * 12 + (needPos.includes(q.pos) ? 4 * W.need * 5 : 0);
+    const pre = (dna / 4 + (.4 + .6 * pf) * Math.max(q.d, 0) * 2 * (W.now + W.need) * 3 + (projOvr(e) - ov) * W.future * 3 - price / B * W.value * 12 + (needPos.includes(q.pos) ? 4 * W.need * 5 : 0)) * (posSel !== "auto" ? posMatch(e, posSel).f : posMatch(e, q.pos).f);
     pool.push({e, est, price, pre, dna, basis: tp.basis});
   }
   if (!pool.length){ st.className = "status err"; st.textContent = (focus === "free" ? "Keine vereinslosen Spieler und keine mit auslaufendem Vertrag gefunden (dafür braucht es den FC-27-Abgleich). " : "") + "Niemand in deiner Datenbank passt zu Budget, Alter, Liga und Position. Lockere die Filter."; out.innerHTML = ""; calcRes = []; return; }
@@ -3171,10 +3183,11 @@ function runCalc(){
     // wer nicht wechseln will oder sich lange eingewöhnen muss, hilft weniger: beides dämpft die Gesamtnote zusätzlich
     // A-Lösung: Qualität zählt mehr als die DNA (DNA-Schwelle bleibt als Vorfilter); sonst je zur Hälfte
     const dw = focus === "a" ? .3 : .5;
-    const total = (dn.dna * dw + sport * (1 - dw)) * (.6 + .4 * cf.feas) * (.65 + .35 * cf.nat)
+    const pm = posMatch(e, slotPos || (posSel !== "auto" ? posSel : e.pos));
+    const total = (dn.dna * dw + sport * (1 - dw)) * (.6 + .4 * cf.feas) * (.65 + .35 * cf.nat) * pm.f
       // Nürnberger Weg: junge Transfers; ältere Spieler nur als Ausnahme
       * (focus !== "exp" && focus !== "a" && ctx.phil && ctx.phil.ageCap && e.age > ctx.phil.ageCap ? Math.max(.6, 1 - (e.age - ctx.phil.ageCap) * .07) : 1);
-    return {e, im, s, dn, phil: ctx.phil, philKey: ctx.philKey, pass: dn.dna >= TH, total, proj, est: x.est, price: x.price, basis: x.basis, slotPos, wageRef, clubNotes: cf.notes};
+    return {e, im, s, dn, pm, pmPos: slotPos || (posSel !== "auto" ? posSel : e.pos), phil: ctx.phil, philKey: ctx.philKey, pass: dn.dna >= TH, total, proj, est: x.est, price: x.price, basis: x.basis, slotPos, wageRef, clubNotes: cf.notes};
   }).sort((a, b) => (b.pass - a.pass) || b.total - a.total).slice(0, 10);
   st.className = "status";
   st.textContent = `Markt gescannt: ${pool.length.toLocaleString("de-DE")} Spieler im Budget · ${passN.toLocaleString("de-DE")} mit Vereins-DNA ab ${TH} · 60 Kandidaten im Kader simuliert (${Math.round(performance.now() - t0)} ms)`;
@@ -3198,6 +3211,8 @@ function calcReasons(r){
   else if (im.slot) out.push(`Würde als ${DE[im.slot.pos]} starten, Schnitt fast unverändert`);
   else out.push(`Kein Stammplatz, Kadertiefe ${im.dDepth >= 0 ? "+" : ""}${r0(im.dDepth)}`);
   if (r.slotPos && r.s.need === 100) out.push(`Deckt deinen Transferbedarf auf ${DE[r.slotPos]}`);
+  if (r.pm && r.pm.t !== "A") out.push(`${DE[r.pmPos]} ist nicht seine A-Position (${DE[e.pos]}), deshalb ${Math.round((1 - r.pm.f) * 100)} % Abzug`);
+  else if (r.pm) out.push(`A-Position ${DE[e.pos]}: spielt dort, wo er gebraucht wird`);
   out.push(r.proj > e.ovr ? `In zwei Jahren etwa GES ${r.proj} (POT ${e.pot})` : r.proj < e.ovr ? `In zwei Jahren etwa GES ${r.proj}, baut altersbedingt ab` : `Hält sein Niveau von GES ${e.ovr}`);
   out.push(e.value != null
     ? `Marktwert ${fmtMio(e.value)}, fair wären etwa ${fmtMio(r.est)}${e.value < r.est * .85 ? ", also günstig" : e.value > r.est * 1.2 ? ", also teuer" : ""}`
