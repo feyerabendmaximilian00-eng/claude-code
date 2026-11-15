@@ -1,8 +1,8 @@
 {
-  "version": "1.5.6",
+  "version": "1.5.7",
   "minLauncher": "1",
-  "released": "2026-11-15T02:48:33.797Z",
-  "notes": "Transfer-Rechner liest Vertragsende, Gehalt und Ausstiegsklausel aus dem Spielstand; Preis-Leistung zählt stärker, Talent weniger",
+  "released": "2026-11-15T02:51:58.226Z",
+  "notes": "Transfer-Rechner richtet sich nach deinem Verein: Ligaplatz nach Kaderstärke, Wechselchance, Gehaltsgefüge, Altersstruktur und Kadertiefe",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "c7c567d24b16f4e14937fa8fcd925bcb98e8d0006f186004f5132c37e42e3cde",
-      "size": 287364
+      "sha256": "8212e5c11fcbc11d52fea528553eb60f68e298a88b0ab4ac9a92aa6c5f63fb93",
+      "size": 293878
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "0334b70826bb364f999675d96300f939246e593e22c2f81d12e0a60006fc4c59",
+      "sha256": "c56536b663c3fde36953592c4e64056d482dfe75d609ab22ae68255fbdf914df",
       "size": 23
     }
   ]

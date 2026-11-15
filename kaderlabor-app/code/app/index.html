@@ -725,10 +725,13 @@ tr.inxi td:first-child{box-shadow:inset 2px 0 0 var(--accent)}
 .ccard ul{margin:12px 0 0;padding-left:18px;font-size:14px;color:var(--ink-2);line-height:1.6}
 .ccard .sc{text-align:right} .ccard .sc b{display:block;font-family:var(--font-display);font-weight:400;font-size:38px;line-height:1;letter-spacing:-.03em}
 .ccard.best .sc b{color:var(--accent)} .ccard .sc span{font-size:13px;color:var(--ink-3)}
-.cbars{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:12px}
+.cbars{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-top:12px}
+.calc-club{margin:8px 0 0;padding:12px 16px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface-2);line-height:1.6}
+.calc-club b{font-weight:500}
 .cbars div{font-size:13px;color:var(--ink-2)} .cbars span{color:var(--ink)}
 .cbars i{display:block;height:4px;border-radius:999px;background:var(--line);margin-top:4px;overflow:hidden} .cbars u{display:block;height:100%;background:var(--accent)}
 .ccard .delta.up{color:var(--good-ink)} .ccard .delta.down{color:var(--bad-ink)}
+@media (max-width:900px){.cbars{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:640px){.ccard{grid-template-columns:minmax(0,1fr) auto;padding:16px}.ccard .rk{display:none}.cbars{grid-template-columns:repeat(2,minmax(0,1fr))}}
 /* Gewichte: nur 400 und 500 */
 b,strong,label,select,legend,summary,.points li b,.tkcard b,.pd-name,.pc-nm,.bc-nm,.tcard b,.qdb-list b,.banner strong{font-weight:500}
@@ -1081,7 +1084,7 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
         </div>
         <button class="btn primary" id="btn-calc" type="button">Besten Transfer berechnen</button>
       </div>
-      <p class="small muted" style="margin:8px 0 0;max-width:75ch">Der Rechner spielt jeden passenden Spieler deiner Datenbank in deinem Kader durch und bewertet fünf Dinge: Wirkung auf die Startelf, Transferbedarf, Entwicklung in zwei Jahren, Preis-Leistung und Wiederverkaufswert. Wie stark jedes zählt, hängt vom Fokus ab. FC 27 speichert keinen Marktwert. Der Rechner schätzt ihn aus GES, POT, Alter und Position und verrechnet aus dem Spielstand Vertragsende, Gehalt und Ausstiegsklausel. Läuft ein Vertrag aus, wird der Spieler deutlich günstiger.</p>
+      <p class="small muted" style="margin:8px 0 0;max-width:75ch">Der Rechner spielt jeden passenden Spieler deiner Datenbank in deinem Kader durch und bewertet fünf Dinge: Wirkung auf die Startelf, Transferbedarf, Entwicklung in zwei Jahren, Preis-Leistung, Wiederverkaufswert und wie gut er zu deinem Verein passt: Wechselchance, Gehaltsgefüge, Altersstruktur und Kadertiefe. Wie stark jedes zählt, hängt vom Fokus und vom Profil deines Vereins ab. FC 27 speichert keinen Marktwert. Der Rechner schätzt ihn aus GES, POT, Alter und Position und verrechnet aus dem Spielstand Vertragsende, Gehalt und Ausstiegsklausel. Läuft ein Vertrag aus, wird der Spieler deutlich günstiger.</p>
       <form class="tfilters" id="tf-form">
         <label for="tf-pos">Position
           <select id="tf-pos"><option value="auto">Automatisch (Transferbedarf)</option></select>
@@ -1105,6 +1108,7 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
         </label>
       </form>
       <div class="row" style="margin-top:12px"><span class="status" id="calc-status" aria-live="polite"></span></div>
+      <p class="calc-club small" id="calc-club" hidden></p>
       <div class="calc-list" id="calc-results"></div>
     </section>
     <section class="panel" style="margin-top:20px" aria-labelledby="tf-h" id="transfer-panel" hidden>
@@ -2557,22 +2561,88 @@ function transferPrice(e){
   return {price: price >= 10 ? Math.round(price * 2) / 2 : Math.round(price * 10) / 10, est, basis};
 }
 const fmtWage = w => w >= 1000 ? `${(Math.round(w / 100) / 10).toLocaleString("de-DE")} Tsd. €/Woche` : `${w} €/Woche`;
-const CALC_LBL = {now:"Startelf", need:"Bedarf", future:"Zukunft", value:"Preis-Leistung", resale:"Wiederverkauf"};
+const CALC_LBL = {now:"Startelf", need:"Bedarf", future:"Zukunft", value:"Preis-Leistung", resale:"Wiederverkauf", club:"Vereinsfit"};
 const fmtMio = v => v <= 0 ? "ablösefrei" : v.toLocaleString("de-DE", {maximumFractionDigits: 1}) + " Mio. €";
+
+/* Verein und Kader als Maßstab: Stärke im Ligavergleich, Gehaltsgefüge, Altersstruktur, Kadertiefe */
+const CLUB_PROFILE = {
+  spitze:     {t: "Spitzenteam der Liga", d: "Sofortwirkung zählt mehr, der Preis etwas weniger.", m: {now: 1.25, need: 1, future: .8, value: .85, resale: .8}},
+  etabliert:  {t: "Mittelfeld der Liga", d: "Ausgewogene Gewichtung.", m: {}},
+  abstieg:    {t: "Abstiegskampf", d: "Spieler, die sofort helfen, zählen deutlich mehr als Entwicklung.", m: {now: 1.35, need: 1.15, future: .5, value: 1, resale: .5}},
+  ausbildung: {t: "Ausbildungsverein (junge Startelf)", d: "Entwicklung und Wiederverkauf zählen mehr.", m: {now: .85, future: 1.35, resale: 1.4}}
+};
+function clubContext(){
+  const P = state.players, ov = last.overall || 70;
+  let club = fcClubName || "";
+  if (!club && DB.length){
+    const ids = new Set(P.map(p => p.fcid).filter(Boolean)), nm = new Set(P.map(p => p.name.toLowerCase())), c = new Map();
+    DB.forEach(e => { if (e.club && ((e.fcid && ids.has(e.fcid)) || nm.has(e.name.toLowerCase()))) c.set(e.club, (c.get(e.club) || 0) + 1); });
+    const best = [...c].sort((a, b) => b[1] - a[1])[0];
+    if (best && best[1] >= 3) club = best[0];
+  }
+  // Vereinsstärke = Schnitt der besten 14 Spieler, eigener Verein aus deinem Kader
+  const byClub = new Map(), clubLeague = new Map();
+  DB.forEach(e => { if (!e.club) return; if (!byClub.has(e.club)) byClub.set(e.club, []); byClub.get(e.club).push(e.ovr); if (!clubLeague.has(e.club)) clubLeague.set(e.club, e.league); });
+  const top = v => { const t = [...v].sort((a, b) => b - a).slice(0, 14); return t.reduce((a, b) => a + b, 0) / t.length; };
+  const strength = new Map(); byClub.forEach((v, k) => { if (v.length >= 11) strength.set(k, top(v)); });
+  const own = P.length ? top(P.map(p => p.ovr)) : ov;
+  const league = club ? (clubLeague.get(club) || "") : "";
+  let rank = null, size = null;
+  if (league){ const riv = [...strength].filter(([k]) => k !== club && clubLeague.get(k) === league).map(([, v]) => v); if (riv.length >= 5){ size = riv.length + 1; rank = 1 + riv.filter(v => v > own).length; } }
+  const wages = P.map(p => p.wage).filter(Boolean).sort((a, b) => a - b);
+  const xiAge = avg(last.xi.filter(x => x.p), x => x.p.age);
+  let profile = "etabliert";
+  if (rank){ if (rank <= Math.max(2, Math.round(size * .2))) profile = "spitze"; else if (rank > size - Math.max(3, Math.round(size * .2))) profile = "abstieg"; }
+  if (xiAge && xiAge < 24.5 && profile !== "abstieg") profile = "ausbildung";
+  return {club, league, own, strength, rank, size, profile, xiAge, n: P.length, maxOvr: Math.max(...P.map(p => p.ovr), ov),
+    wageTop: wages.length ? wages[wages.length - 1] : null, wageMid: wages.length ? wages[Math.floor(wages.length * .75)] : null};
+}
+function clubFit(e, ctx, pos, isNeed){
+  const c01 = v => clamp(v, 0, 1), notes = [];
+  // Wechselbereitschaft: stärkerer Verein oder Star über deinem Niveau → unwahrscheinlich
+  const cs = e.club ? ctx.strength.get(e.club) : null;
+  const fClub = cs == null ? 1 : c01(1 - (cs - ctx.own - 2) / 8);
+  const fStar = c01(1 - (e.ovr - ctx.maxOvr - 4) / 6);
+  const feas = fClub * fStar;
+  if (fClub < .6) notes.push(`Wechsel unwahrscheinlich: ${e.club} ist klar stärker als dein Verein`);
+  else if (fStar < .6) notes.push("Wechsel unwahrscheinlich: deutlich besser als dein bester Spieler");
+  // Gehaltsgefüge
+  let w = .7;
+  if (e.wage && ctx.wageTop){
+    w = e.wage <= ctx.wageMid ? 1 : e.wage <= ctx.wageTop ? .75 : e.wage <= ctx.wageTop * 1.5 ? .4 : .1;
+    if (w <= .4) notes.push(`Gehalt sprengt dein Gefüge (Topverdiener ${fmtWage(ctx.wageTop)})`);
+  }
+  // Altersstruktur der Startelf
+  let a = e.age >= 32 ? .6 : 1;
+  if (ctx.xiAge >= 28){ a = e.age <= 26 ? 1 : e.age <= 29 ? .7 : .35; if (e.age <= 26) notes.push(`Verjüngt deine Startelf (Ø ${r1(ctx.xiAge).replace(".", ",")} Jahre)`); }
+  else if (ctx.xiAge && ctx.xiAge <= 24.5){ a = e.age >= 24 && e.age <= 30 ? 1 : .7; if (e.age >= 27 && e.age <= 30) notes.push(`Bringt Erfahrung in eine junge Startelf (Ø ${r1(ctx.xiAge).replace(".", ",")} Jahre)`); }
+  // Kadertiefe auf der Position
+  const ov = last.overall || 70, role = ROLE[pos];
+  const rivals = state.players.filter(p => (p.pos === pos || p.alt.includes(pos) || ROLE[p.pos] === role) && fitAt(p, pos) >= ov - 4).length;
+  const d = isNeed ? 1 : rivals >= 4 ? .4 : rivals === 3 ? .7 : 1;
+  if (!isNeed && rivals >= 4) notes.push(`Schon ${rivals} gute Spieler für ${DE[pos]} im Kader`);
+  const full = ctx.n >= 32 ? .6 : 1;
+  if (ctx.n >= 32) notes.push(`Kader mit ${ctx.n} Spielern voll: erst verkaufen`);
+  return {score: 100 * feas * full * (w * .4 + a * .3 + d * .3), feas, notes};
+}
 let calcRes = [];
 function runCalc(){
   const st = $("#calc-status"), out = $("#calc-results");
   if (!last) return;
   if (!DB.length){ st.className = "status err"; st.textContent = "Deine Datenbank ist leer. Gleiche unter Datenbank mit FC 27 ab oder lade Spieler hoch."; out.innerHTML = ""; calcRes = []; return; }
   const t0 = performance.now();
-  const posSel = $("#tf-pos").value, focus = $("#tf-focus").value, W = CALC_W[focus] || CALC_W.now;
+  const posSel = $("#tf-pos").value, focus = $("#tf-focus").value, ctx = clubContext();
+  // Gewichte an den Verein anpassen, dazu 15 % Vereinsfit
+  const W = (() => { const b = CALC_W[focus] || CALC_W.now, m = CLUB_PROFILE[ctx.profile].m, o = {};
+    Object.keys(b).forEach(k => o[k] = b[k] * (m[k] ?? 1));
+    const sum = Object.values(o).reduce((x, y) => x + y, 0); Object.keys(o).forEach(k => o[k] = o[k] / sum * .85); o.club = .15; return o; })();
   const bIn = parseFloat($("#tf-budget").value), B = Number.isFinite(bIn) && bIn > 0 ? bIn : 40;
   const maxAge = toInt($("#tf-age").value) ?? 40, league = $("#tf-league").value.trim().toLowerCase();
   const ov = last.overall || 70;
   const needPos = posSel !== "auto" ? [posSel] : last.plan.needs.map(n => n.pos);
   const pool = [];
   for (const e of DB){
-    if (e.age > maxAge || inSquadName(e.name)) continue;
+    if (e.age > maxAge || inSquadName(e.name) || (ctx.club && e.club === ctx.club)) continue;
     if (league && !(String(e.league) + " " + String(e.club)).toLowerCase().includes(league)) continue;
     if (posSel !== "auto" && fitAt(e, posSel) < e.ovr - 3) continue;
     const tp = transferPrice(e), est = tp.est, price = tp.price;
@@ -2582,7 +2652,8 @@ function runCalc(){
     const q = posSel !== "auto"
       ? (s => ({d: fitAt(e, posSel) - (s && s.p ? s.fit : 40), pos: posSel}))(last.xi.filter(x => x.pos === posSel).sort((a, b) => a.fit - b.fit)[0])
       : quickImpact(e);
-    const pre = Math.max(q.d, 0) * 2 * (W.now + W.need) * 3 + (projOvr(e) - ov) * W.future * 3 - price / B * W.value * 12 + (needPos.includes(q.pos) ? 4 * W.need * 5 : 0);
+    const pf = clubFit(e, ctx, q.pos || e.pos, true).feas;
+    const pre = (.4 + .6 * pf) * Math.max(q.d, 0) * 2 * (W.now + W.need) * 3 + (projOvr(e) - ov) * W.future * 3 - price / B * W.value * 12 + (needPos.includes(q.pos) ? 4 * W.need * 5 : 0);
     pool.push({e, est, price, pre, basis: tp.basis});
   }
   if (!pool.length){ st.className = "status err"; st.textContent = (focus === "free" ? "Keine vereinslosen Spieler und keine mit auslaufendem Vertrag gefunden (dafür braucht es den FC-27-Abgleich). " : "") + "Niemand in deiner Datenbank passt zu Budget, Alter, Liga und Position. Lockere die Filter."; out.innerHTML = ""; calcRes = []; return; }
@@ -2601,11 +2672,21 @@ function runCalc(){
         * (.1 + .9 * c01(((im.slot ? im.slot.fit : fitAt(e, e.pos)) - (ov - 10)) / 12)),
       resale: a <= 21 ? 100 : a <= 23 ? 85 : a <= 25 ? 70 : a <= 27 ? 50 : a <= 29 ? 30 : a <= 31 ? 12 : 0
     };
-    const total = Object.keys(W).reduce((t, k) => t + W[k] * s[k], 0);
-    return {e, im, s, total, proj, est: x.est, price: x.price, basis: x.basis, slotPos, wageRef};
+    const cf = clubFit(e, ctx, slotPos || e.pos, !!slotPos && needPos.includes(slotPos));
+    s.club = cf.score;
+    // ein Spieler, der nicht kommen will, hilft nicht: Wechselchance dämpft die Gesamtnote
+    const total = Object.keys(W).reduce((t, k) => t + W[k] * s[k], 0) * (.55 + .45 * cf.feas);
+    return {e, im, s, total, proj, est: x.est, price: x.price, basis: x.basis, slotPos, wageRef, clubNotes: cf.notes};
   }).sort((a, b) => b.total - a.total).slice(0, 10);
   st.className = "status";
   st.textContent = `${pool.length} Spieler im Budget durchgerechnet, die besten 60 im kompletten Kader simuliert (${Math.round(performance.now() - t0)} ms).`;
+  const pr = CLUB_PROFILE[ctx.profile];
+  $("#calc-club").innerHTML = `<b>${esc(ctx.club || "Dein Verein")}</b>${ctx.league ? " · " + esc(ctx.league) : ""}`
+    + (ctx.rank ? ` · Kaderstärke Platz ${ctx.rank} von ${ctx.size}` : "")
+    + (ctx.xiAge ? ` · Ø Alter Startelf ${r1(ctx.xiAge).replace(".", ",")}` : "")
+    + (ctx.wageTop ? ` · Topgehalt ${fmtWage(ctx.wageTop)}` : "") + ` · ${ctx.n} Spieler`
+    + `<br><span class="muted">Profil: ${pr.t}. ${pr.d}${ctx.club ? "" : " Für Ligaplatz und Wechselchance den Spielstand abgleichen."}</span>`;
+  $("#calc-club").hidden = false;
   renderCalc();
 }
 function calcReasons(r){
@@ -2622,6 +2703,7 @@ function calcReasons(r){
     : `Ablöse etwa ${fmtMio(r.price)} statt ${fmtMio(r.est)}: ${r.basis}${r.basis === "Ausstiegsklausel" ? "" : ""}`);
   const k = [e.contract ? `Vertrag bis ${e.contract}` : "", e.wage ? `Gehalt ${fmtWage(e.wage)}${r.wageRef ? (e.wage > r.wageRef ? ", mehr als dein Topverdiener" : "") : ""}` : "", e.release && r.basis !== "Ausstiegsklausel" ? `Ausstiegsklausel ${fmtMio(e.release)}` : ""].filter(Boolean);
   if (k.length) out.push(k.join(" · "));
+  (r.clubNotes || []).forEach(t => out.push(t));
   return out;
 }
 function renderCalc(){
