@@ -727,6 +727,69 @@ tr.inxi td:first-child{box-shadow:inset 2px 0 0 var(--accent)}
 .ccard .delta.up{color:var(--good-ink)} .ccard .delta.down{color:var(--bad-ink)}
 @media (max-width:900px){.cbars{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:640px){.ccard{grid-template-columns:minmax(0,1fr) auto;padding:16px}.ccard .rk{display:none}.cbars{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ===== Scouting-Zentrale: Seitenleiste, Statusleiste, Dossiers ===== */
+body{margin:0}
+.ni{width:18px;height:18px;flex:none}
+.clubcard{display:none}
+.cmdbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.cb-crumb{font-size:13px;color:var(--ink-3)}
+.cmdbar h2{font-size:28px;margin:2px 0 0}
+.kpis{display:flex;gap:8px;flex-wrap:wrap}
+.kpi{display:flex;flex-direction:column;min-width:84px;padding:8px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface)}
+.kpi span{font-size:13px;color:var(--ink-3)} .kpi b{font-family:var(--font-display);font-weight:400;font-size:20px;line-height:1.2}
+.method summary{margin-top:8px;font-size:14px;color:var(--ink-2);cursor:pointer}
+.panel{padding:20px}
+.panel h3{font-size:20px}
+@media (min-width:1100px){
+  .wrap{display:grid;grid-template-columns:264px minmax(0,1fr);row-gap:16px;column-gap:0;max-width:none;padding:0 0 48px}
+  .wrap>*{grid-column:2;margin-inline:32px;min-width:0}
+  .wrap>.rail{grid-column:1;grid-row:1 / span 60;margin:0;position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;overflow-x:clip;display:flex;flex-direction:column;gap:20px;padding:24px 16px;border-right:1px solid var(--line);background:var(--surface)}
+  .rail header.top{display:flex;flex-direction:column;align-items:stretch;gap:16px;padding:0;margin:0}
+  .rail .brand{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+  .rail .brand h1{font-size:26px}
+  .clubcard{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg)}
+  .crest{width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-family:var(--font-display);font-size:15px;border:1px solid var(--line-strong)}
+  .cc-txt{min-width:0;display:flex;flex-direction:column} .cc-txt b{font-weight:500;font-size:15px;line-height:1.3} .cc-txt small{font-size:13px;color:var(--ink-3)}
+  .rail .toprow{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+  .rail .toprow .btn{width:100%;justify-content:center;text-align:center}
+  .rail .mainnav{position:static;margin:0!important;padding:0!important;border:0;background:none;display:flex;flex-direction:column;align-items:stretch;flex:1;gap:16px;top:auto}
+  .rail .navin{flex-direction:column;overflow:visible;gap:2px;flex:none}
+  .rail .navin a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--r-sm)}
+  .rail .navin a::after{display:none}
+  .rail .navin a:hover{background:color-mix(in srgb,var(--ink) 5%,transparent)!important}
+  .rail .navin a[aria-selected="true"]{background:var(--accent-soft)!important;color:var(--ink);box-shadow:inset 2px 0 0 var(--accent)!important}
+  .rail .nb{margin-left:auto}
+  .rail .navright{margin-top:auto;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:16px}
+  .rail .navsum{display:none}
+  .rail .savestate{font-size:13px}
+  .cmdbar{position:sticky;top:0;z-index:15;margin-inline:0!important;padding:16px 32px;background:var(--bg);border-bottom:1px solid var(--line)}
+  body::before{display:none}
+}
+@media (max-width:1099px){
+  .rail{display:contents}
+  .navin .ni{display:none}
+  .cmdbar h2{display:none}
+  .kpi{min-width:0;flex:1 1 30%}
+}
+/* Dossiers */
+.ccard .sc{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.ccard .sc .tot b{font-size:28px;display:block;line-height:1.1} .ccard .tot span{font-size:13px;color:var(--ink-3)}
+.dnaring{position:relative;width:64px;height:64px;flex:none}
+.dnaring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.dnaring circle{fill:none;stroke-width:4} .dnaring .tr{stroke:var(--line)} .dnaring .fg{stroke:var(--ink-3);stroke-linecap:round}
+.dnaring.ok .fg{stroke:var(--accent)}
+.ccard .sc .dnaring>span,.dnaring>span{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.ccard .sc .dnaring b,.dnaring b{font-family:var(--font-display);font-weight:400;font-size:20px;letter-spacing:-.02em} .dnaring small{font-size:13px;color:var(--ink-3);margin-top:2px}
+@media (min-width:1300px){.ccard ul{columns:2;column-gap:32px}.ccard ul li{break-inside:avoid}}
+.ccard .btn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+/* Shortlist */
+.shortlist{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.slrow{display:grid;grid-template-columns:64px minmax(0,1fr) repeat(3,auto) auto;gap:16px;align-items:center;padding:8px 16px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface-2)}
+.slrow b{font-weight:500} .slrow small{display:block;font-size:13px;color:var(--ink-3)}
+.slk{display:flex;flex-direction:column;align-items:flex-end;min-width:64px} .slk span{font-size:13px;color:var(--ink-3)} .slk b{font-family:var(--font-display);font-weight:400;font-size:18px}
+.slact{display:flex;gap:8px}
+@media (max-width:760px){.slrow{grid-template-columns:64px minmax(0,1fr);}.slk{align-items:flex-start}.slact{grid-column:1 / -1}}
 /* Gewichte: nur 400 und 500 */
 b,strong,label,select,legend,summary,.points li b,.tkcard b,.pd-name,.pc-nm,.bc-nm,.tcard b,.qdb-list b,.banner strong{font-weight:500}
 h1,h2,h3,h4{font-weight:400}
@@ -740,26 +803,28 @@ h1,h2,h3,h4{font-weight:400}
 
 <div class="sky" aria-hidden="true"></div>
 <div class="wrap">
-  <header class="top" data-enter="1">
+  <aside class="rail" data-enter="1">
+  <header class="top">
     <div class="brand">
       <h1>Kader<span>labor</span></h1>
-      <span class="tag">FC 27 · Karriere</span>
+      <span class="tag">Sportvorstand · FC 27</span>
     </div>
-    <div class="row">
+    <div class="clubcard" id="clubcard"><div class="crest" id="crest" aria-hidden="true">KL</div><div class="cc-txt"><b id="cc-name">Dein Verein</b><small id="cc-meta">Karrieremodus</small></div></div>
+    <div class="row toprow">
       <button class="btn" id="btn-copy" type="button">Kader als CSV kopieren</button>
       <a class="btn primary" id="btn-goto-import" href="#kader">Kader hochladen</a>
     </div>
   </header>
 
-  <nav class="mainnav" aria-label="Bereiche" data-enter="2">
+  <nav class="mainnav" aria-label="Bereiche">
     <div class="navin" role="tablist">
-      <a href="#aufstellung" data-nav="aufstellung" role="tab">Aufstellung</a>
-      <a href="#analyse" data-nav="analyse" role="tab">Analyse <span class="nb" id="nb-analyse"></span></a>
-      <a href="#taktik" data-nav="taktik" role="tab">Taktik <span class="nb" id="nb-taktik"></span></a>
-      <a href="#kader" data-nav="kader" role="tab">Kader <span class="nb" id="nb-kader"></span></a>
-      <a href="#transfers" data-nav="transfers" role="tab">Transfers</a>
-      <a href="#datenbank" data-nav="datenbank" role="tab">Datenbank <span class="nb" id="nb-db"></span></a>
-      <a href="#bericht" data-nav="bericht" role="tab" id="nav-bericht" hidden>Scoutbericht</a>
+      <a href="#aufstellung" data-nav="aufstellung" role="tab"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/><circle cx="12" cy="12" r="3"/></svg><span>Matchplan</span></a>
+      <a href="#analyse" data-nav="analyse" role="tab"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11M10 20V5M16 20v-6M2 20h20"/></svg><span>Kaderanalyse</span> <span class="nb" id="nb-analyse"></span></a>
+      <a href="#taktik" data-nav="taktik" role="tab"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 8l8 8M14 6h4v4"/></svg><span>Taktik</span> <span class="nb" id="nb-taktik"></span></a>
+      <a href="#kader" data-nav="kader" role="tab"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M16 5a3 3 0 0 1 0 6M21 20c0-2-1-4-3-4.5"/></svg><span>Kader</span> <span class="nb" id="nb-kader"></span></a>
+      <a href="#transfers" data-nav="transfers" role="tab"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span>Scouting</span> <span class="nb" id="nb-short"></span></a>
+      <a href="#datenbank" data-nav="datenbank" role="tab"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg><span>Spielerdatenbank</span> <span class="nb" id="nb-db"></span></a>
+      <a href="#bericht" data-nav="bericht" role="tab" id="nav-bericht" hidden><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l3 3v15H6zM9 11h6M9 15h6"/></svg><span>Scoutbericht</span></a>
     </div>
     <div class="navright">
       <span class="savestate" id="savestate" aria-live="polite" title="Speicherstatus"></span>
@@ -770,6 +835,11 @@ h1,h2,h3,h4{font-weight:400}
       </button>
     </div>
   </nav>
+  </aside>
+  <div class="cmdbar" id="cmdbar" data-enter="2">
+    <div class="cb-l"><div class="cb-crumb" id="cb-crumb">Karrieremodus</div><h2 id="cb-title">Matchplan</h2></div>
+    <div class="kpis" id="kpis"></div>
+  </div>
 
   <div class="banner" id="sample-banner" hidden>
     <span><strong>Beispielkader:</strong> Die Spieler unten sind erfunden und zeigen nur, wie die Analyse aussieht. Lade deinen eigenen Karriere-Kader hoch.</span>
@@ -1058,7 +1128,14 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
     </div>
   </section>
   </div>
-  <div class="view" id="v-transfers" data-view="transfers" role="tabpanel" aria-label="Transfers" hidden>
+  <div class="view" id="v-transfers" data-view="transfers" role="tabpanel" aria-label="Scouting" hidden>
+    <section class="panel" aria-labelledby="sl-h" id="shortlist-panel" style="margin-bottom:16px">
+      <div class="row" style="justify-content:space-between">
+        <div><div class="eyebrow">Sportvorstand</div><h3 id="sl-h">Shortlist</h3></div>
+        <span class="small muted" id="sl-count"></span>
+      </div>
+      <div class="shortlist" id="shortlist"></div>
+    </section>
       <section class="panel" aria-labelledby="plan-h">
         <div class="eyebrow">Karriereplanung</div>
         <h3 id="plan-h">Transfers &amp; Talente</h3>
@@ -1073,12 +1150,12 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
     <section class="panel" style="margin-top:20px" aria-labelledby="calc-h" id="calc-panel">
       <div class="row" style="justify-content:space-between">
         <div>
-          <div class="eyebrow">Berechnet aus deiner Datenbank</div>
-          <h3 id="calc-h">Transfer-Rechner</h3>
+          <div class="eyebrow">Scouting-Abteilung</div>
+          <h3 id="calc-h">Transferziele</h3>
         </div>
-        <button class="btn primary" id="btn-calc" type="button">Besten Transfer berechnen</button>
+        <button class="btn primary" id="btn-calc" type="button">Markt scannen</button>
       </div>
-      <p class="small muted" style="margin:8px 0 0;max-width:75ch">Nach dem Vorbild des Schalke-Modells bekommt jeder Spieler eine Vereins-DNA von 0 bis 100: Passung zur Spielidee, Intensität und Mentalität (intensiv, aggressiv, mutig), Kultur (Heimat, Sprache, Altersstruktur) und Wirtschaft (Gehalt, Ablöse, Wechselchance). Empfohlen werden zuerst Spieler ab der DNA-Schwelle. Die Gesamtnote ist je zur Hälfte Vereins-DNA und sportlicher Nutzen: Wirkung auf die Startelf, Bedarf, Entwicklung, Preis-Leistung und Wiederverkauf, gewichtet nach Fokus und Vereinsprofil. FC 27 speichert keinen Marktwert. Der Rechner schätzt ihn aus GES, POT, Alter und Position und verrechnet aus dem Spielstand Vertragsende, Gehalt und Ausstiegsklausel. Läuft ein Vertrag aus, wird der Spieler deutlich günstiger.</p>
+      <details class="method"><summary>Methodik</summary><p class="small muted" style="margin:8px 0 0;max-width:75ch">Nach dem Vorbild des Schalke-Modells bekommt jeder Spieler eine Vereins-DNA von 0 bis 100: Passung zur Spielidee, Intensität und Mentalität (intensiv, aggressiv, mutig), Kultur (Heimat, Sprache, Altersstruktur) und Wirtschaft (Gehalt, Ablöse, Wechselchance). Empfohlen werden zuerst Spieler ab der DNA-Schwelle. Die Gesamtnote ist je zur Hälfte Vereins-DNA und sportlicher Nutzen: Wirkung auf die Startelf, Bedarf, Entwicklung, Preis-Leistung und Wiederverkauf, gewichtet nach Fokus und Vereinsprofil. FC 27 speichert keinen Marktwert. Der Rechner schätzt ihn aus GES, POT, Alter und Position und verrechnet aus dem Spielstand Vertragsende, Gehalt und Ausstiegsklausel. Läuft ein Vertrag aus, wird der Spieler deutlich günstiger.</p></details>
       <form class="tfilters" id="tf-form">
         <label for="tf-pos">Position
           <select id="tf-pos"><option value="auto">Automatisch (Transferbedarf)</option></select>
@@ -1840,7 +1917,7 @@ function renderLinks(A){
 
 function renderPlan(A){
   const P = A.plan;
-  $("#needs").innerHTML = P.needs.length ? P.needs.map(n => `<li><div><strong>${DE[n.pos]}</strong> · Ziel GES ${n.target}+<small>${esc(n.why)}</small><small>${esc(n.hint)}</small><button type="button" class="findbtn" data-find="${n.pos}">Besten Transfer berechnen</button></div></li>`).join("")
+  $("#needs").innerHTML = P.needs.length ? P.needs.map(n => `<li><div><strong>${DE[n.pos]}</strong> · Ziel GES ${n.target}+<small>${esc(n.why)}</small><small>${esc(n.hint)}</small><button type="button" class="findbtn" data-find="${n.pos}">Markt nach ${DE[n.pos]} scannen</button></div></li>`).join("")
     : `<li class="muted">Kein dringender Bedarf. Die Startelf ist ausgeglichen.</li>`;
   $("#talents").innerHTML = P.talents.length ? P.talents.map(t => `<li><div>${esc(t.p.name)} <span class="small muted">${DE[t.p.pos]} · ${t.p.age} J.</span><small>${esc(t.why)}</small></div><span class="num"><b>${t.p.ovr}</b> → ${t.p.pot}</span></li>`).join("")
     : `<li class="muted">Keine Talente mit großem Potenzial im Kader.</li>`;
@@ -1934,6 +2011,7 @@ function renderNav(A){
   $("#nb-kader").textContent = state.players.length || "";
   $("#nb-db").textContent = typeof DB !== "undefined" && DB.length ? DB.length : "";
   $("#navsum").innerHTML = `${esc(state.formation)} · Gesamt <b>${r1(A.overall)}</b> · Synergie <b>${r0(A.syn)}</b>`;
+  if (typeof renderCmd === "function") try { renderCmd(); } catch(e){}
   const g = [...A.points.cons.slice(0, 3).map(x => ({...x, k: "bad", l: "Minus"})), ...A.points.pros.slice(0, 2).map(x => ({...x, k: "good", l: "Plus"}))];
   $("#glance").innerHTML = g.length ? g.map(x => `<li><span class="pill ${x.k}">${x.l}</span><div><strong>${esc(x.t)}</strong><span class="t">${esc(x.d)}</span></div></li>`).join("")
     : `<li><span class="pill warn">–</span><div><span class="t">Noch keine Auffälligkeiten.</span></div></li>`;
@@ -2805,7 +2883,7 @@ function runCalc(){
     return {e, im, s, dn, phil: ctx.phil, philKey: ctx.philKey, pass: dn.dna >= TH, total, proj, est: x.est, price: x.price, basis: x.basis, slotPos, wageRef, clubNotes: cf.notes};
   }).sort((a, b) => (b.pass - a.pass) || b.total - a.total).slice(0, 10);
   st.className = "status";
-  st.textContent = `${pool.length} Spieler im Budget durchgerechnet, ${passN} erreichen die Vereins-DNA ${TH}+, die besten 60 im kompletten Kader simuliert (${Math.round(performance.now() - t0)} ms).`;
+  st.textContent = `Markt gescannt: ${pool.length.toLocaleString("de-DE")} Spieler im Budget · ${passN.toLocaleString("de-DE")} mit Vereins-DNA ab ${TH} · 60 Kandidaten im Kader simuliert (${Math.round(performance.now() - t0)} ms)`;
   const pr = CLUB_PROFILE[ctx.profile];
   $("#calc-club").innerHTML = `<b>${esc(ctx.club || "Dein Verein")}</b>${ctx.league ? " · " + esc(ctx.league) : ""}`
     + (ctx.rank ? ` · Kaderstärke Platz ${ctx.rank} von ${ctx.size}` : "")
@@ -2845,15 +2923,15 @@ function renderCalc(){
     return `<article class="ccard${i === 0 && r.pass ? " best" : ""}${r.pass ? "" : " below"}">
       <div class="rk num">${i + 1}</div>
       <div style="min-width:0">
-        ${i === 0 && r.pass ? '<div class="eyebrow" style="color:var(--accent)">Sinnvollster Transfer</div>' : !r.pass ? '<div class="eyebrow">Unter der DNA-Schwelle</div>' : ""}
+        ${i === 0 && r.pass ? '<div class="eyebrow" style="color:var(--accent)">Top-Ziel</div>' : !r.pass ? '<div class="eyebrow">Unter der DNA-Schwelle</div>' : ""}
         <div class="nm">${esc(e.name)}</div>
         <div class="meta">${DE[e.pos]}${e.alt.length ? "/" + e.alt.map(x => DE[x]).join("/") : ""} · ${e.age} J. · GES ${e.ovr} · POT ${e.pot}${e.club ? " · " + esc(e.club) : ""}${e.league ? " · " + esc(e.league) : ""}</div>
         <ul>${calcReasons(r).map(t => `<li>${esc(t)}</li>`).join("")}</ul>
         <div class="cbars">${Object.keys(CALC_LBL).map(k => `<div>${CALC_LBL[k]} <span class="num">${r0(r.s[k])}</span><i><u style="width:${clamp(r.s[k], 0, 100)}%"></u></i></div>`).join("")}</div>
-        <div class="row" style="margin-top:12px;gap:12px"><button class="btn" type="button" data-calcadd="${esc(e.id)}">Zum Kader hinzufügen</button>
+        <div class="row" style="margin-top:12px;gap:12px"><button class="btn" type="button" data-short="${esc(e.id)}" aria-pressed="${slHas(e.id)}">${slHas(e.id) ? "Auf der Shortlist" : "Auf die Shortlist"}</button><button class="btn" type="button" data-calcadd="${esc(e.id)}">Verpflichten</button>
           <span class="small"><span class="delta num ${cls}">${d >= 0 ? "+" : ""}${r1(d)}</span> Gesamt · ${e.value != null || r.price <= 0 ? "" : "≈ "}${fmtMio(r.price)}</span></div>
       </div>
-      <div class="sc"><b class="num">${r0(r.total)}</b><span>von 100</span><span class="dnab${r.pass ? " ok" : ""}">DNA ${r0(r.s.dna)}</span></div>
+      <div class="sc">${dnaRing(r.s.dna, r.pass)}<div class="tot"><b class="num">${r0(r.total)}</b><span>Gesamt</span></div></div>
     </article>`;
   }).join("");
 }
@@ -3959,6 +4037,7 @@ function applyFcData(payload){
     });
   }
   fcClubName = myClub;
+  try { if (myClub) localStorage.setItem("kaderlabor.club", myClub); } catch(e){}
   fcClubRows = myClub ? rows.filter(r => r.club === myClub) : null;
   saveDB(); lastLocalState = null; save(); renderAll();
   const fs = $("#fc-status"); fs.className = "status";
@@ -3992,6 +4071,65 @@ if (FC){
     $("#fc-take-note").textContent = `Kader ersetzt: ${state.players.length} Spieler von ${fcClubName}.`;
   });
 }
+
+/* ---------- Shortlist des Sportvorstands (nur in diesem Browser) ---------- */
+const SLKEY = "kaderlabor.shortlist";
+let SL = [];
+try { const d = JSON.parse(localStorage.getItem(SLKEY) || "[]"); if (Array.isArray(d)) SL = d.filter(x => x && x.id && x.name); } catch(e){}
+const slHas = id => SL.some(x => x.id === id);
+function slSave(){ try { localStorage.setItem(SLKEY, JSON.stringify(SL)); } catch(e){} renderShortlist(); }
+function dnaRing(v, ok){
+  const c = 150.8, d = clamp(v, 0, 100) / 100 * c;
+  return `<div class="dnaring${ok ? " ok" : ""}" title="Vereins-DNA"><svg viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="24" class="tr"/><circle cx="28" cy="28" r="24" class="fg" stroke-dasharray="${d.toFixed(1)} ${c}"/></svg><span><b class="num">${r0(v)}</b><small>DNA</small></span></div>`;
+}
+function renderShortlist(){
+  const box = $("#shortlist"); if (!box) return;
+  $("#sl-count").textContent = SL.length ? `${SL.length} ${SL.length === 1 ? "Kandidat" : "Kandidaten"}` : "";
+  const nb = $("#nb-short"); if (nb) nb.textContent = SL.length || "";
+  box.innerHTML = SL.length ? SL.map(x => `<div class="slrow">
+      ${dnaRing(x.dna, x.dna >= 70)}
+      <div style="min-width:0"><b>${esc(x.name)}</b><small>${esc(x.pos)} · ${x.age} J. · GES ${x.ovr} · POT ${x.pot}${x.club ? " · " + esc(x.club) : ""}</small></div>
+      <div class="slk"><span>Gesamt</span><b class="num">${r0(x.total)}</b></div>
+      <div class="slk"><span>Ablöse</span><b class="num">${x.price <= 0 ? "frei" : fmtMio(x.price)}</b></div>
+      <div class="slk"><span>Vertrag</span><b class="num">${x.contract || "–"}</b></div>
+      <div class="slact"><button class="btn" type="button" data-sladd="${esc(x.id)}">Verpflichten</button><button class="btn" type="button" data-sldel="${esc(x.id)}" aria-label="${esc(x.name)} von der Shortlist nehmen">Entfernen</button></div>
+    </div>`).join("") : '<p class="small muted" style="margin:8px 0 0">Noch leer. Setze Kandidaten aus den Transferzielen mit „Auf die Shortlist“ hierher.</p>';
+}
+$("#shortlist").addEventListener("click", e => {
+  const del = e.target.closest("[data-sldel]"), add = e.target.closest("[data-sladd]");
+  if (del){ SL = SL.filter(x => x.id !== del.dataset.sldel); slSave(); renderCalc(); return; }
+  if (add){ const en = DB.find(x => x.id === add.dataset.sladd); if (!en) return; const r = addFromDb(en); $("#sl-count").textContent = r ? `${en.name} verpflichtet.` : `${en.name} ist schon im Kader.`; }
+});
+$("#calc-results").addEventListener("click", e => {
+  const b = e.target.closest("[data-short]"); if (!b) return;
+  const r = calcRes.find(x => x.e.id === b.dataset.short); if (!r) return;
+  if (slHas(r.e.id)) SL = SL.filter(x => x.id !== r.e.id);
+  else SL.unshift({id: r.e.id, name: r.e.name, pos: DE[r.e.pos], age: r.e.age, ovr: r.e.ovr, pot: r.e.pot, club: r.e.club, dna: r.s.dna, total: r.total, price: r.price, contract: r.e.contract || null});
+  slSave(); renderCalc();
+});
+renderShortlist();
+
+/* ---------- Statusleiste und Vereinskarte ---------- */
+const VIEW_T = {aufstellung: "Matchplan", analyse: "Kaderanalyse", taktik: "Taktik", kader: "Kader", transfers: "Scouting", datenbank: "Spielerdatenbank", bericht: "Scoutbericht"};
+function renderCmd(){
+  if (!last) return;
+  let club = "", gd = null;
+  try { club = fcClubName || localStorage.getItem("kaderlabor.club") || ""; } catch(e){}
+  try { gd = fcGameDate; } catch(e){}
+  const d = gd ? new Date(gd) : null, y = d ? (d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1) : null;
+  const view = (location.hash.slice(1) in VIEW_T) ? location.hash.slice(1) : "aufstellung";
+  $("#cb-title").textContent = VIEW_T[view];
+  $("#cb-crumb").textContent = [club || "Dein Verein", y ? `Saison ${y}/${String(y + 1).slice(2)}` : "", d ? d.toLocaleDateString("de-DE", {day: "numeric", month: "long", year: "numeric"}) : ""].filter(Boolean).join(" · ");
+  const P = state.players, ages = P.map(p => p.age);
+  const k = [["Gesamt", r1(last.overall).replace(".", ",")], ["Synergie", r0(last.syn)], ["Kader", P.length], ["Ø Alter", ages.length ? r1(avg(ages)).replace(".", ",") : "–"], ["Datenbank", DB.length ? DB.length.toLocaleString("de-DE") : "–"]];
+  $("#kpis").innerHTML = k.map(([l, v]) => `<div class="kpi"><span>${l}</span><b class="num">${v}</b></div>`).join("");
+  $("#cc-name").textContent = club || "Dein Verein";
+  $("#cc-meta").textContent = club ? (d ? `Spieltag ${d.toLocaleDateString("de-DE")}` : "Karrieremodus") : "Spielstand abgleichen";
+  const w = (club || "Kaderlabor").split(/\s+/).filter(x => /\p{L}/u.test(x));
+  $("#crest").textContent = (w.map(x => /^[A-ZÄÖÜ]{2,3}$/.test(x) ? x : x[0]).join("").slice(0, 3) || "KL").toUpperCase();
+}
+window.addEventListener("hashchange", renderCmd);
+renderCmd();
 
 $("#use-dyn").checked = state.useDyn !== false;
 showView(location.hash.slice(1) || "aufstellung", false);

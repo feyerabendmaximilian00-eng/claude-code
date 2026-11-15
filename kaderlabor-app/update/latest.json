@@ -1,8 +1,8 @@
 {
-  "version": "1.6.1",
+  "version": "1.7.0",
   "minLauncher": "1",
-  "released": "2026-11-15T03:09:41.478Z",
-  "notes": "Transfer-Rechner: Vereinsphilosophie, bei Nürnberg automatisch Nürnberger Weg mit JTA-Ansatz (junge Transfers, Weiterverkauf, Ligadominanz, unterschätzte Märkte)",
+  "released": "2026-11-15T03:18:27.981Z",
+  "notes": "Scouting-Zentrale: Seitenleiste mit Vereinskarte, Statusleiste mit Saison und Kennzahlen, Dossiers mit DNA-Ring, Shortlist",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "d32d2e59359eedf64f30ad73726fce559cc370494ee2c3bfab1c93fc7f86e9c7",
-      "size": 307244
+      "sha256": "c5c8b218de8ef161716a89743fa02354cdf35c9a2f67012f8384ce3ee30cffc5",
+      "size": 320170
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "d646932e8b2c95426f6ad2719f21cd363697bd8eb9e13e0b2e6825055aad4efd",
+      "sha256": "f1935b61b63bbbe70530ce505b902dd8af05dd34fc4f9ebfd4a3d9a642b74b98",
       "size": 23
     }
   ]
