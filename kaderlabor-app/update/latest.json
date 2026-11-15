@@ -1,8 +1,8 @@
 {
-  "version": "1.9.0",
+  "version": "1.9.1",
   "minLauncher": "1",
-  "released": "2026-11-15T04:12:34.935Z",
-  "notes": "Vereins-DNA: bezahlbare Spieler werden bei kleinem Budget nicht mehr abgewertet",
+  "released": "2026-11-15T04:20:00.153Z",
+  "notes": "Fokus: Junges Talent, Ablösefrei, Schnäppchen, Sofortverstärkung, A-Lösung, Erfahrener Spieler",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "62cc7adb3f83065a7049e3e275c595195e1b3d00ff6e1b4a41d551a1524e770c",
-      "size": 541616
+      "sha256": "a3221cf7d1c32c60338af1df2e48da94772cfd92d713031a1316d88e9f4dc6a6",
+      "size": 543188
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "d9a153bb662fa45537feb7c52c718852a71eaedc1ce264165d1e1d9e3db7662b",
+      "sha256": "02aa2be83847e6a43bc03baf64ae0a5f1cbbc70ed08c2f64909408712d136db9",
       "size": 23
     }
   ]
