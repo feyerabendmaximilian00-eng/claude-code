@@ -1,8 +1,8 @@
 {
-  "version": "1.5.7",
+  "version": "1.5.8",
   "minLauncher": "1",
-  "released": "2026-11-15T02:51:58.226Z",
-  "notes": "Transfer-Rechner richtet sich nach deinem Verein: Ligaplatz nach Kaderstärke, Wechselchance, Gehaltsgefüge, Altersstruktur und Kadertiefe",
+  "released": "2026-11-15T02:53:30.298Z",
+  "notes": "Transfer-Rechner: Nationalitätsfaktor (Heimatland, gleiche Sprache, Europa, Rest der Welt)",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "8212e5c11fcbc11d52fea528553eb60f68e298a88b0ab4ac9a92aa6c5f63fb93",
-      "size": 293878
+      "sha256": "e46b0435de980fc56f12e798c940ccaa94490526b3ed0629d2948a68b6467273",
+      "size": 296664
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "c56536b663c3fde36953592c4e64056d482dfe75d609ab22ae68255fbdf914df",
+      "sha256": "33123ec5b07ad4e0a68ecc604095fa49d207560ed574bb5d9bb3c9ba3bd3c98e",
       "size": 23
     }
   ]

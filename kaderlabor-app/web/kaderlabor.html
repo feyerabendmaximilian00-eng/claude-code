@@ -1075,7 +1075,7 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
         </div>
         <button class="btn primary" id="btn-calc" type="button">Besten Transfer berechnen</button>
       </div>
-      <p class="small muted" style="margin:8px 0 0;max-width:75ch">Der Rechner spielt jeden passenden Spieler deiner Datenbank in deinem Kader durch und bewertet fünf Dinge: Wirkung auf die Startelf, Transferbedarf, Entwicklung in zwei Jahren, Preis-Leistung, Wiederverkaufswert und wie gut er zu deinem Verein passt: Wechselchance, Gehaltsgefüge, Altersstruktur und Kadertiefe. Wie stark jedes zählt, hängt vom Fokus und vom Profil deines Vereins ab. FC 27 speichert keinen Marktwert. Der Rechner schätzt ihn aus GES, POT, Alter und Position und verrechnet aus dem Spielstand Vertragsende, Gehalt und Ausstiegsklausel. Läuft ein Vertrag aus, wird der Spieler deutlich günstiger.</p>
+      <p class="small muted" style="margin:8px 0 0;max-width:75ch">Der Rechner spielt jeden passenden Spieler deiner Datenbank in deinem Kader durch und bewertet fünf Dinge: Wirkung auf die Startelf, Transferbedarf, Entwicklung in zwei Jahren, Preis-Leistung, Wiederverkaufswert und wie gut er zu deinem Verein passt: Wechselchance, Gehaltsgefüge, Altersstruktur, Kadertiefe und Nationalität (Heimatland vor gleicher Sprache vor Europa). Wie stark jedes zählt, hängt vom Fokus und vom Profil deines Vereins ab. FC 27 speichert keinen Marktwert. Der Rechner schätzt ihn aus GES, POT, Alter und Position und verrechnet aus dem Spielstand Vertragsende, Gehalt und Ausstiegsklausel. Läuft ein Vertrag aus, wird der Spieler deutlich günstiger.</p>
       <form class="tfilters" id="tf-form">
         <label for="tf-pos">Position
           <select id="tf-pos"><option value="auto">Automatisch (Transferbedarf)</option></select>
@@ -2562,6 +2562,29 @@ const CLUB_PROFILE = {
   abstieg:    {t: "Abstiegskampf", d: "Spieler, die sofort helfen, zählen deutlich mehr als Entwicklung.", m: {now: 1.35, need: 1.15, future: .5, value: 1, resale: .5}},
   ausbildung: {t: "Ausbildungsverein (junge Startelf)", d: "Entwicklung und Wiederverkauf zählen mehr.", m: {now: .85, future: 1.35, resale: 1.4}}
 };
+
+/* Nationalität: Heimatland des Vereins > gleiche Sprache > Europa > Rest der Welt */
+const EUROPE = new Set(["Albanien","Andorra","Armenien","Österreich","Aserbaidschan","Belarus","Belgien","Bosnien und Herzegowina","Bulgarien","Kroatien","Zypern","Tschechien","Dänemark","England","Montenegro","Färöer","Finnland","Frankreich","Nordmazedonien","Georgien","Deutschland","Griechenland","Ungarn","Island","Irland","Israel","Italien","Lettland","Liechtenstein","Litauen","Luxemburg","Malta","Moldau","Niederlande","Nordirland","Norwegen","Polen","Portugal","Rumänien","Russland","San Marino","Schottland","Slowakei","Slowenien","Spanien","Schweden","Schweiz","Türkei","Ukraine","Wales","Serbien","Kosovo","Gibraltar","Estland","Kasachstan"]);
+const LANG = {de: ["Deutschland","Österreich","Schweiz","Liechtenstein","Luxemburg"], en: ["England","Schottland","Wales","Nordirland","Irland","USA","Kanada","Australien"],
+  es: ["Spanien","Argentinien","Kolumbien","Uruguay","Chile","Peru","Paraguay","Bolivien","Ecuador","Venezuela","Mexiko"], pt: ["Portugal","Brasilien"],
+  fr: ["Frankreich","Belgien","Schweiz","Luxemburg"], it: ["Italien","Schweiz","San Marino"], nl: ["Niederlande","Belgien"]};
+const LEAGUE_NATION = [[/bundesliga|3\. liga|germany/i, "Deutschland"], [/austria|österreich/i, "Österreich"], [/switzerland|schweiz/i, "Schweiz"], [/england|premier league|championship/i, "England"],
+  [/spain|laliga|la liga/i, "Spanien"], [/italy|serie a/i, "Italien"], [/france|ligue/i, "Frankreich"], [/netherlands|eredivisie/i, "Niederlande"], [/portugal/i, "Portugal"], [/scotland/i, "Schottland"]];
+function homeNation(league){
+  const hit = LEAGUE_NATION.find(([re]) => re.test(league || ""));
+  if (hit) return hit[1];
+  const c = new Map(); state.players.forEach(p => p.nat && c.set(p.nat, (c.get(p.nat) || 0) + 1));
+  return [...c].sort((a, b) => b[1] - a[1])[0]?.[0] || "Deutschland";
+}
+function nationFit(nat, home){
+  nat = String(nat || "");
+  if (!nat) return {n: .75, note: ""};
+  if (nat === home) return {n: 1, note: `${nat}: keine Eingewöhnung, stärkt den einheimischen Kern`};
+  const langs = Object.values(LANG).filter(l => l.includes(home));
+  if (langs.some(l => l.includes(nat))) return {n: .88, note: `${nat}: gleiche Sprache, schnelle Eingewöhnung`};
+  if (EUROPE.has(nat)) return {n: .72, note: ""};
+  return {n: .55, note: `${/^Nation \d+$/.test(nat) ? "Nicht aus Europa" : nat}: längere Eingewöhnung`};
+}
 function clubContext(){
   const P = state.players, ov = last.overall || 70;
   let club = fcClubName || "";
@@ -2585,7 +2608,7 @@ function clubContext(){
   let profile = "etabliert";
   if (rank){ if (rank <= Math.max(2, Math.round(size * .2))) profile = "spitze"; else if (rank > size - Math.max(3, Math.round(size * .2))) profile = "abstieg"; }
   if (xiAge && xiAge < 24.5 && profile !== "abstieg") profile = "ausbildung";
-  return {club, league, own, strength, rank, size, profile, xiAge, n: P.length, maxOvr: Math.max(...P.map(p => p.ovr), ov),
+  return {club, league, home: homeNation(league), own, strength, rank, size, profile, xiAge, n: P.length, maxOvr: Math.max(...P.map(p => p.ovr), ov),
     wageTop: wages.length ? wages[wages.length - 1] : null, wageMid: wages.length ? wages[Math.floor(wages.length * .75)] : null};
 }
 function clubFit(e, ctx, pos, isNeed){
@@ -2614,7 +2637,9 @@ function clubFit(e, ctx, pos, isNeed){
   if (!isNeed && rivals >= 4) notes.push(`Schon ${rivals} gute Spieler für ${DE[pos]} im Kader`);
   const full = ctx.n >= 32 ? .6 : 1;
   if (ctx.n >= 32) notes.push(`Kader mit ${ctx.n} Spielern voll: erst verkaufen`);
-  return {score: 100 * feas * full * (w * .4 + a * .3 + d * .3), feas, notes};
+  const nf = nationFit(e.nat, ctx.home);
+  if (nf.note) notes.push(nf.note);
+  return {score: 100 * feas * full * (w * .3 + a * .25 + d * .2 + nf.n * .25), feas, nat: nf.n, notes};
 }
 let calcRes = [];
 function runCalc(){
@@ -2666,7 +2691,8 @@ function runCalc(){
     const cf = clubFit(e, ctx, slotPos || e.pos, !!slotPos && needPos.includes(slotPos));
     s.club = cf.score;
     // ein Spieler, der nicht kommen will, hilft nicht: Wechselchance dämpft die Gesamtnote
-    const total = Object.keys(W).reduce((t, k) => t + W[k] * s[k], 0) * (.55 + .45 * cf.feas);
+    // Nationalität wirkt zusätzlich leicht auf die Gesamtnote (Eingewöhnung, einheimischer Kern)
+    const total = Object.keys(W).reduce((t, k) => t + W[k] * s[k], 0) * (.55 + .45 * cf.feas) * (.9 + .1 * cf.nat);
     return {e, im, s, total, proj, est: x.est, price: x.price, basis: x.basis, slotPos, wageRef, clubNotes: cf.notes};
   }).sort((a, b) => b.total - a.total).slice(0, 10);
   st.className = "status";
@@ -2675,7 +2701,7 @@ function runCalc(){
   $("#calc-club").innerHTML = `<b>${esc(ctx.club || "Dein Verein")}</b>${ctx.league ? " · " + esc(ctx.league) : ""}`
     + (ctx.rank ? ` · Kaderstärke Platz ${ctx.rank} von ${ctx.size}` : "")
     + (ctx.xiAge ? ` · Ø Alter Startelf ${r1(ctx.xiAge).replace(".", ",")}` : "")
-    + (ctx.wageTop ? ` · Topgehalt ${fmtWage(ctx.wageTop)}` : "") + ` · ${ctx.n} Spieler`
+    + (ctx.wageTop ? ` · Topgehalt ${fmtWage(ctx.wageTop)}` : "") + ` · ${ctx.n} Spieler · Heimatland ${esc(ctx.home)}`
     + `<br><span class="muted">Profil: ${pr.t}. ${pr.d}${ctx.club ? "" : " Für Ligaplatz und Wechselchance den Spielstand abgleichen."}</span>`;
   $("#calc-club").hidden = false;
   renderCalc();
