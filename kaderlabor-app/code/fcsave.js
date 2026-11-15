@@ -16,6 +16,9 @@ const P = {
   balance: ["onkY", 1], reactions: ["YCnI", 1], ballcontrol: ["MgwU", 1], dribbling: ["nEbM", 1], composure: ["jlQJ", 1],
   interceptions: ["wWzG", 1], headingaccuracy: ["aReg", 1], defensiveawareness: ["SJKz", 1], standingtackle: ["CsyD", 1],
   slidingtackle: ["PhuM", 1], jumping: ["URGo", 1], stamina: ["XjDq", 1], strength: ["nmgT", 1], aggression: ["iTce", 1],
+  // Karriere: Vertragsende (Jahr − 2000), Wochengehalt in €, Ausstiegsklausel in € (0 = keine).
+  // Geprüft an Haaland 2034, Yamal 2031, Musiala 2030, Kimmich 2029. Einen Marktwert speichert das Spiel nicht.
+  contractvaliduntil: ["qvmK", 2000], wage: ["cmGX", 0], releaseclause: ["pSzm", 0],
 };
 const POS = {0:"TW",1:"IV",2:"RAV",3:"RV",4:"IV",5:"IV",6:"IV",7:"LV",8:"LAV",9:"ZDM",10:"ZDM",11:"ZDM",12:"RM",13:"ZM",14:"ZM",15:"ZM",16:"LM",
   17:"ZOM",18:"ZOM",19:"ZOM",20:"HS",21:"HS",22:"HS",23:"RF",24:"ST",25:"ST",26:"ST",27:"LF"};
@@ -184,6 +187,12 @@ function readSave(file, names, opts = {}) {
       row[k] = Math.round(s / t);
     }
     for (const [k, col] of Object.entries(SUBS)) row.sub[k] = g(i, col);
+    if (players.has("qvmK")) {
+      const cy = g(i, "contractvaliduntil"), wage = g(i, "wage"), rc = g(i, "releaseclause");
+      if (cy > 2000 && club != null) row.contract = cy;
+      if (wage > 0 && club != null) row.wage = wage;
+      if (rc > 0) row.release = Math.round(rc / 1e5) / 10;
+    }
     rows.push(row);
   }
   // gleichnamige Spieler im selben Verein unterscheidbar machen

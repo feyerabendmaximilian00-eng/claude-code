@@ -1,8 +1,8 @@
 {
-  "version": "1.5.5",
+  "version": "1.5.6",
   "minLauncher": "1",
-  "released": "2026-11-13T21:49:01.909Z",
-  "notes": "Transfer-Rechner: berechnet aus der Datenbank den sinnvollsten Transfer nach Startelf-Wirkung, Bedarf, Entwicklung, Marktwert und Wiederverkaufswert",
+  "released": "2026-11-15T02:48:33.797Z",
+  "notes": "Transfer-Rechner liest Vertragsende, Gehalt und Ausstiegsklausel aus dem Spielstand; Preis-Leistung zählt stärker, Talent weniger",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "6c0ecc51583bac5cc784fccce321223a64b2ff4f5cdba79c889573818a5e5029",
-      "size": 284072
+      "sha256": "c7c567d24b16f4e14937fa8fcd925bcb98e8d0006f186004f5132c37e42e3cde",
+      "size": 287364
     },
     {
       "path": "app/settings.html",
@@ -31,13 +31,13 @@
     },
     {
       "path": "app-main.js",
-      "sha256": "daa6f15b5136c43ea3a8c1a1f04d850f243420eb81d736dc98ee48183a5fcaa8",
+      "sha256": "c55924da6e93a31b18bb81354fc896af2d2e9ee5f4be78249ebef06cf459fd0c",
       "size": 24025
     },
     {
       "path": "fcsave.js",
-      "sha256": "23df41051471355e7b5c1efded18b948160af8da090e5d29c59451fe7d71d7cd",
-      "size": 13324
+      "sha256": "1aa0838680d68025353560b1ffdb9d01b478acbc78faad768fc912f2de1bbe18",
+      "size": 13925
     },
     {
       "path": "preload.js",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "72232ce1d43e562f975bf769ea50b8cceb07926cf1b53115ed654a1816e9c8df",
+      "sha256": "0334b70826bb364f999675d96300f939246e593e22c2f81d12e0a60006fc4c59",
       "size": 23
     }
   ]

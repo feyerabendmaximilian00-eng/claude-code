@@ -1081,7 +1081,7 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
         </div>
         <button class="btn primary" id="btn-calc" type="button">Besten Transfer berechnen</button>
       </div>
-      <p class="small muted" style="margin:8px 0 0;max-width:75ch">Der Rechner spielt jeden passenden Spieler deiner Datenbank in deinem Kader durch und bewertet fünf Dinge: Wirkung auf die Startelf, Transferbedarf, Entwicklung in zwei Jahren, Preis-Leistung und Wiederverkaufswert. Wie stark jedes zählt, hängt vom Fokus ab. Fehlt ein Marktwert, schätzt der Rechner ihn aus GES, POT, Alter und Position.</p>
+      <p class="small muted" style="margin:8px 0 0;max-width:75ch">Der Rechner spielt jeden passenden Spieler deiner Datenbank in deinem Kader durch und bewertet fünf Dinge: Wirkung auf die Startelf, Transferbedarf, Entwicklung in zwei Jahren, Preis-Leistung und Wiederverkaufswert. Wie stark jedes zählt, hängt vom Fokus ab. FC 27 speichert keinen Marktwert. Der Rechner schätzt ihn aus GES, POT, Alter und Position und verrechnet aus dem Spielstand Vertragsende, Gehalt und Ausstiegsklausel. Läuft ein Vertrag aus, wird der Spieler deutlich günstiger.</p>
       <form class="tfilters" id="tf-form">
         <label for="tf-pos">Position
           <select id="tf-pos"><option value="auto">Automatisch (Transferbedarf)</option></select>
@@ -1097,7 +1097,7 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
             <option value="now">Sofortverstärkung</option>
             <option value="talent">Junges Talent (hohes POT)</option>
             <option value="bargain">Schnäppchen / Preis-Leistung</option>
-            <option value="free">Vertragsende / ablösefrei</option>
+            <option value="free">Ablösefrei / Vertrag läuft aus</option>
           </select>
         </label>
         <label for="tf-league">Liga (optional)
@@ -1510,7 +1510,9 @@ function normalizePlayer(raw){
   const f = String(raw.foot || "").trim().toLowerCase();
   const p = {id: raw.id || ("p" + Date.now().toString(36) + (uid++)), name: String(raw.name || "Unbekannt").trim().slice(0, 40) || "Unbekannt",
     pos, alt, age: clamp(toInt(raw.age) ?? 25, 15, 45), ovr, pot, foot: (f.startsWith("l") ? "L" : "R"),
-    nat: String(raw.nat || "").trim().slice(0, 30), est: [], fcid: toInt(raw.fcid), dyn: (() => { const d = toInt(raw.dyn); return d == null ? null : clamp(d, 30, 99); })()};
+    nat: String(raw.nat || "").trim().slice(0, 30), est: [], fcid: toInt(raw.fcid),
+    contract: (c => c != null && c > 2000 && c < 2100 ? c : null)(toInt(raw.contract)), wage: (w => Number.isFinite(w) && w > 0 ? Math.round(w) : null)(Number(raw.wage)),
+    release: (r => Number.isFinite(r) && r > 0 ? r : null)(Number(raw.release)), dyn: (() => { const d = toInt(raw.dyn); return d == null ? null : clamp(d, 30, 99); })()};
   const tpl = TPL[ROLE[pos]];
   p.sub = {};
   const rs = (raw.sub && typeof raw.sub === "object") ? raw.sub : {};
@@ -2528,13 +2530,35 @@ function projOvr(p, yrs = 2){
   return Math.round(o);
 }
 const CALC_W = {
-  now:     {now:.45, need:.2,  future:.1,  value:.15, resale:.1},
-  talent:  {now:.1,  need:.1,  future:.45, value:.1,  resale:.25},
-  bargain: {now:.25, need:.15, future:.1,  value:.4,  resale:.1},
-  free:    {now:.2,  need:.15, future:.05, value:.5,  resale:.1}
+  now:     {now:.4,  need:.2,  future:.05, value:.3,  resale:.05},
+  talent:  {now:.15, need:.15, future:.3,  value:.3,  resale:.1},
+  bargain: {now:.25, need:.15, future:.05, value:.5,  resale:.05},
+  free:    {now:.3,  need:.2,  future:.05, value:.4,  resale:.05}
 };
+let fcGameDate = null;
+try { fcGameDate = localStorage.getItem("kaderlabor.fcdate"); } catch(e){}
+// Saisonende = Jahr, in dem die laufende Saison endet (Verträge laufen am 30.6. aus)
+function seasonEnd(){ const d = fcGameDate ? new Date(fcGameDate) : new Date(); return d.getMonth() >= 6 ? d.getFullYear() + 1 : d.getFullYear(); }
+// Ablöse: geschätzter Wert, angepasst an die Restlaufzeit; Ausstiegsklausel deckelt; vereinslos = ablösefrei
+function transferPrice(e){
+  const est = estValue(e);
+  if (e.value != null) return {price: e.value, est, basis: "Marktwert aus der Datenbank"};
+  if (e.fcid && (!e.club || /vereinslos/i.test(e.league || ""))) return {price: 0, est, basis: "vereinslos"};
+  let price = est, basis = "geschätzt";
+  if (e.contract){
+    const left = e.contract - seasonEnd();
+    const m = (fcGameDate ? new Date(fcGameDate) : new Date()).getMonth();
+    if (left <= 0 && m <= 5){ price = 0; basis = `Vertrag läuft im Juni ${e.contract} aus, Vorvertrag möglich`; }
+    else if (left <= 0){ price = est * .5; basis = `Vertrag läuft ${e.contract} aus, ab Januar ablösefrei per Vorvertrag`; }
+    else if (left === 1){ price = est * .8; basis = "nur noch ein Jahr Vertrag nach dieser Saison"; }
+    else if (left >= 4){ price = est * 1.1; basis = "langer Vertrag"; }
+  }
+  if (e.release && e.release < price){ price = e.release; basis = "Ausstiegsklausel"; }
+  return {price: price >= 10 ? Math.round(price * 2) / 2 : Math.round(price * 10) / 10, est, basis};
+}
+const fmtWage = w => w >= 1000 ? `${(Math.round(w / 100) / 10).toLocaleString("de-DE")} Tsd. €/Woche` : `${w} €/Woche`;
 const CALC_LBL = {now:"Startelf", need:"Bedarf", future:"Zukunft", value:"Preis-Leistung", resale:"Wiederverkauf"};
-const fmtMio = v => (v >= 10 ? r1(v).replace(/\.0$/, "") : String(v).replace(".", ",")) + " Mio. €";
+const fmtMio = v => v <= 0 ? "ablösefrei" : v.toLocaleString("de-DE", {maximumFractionDigits: 1}) + " Mio. €";
 let calcRes = [];
 function runCalc(){
   const st = $("#calc-status"), out = $("#calc-results");
@@ -2551,17 +2575,20 @@ function runCalc(){
     if (e.age > maxAge || inSquadName(e.name)) continue;
     if (league && !(String(e.league) + " " + String(e.club)).toLowerCase().includes(league)) continue;
     if (posSel !== "auto" && fitAt(e, posSel) < e.ovr - 3) continue;
-    const est = estValue(e), price = e.value != null ? e.value : est;
+    const tp = transferPrice(e), est = tp.est, price = tp.price;
     if (price > B) continue;
+    if (focus === "free" && price > 0 && !(e.contract && e.contract <= seasonEnd())) continue;
+    if (fitAt(e, e.pos) < ov - 14) continue;
     const q = posSel !== "auto"
       ? (s => ({d: fitAt(e, posSel) - (s && s.p ? s.fit : 40), pos: posSel}))(last.xi.filter(x => x.pos === posSel).sort((a, b) => a.fit - b.fit)[0])
       : quickImpact(e);
     const pre = Math.max(q.d, 0) * 2 * (W.now + W.need) * 3 + (projOvr(e) - ov) * W.future * 3 - price / B * W.value * 12 + (needPos.includes(q.pos) ? 4 * W.need * 5 : 0);
-    pool.push({e, est, price, pre});
+    pool.push({e, est, price, pre, basis: tp.basis});
   }
-  if (!pool.length){ st.className = "status err"; st.textContent = "Niemand in deiner Datenbank passt zu Budget, Alter, Liga und Position. Lockere die Filter."; out.innerHTML = ""; calcRes = []; return; }
+  if (!pool.length){ st.className = "status err"; st.textContent = (focus === "free" ? "Keine vereinslosen Spieler und keine mit auslaufendem Vertrag gefunden (dafür braucht es den FC-27-Abgleich). " : "") + "Niemand in deiner Datenbank passt zu Budget, Alter, Liga und Position. Lockere die Filter."; out.innerHTML = ""; calcRes = []; return; }
   pool.sort((a, b) => b.pre - a.pre);
   const c01 = v => clamp(v, 0, 1);
+  const wages = state.players.map(p => p.wage).filter(Boolean), wageRef = wages.length ? Math.max(...wages) : null;
   calcRes = pool.slice(0, 60).map(x => {
     const e = x.e, im = impactOf({...e, id: "calc-" + e.id});
     const slotPos = im.slot ? im.slot.pos : null, proj = projOvr(e), a = e.age;
@@ -2569,11 +2596,13 @@ function runCalc(){
       now: c01(im.dOverall / 1.2) * 75 + c01(im.dDepth / 6) * 25,
       need: slotPos && needPos.includes(slotPos) ? 100 : slotPos ? 55 : needPos.some(np => fitAt(e, np) >= ov - 4) ? 35 : 0,
       future: c01((proj - ov + 6) / 12) * 100,
-      value: c01((x.est / Math.max(x.price, .1) - .5)) * 50 + c01(1 - x.price / B) * 50,
+      value: (c01(1 - x.price / B) * 45 + c01(x.est / Math.max(x.price, .1) - .5) * 35
+        + (wageRef && e.wage ? c01(1.5 - e.wage / wageRef) : .5) * 20)
+        * (.1 + .9 * c01(((im.slot ? im.slot.fit : fitAt(e, e.pos)) - (ov - 10)) / 12)),
       resale: a <= 21 ? 100 : a <= 23 ? 85 : a <= 25 ? 70 : a <= 27 ? 50 : a <= 29 ? 30 : a <= 31 ? 12 : 0
     };
     const total = Object.keys(W).reduce((t, k) => t + W[k] * s[k], 0);
-    return {e, im, s, total, proj, est: x.est, price: x.price, slotPos};
+    return {e, im, s, total, proj, est: x.est, price: x.price, basis: x.basis, slotPos, wageRef};
   }).sort((a, b) => b.total - a.total).slice(0, 10);
   st.className = "status";
   st.textContent = `${pool.length} Spieler im Budget durchgerechnet, die besten 60 im kompletten Kader simuliert (${Math.round(performance.now() - t0)} ms).`;
@@ -2588,7 +2617,11 @@ function calcReasons(r){
   out.push(r.proj > e.ovr ? `In zwei Jahren etwa GES ${r.proj} (POT ${e.pot})` : r.proj < e.ovr ? `In zwei Jahren etwa GES ${r.proj}, baut altersbedingt ab` : `Hält sein Niveau von GES ${e.ovr}`);
   out.push(e.value != null
     ? `Marktwert ${fmtMio(e.value)}, fair wären etwa ${fmtMio(r.est)}${e.value < r.est * .85 ? ", also günstig" : e.value > r.est * 1.2 ? ", also teuer" : ""}`
-    : `Geschätzter Marktwert ${fmtMio(r.est)}`);
+    : r.price <= 0 ? `Ablösefrei (${r.basis})`
+    : r.basis === "geschätzt" ? `Ablöse etwa ${fmtMio(r.price)}`
+    : `Ablöse etwa ${fmtMio(r.price)} statt ${fmtMio(r.est)}: ${r.basis}${r.basis === "Ausstiegsklausel" ? "" : ""}`);
+  const k = [e.contract ? `Vertrag bis ${e.contract}` : "", e.wage ? `Gehalt ${fmtWage(e.wage)}${r.wageRef ? (e.wage > r.wageRef ? ", mehr als dein Topverdiener" : "") : ""}` : "", e.release && r.basis !== "Ausstiegsklausel" ? `Ausstiegsklausel ${fmtMio(e.release)}` : ""].filter(Boolean);
+  if (k.length) out.push(k.join(" · "));
   return out;
 }
 function renderCalc(){
@@ -2605,7 +2638,7 @@ function renderCalc(){
         <ul>${calcReasons(r).map(t => `<li>${esc(t)}</li>`).join("")}</ul>
         <div class="cbars">${Object.keys(CALC_LBL).map(k => `<div>${CALC_LBL[k]} <span class="num">${r0(r.s[k])}</span><i><u style="width:${clamp(r.s[k], 0, 100)}%"></u></i></div>`).join("")}</div>
         <div class="row" style="margin-top:12px;gap:12px"><button class="btn" type="button" data-calcadd="${esc(e.id)}">Zum Kader hinzufügen</button>
-          <span class="small"><span class="delta num ${cls}">${d >= 0 ? "+" : ""}${r1(d)}</span> Gesamt · ${e.value != null ? "" : "≈ "}${fmtMio(r.price)}</span></div>
+          <span class="small"><span class="delta num ${cls}">${d >= 0 ? "+" : ""}${r1(d)}</span> Gesamt · ${e.value != null || r.price <= 0 ? "" : "≈ "}${fmtMio(r.price)}</span></div>
       </div>
       <div class="sc"><b class="num">${r0(r.total)}</b><span>von 100</span></div>
     </article>`;
@@ -3677,6 +3710,7 @@ let fcClubRows = null, fcClubName = "";
 const fcNorm = t => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
 function applyFcData(payload){
   const rows = payload.rows || [], meta = payload.meta || {};
+  if (meta.gameDate){ fcGameDate = meta.gameDate; try { localStorage.setItem("kaderlabor.fcdate", meta.gameDate); } catch(e){} }
   DB = rows.map(r => ({...normalizePlayer({...r, id: undefined}), club: r.club || "", value: null, league: r.league || ""}));
   // eigenen Kader zuordnen: zuerst über die FC-Spieler-ID, dann über den Namen (ohne Akzente, auch Teilnamen)
   const byId = new Map(rows.map(r => [r.fcid, r]));
