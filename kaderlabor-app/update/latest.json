@@ -1,8 +1,8 @@
 {
-  "version": "1.9.1",
+  "version": "1.9.2",
   "minLauncher": "1",
-  "released": "2026-11-15T04:20:00.153Z",
-  "notes": "Fokus: Junges Talent, Ablösefrei, Schnäppchen, Sofortverstärkung, A-Lösung, Erfahrener Spieler",
+  "released": "2026-11-15T04:28:49.526Z",
+  "notes": "Spielerprofile mit Rosendiagrammen, Typ-Plaketten und Vereins-DNA; App-Symbol im Stil des 1. FCN",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -11,18 +11,18 @@
     },
     {
       "path": "app/icon.ico",
-      "sha256": "a5155ed83a0bc114330490d9fce5e342067a45f082f8ba34a112234652ee5c27",
-      "size": 15764
+      "sha256": "dab22d3be277b168ddd32f03ff4e1ad7dee832d01b9d2148d355e310637228ee",
+      "size": 68143
     },
     {
       "path": "app/icon.png",
-      "sha256": "7bdb86f4cc01f4437f5f0b1d1ef86b54d4a6961b00df56d6630b20152887634c",
-      "size": 15742
+      "sha256": "da4cb5a0c14de10b25c06bd68211bf0c96010b8d548c0ed857ac7375d8215227",
+      "size": 34098
     },
     {
       "path": "app/index.html",
-      "sha256": "a3221cf7d1c32c60338af1df2e48da94772cfd92d713031a1316d88e9f4dc6a6",
-      "size": 543188
+      "sha256": "ab44e60c16f8b5d7aef0c301f49a300e06b88abac24e1885bb30463f0ee1d887",
+      "size": 556608
     },
     {
       "path": "app/settings.html",
@@ -31,8 +31,8 @@
     },
     {
       "path": "app-main.js",
-      "sha256": "bff55a7eb6ce026ad0438bcc38fecc0f9ba58731d5ef7b7386ae4ebda9c98c60",
-      "size": 24025
+      "sha256": "aba8dc47c6d368251cc77029df3a9cff8e952367941464eba21950993253897a",
+      "size": 24260
     },
     {
       "path": "fcsave.js",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "02aa2be83847e6a43bc03baf64ae0a5f1cbbc70ed08c2f64909408712d136db9",
+      "sha256": "f29a86a428644266b69f9644f3b9cfd593c42f8de10e0a9b15e9bc3bf1dbb06c",
       "size": 23
     }
   ]

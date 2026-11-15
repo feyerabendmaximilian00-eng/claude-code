@@ -400,6 +400,8 @@ else {
   app.whenReady().then(() => {
     buildMenu(); createMainWindow();
     if (!readSettings().shortcutCreated) createShortcuts(false);
+    // neues Symbol (FCN-Logo) einmalig in bestehende Verknüpfungen übernehmen
+    else if (readSettings().iconVersion !== "fcn1") { createShortcuts(false); const st2 = readSettings(); st2.iconVersion = "fcn1"; writeSettings(st2); }
     // FC 27: Ordner vorbelegen, beobachten und beim Start den neuesten Spielstand prüfen
     { const s = readSettings(); if (!s.fcFolder && fcDefaultFolder()) { s.fcFolder = fcDefaultFolder(); writeSettings(s); } }
     fcWatch();
