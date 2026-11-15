@@ -1,8 +1,8 @@
 {
-  "version": "1.8.9",
+  "version": "1.9.0",
   "minLauncher": "1",
-  "released": "2026-11-15T04:08:30.256Z",
-  "notes": "Standardbudget 10 Mio. Euro für Scouting und Schattenkader",
+  "released": "2026-11-15T04:12:34.935Z",
+  "notes": "Vereins-DNA: bezahlbare Spieler werden bei kleinem Budget nicht mehr abgewertet",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "c715c60fa65e4a59a1dde346d12c8363f1826adbc6ce8a10b54c7231c0a8014c",
-      "size": 541354
+      "sha256": "62cc7adb3f83065a7049e3e275c595195e1b3d00ff6e1b4a41d551a1524e770c",
+      "size": 541616
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "225d0c01a1b04473d9f3ea956b1f01d7888e8753527320924bdd676c08288773",
+      "sha256": "d9a153bb662fa45537feb7c52c718852a71eaedc1ce264165d1e1d9e3db7662b",
       "size": 23
     }
   ]
