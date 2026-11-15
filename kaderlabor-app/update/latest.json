@@ -1,8 +1,8 @@
 {
-  "version": "1.8.7",
+  "version": "1.8.8",
   "minLauncher": "1",
-  "released": "2026-11-15T04:03:12.356Z",
-  "notes": "Tasse entfernt, zweites Polaroid mit Nordkurven-Choreo",
+  "released": "2026-11-15T04:04:36.335Z",
+  "notes": "Polaroids ohne Überlappung, Klebeband mittig",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "3951ed785dc65512aa82280517504fac8deba5d446ae6ca80db412ee46c857b8",
-      "size": 540791
+      "sha256": "03e1cf45b54a39890f1fe9b484d4a7df29343f84d5f9261d0737beb7941ae6e3",
+      "size": 540787
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "807564692e7b2ba57b330576b9e070c23abad28567bb849e08e842f3de3513c0",
+      "sha256": "f6211f79b12ac919c5b5da094857de6cc61e70cee3d8451a029fd62ab6b832b6",
       "size": 23
     }
   ]
