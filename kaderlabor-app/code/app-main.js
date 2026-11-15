@@ -274,9 +274,9 @@ function createMainWindow() {
   const s = readSettings();
   mainWindow = new BrowserWindow({
     width: 1440, height: 920, minWidth: 420, minHeight: 600, show: false,
-    backgroundColor: "#072830",
+    backgroundColor: "#1f1b1c",
     title: "Glubb-DNA",
-    icon: path.join(CODE, "app", "icon.png"),
+    icon: path.join(CODE, "app", process.platform === "win32" ? "icon.ico" : "icon.png"),
     autoHideMenuBar: true, // Menü mit Alt einblenden
     webPreferences: { preload: path.join(CODE, "preload.js"), contextIsolation: true, nodeIntegration: false, sandbox: true },
   });
@@ -324,13 +324,25 @@ function createShortcuts(interactive) {
   }
   try {
     // Symbol an einen festen Ort kopieren, damit die Verknüpfung auch nach Updates ein Symbol hat
-    const icon = path.join(app.getPath("userData"), "kaderlabor.ico");
+    const icon = path.join(app.getPath("userData"), "glubb-dna.ico"); // neuer Dateiname, damit Windows das alte Symbol nicht aus dem Zwischenspeicher nimmt
     fs.copyFileSync(path.join(CODE, "app", "icon.ico"), icon);
     const opts = { target: process.execPath, cwd: path.dirname(process.execPath), description: "Glubb-DNA – Scouting und Kaderplanung für den FC-27-Karrieremodus", icon, iconIndex: 0, appUserModelId: "Kaderlabor" };
     const targets = [
       path.join(app.getPath("desktop"), "Glubb-DNA.lnk"),
       path.join(app.getPath("appData"), "Microsoft", "Windows", "Start Menu", "Programs", "Glubb-DNA.lnk"),
     ];
+    // an die Taskleiste angeheftete Verknüpfungen auf dieses Programm: Symbol und Name aktualisieren
+    try {
+      const pinDir = path.join(app.getPath("appData"), "Microsoft", "Internet Explorer", "Quick Launch", "User Pinned", "TaskBar");
+      if (fs.existsSync(pinDir)) for (const f of fs.readdirSync(pinDir)) {
+        if (!/\.lnk$/i.test(f)) continue;
+        const lp = path.join(pinDir, f);
+        let info = null; try { info = shell.readShortcutLink(lp); } catch {}
+        if (info && info.target && path.resolve(info.target).toLowerCase() === path.resolve(process.execPath).toLowerCase()) {
+          shell.writeShortcutLink(lp, "update", { icon, iconIndex: 0, appUserModelId: "Kaderlabor", description: opts.description });
+        }
+      }
+    } catch {}
     // alte Verknüpfungen unter dem früheren Namen entfernen
     for (const old of [path.join(app.getPath("desktop"), "Kaderlabor.lnk"), path.join(app.getPath("appData"), "Microsoft", "Windows", "Start Menu", "Programs", "Kaderlabor.lnk")]) {
       try { if (fs.existsSync(old)) fs.unlinkSync(old); } catch {}
@@ -402,10 +414,11 @@ if (!gotLock) app.quit();
 else {
   app.on("second-instance", () => { if (mainWindow) { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.focus(); } });
   app.whenReady().then(() => {
+    if (process.platform === "win32") app.setAppUserModelId("Kaderlabor");
     buildMenu(); createMainWindow();
     if (!readSettings().shortcutCreated) createShortcuts(false);
     // neues Symbol (FCN-Logo) einmalig in bestehende Verknüpfungen übernehmen
-    else if (readSettings().iconVersion !== "glubb1") { createShortcuts(false); const st2 = readSettings(); st2.iconVersion = "glubb1"; writeSettings(st2); }
+    else if (readSettings().iconVersion !== "glubb2") { createShortcuts(false); const st2 = readSettings(); st2.iconVersion = "glubb2"; writeSettings(st2); }
     // FC 27: Ordner vorbelegen, beobachten und beim Start den neuesten Spielstand prüfen
     { const s = readSettings(); if (!s.fcFolder && fcDefaultFolder()) { s.fcFolder = fcDefaultFolder(); writeSettings(s); } }
     fcWatch();

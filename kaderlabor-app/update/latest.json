@@ -1,8 +1,8 @@
 {
-  "version": "1.9.3",
+  "version": "1.9.4",
   "minLauncher": "1",
-  "released": "2026-11-15T04:30:31.325Z",
-  "notes": "Umbenannt in Glubb-DNA",
+  "released": "2026-11-15T04:32:49.415Z",
+  "notes": "Taskleisten-Symbol: FCN-Logo auch für angeheftete Verknüpfungen",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -31,8 +31,8 @@
     },
     {
       "path": "app-main.js",
-      "sha256": "adf8dfc1514f36b920ad68ed238dc97ed4b7935f21c26541ce0c9e6c7717794b",
-      "size": 24606
+      "sha256": "f4de1dfcee543c9af25630628c327b726898e9e0b49a8d3cfa70f92c13da21fc",
+      "size": 25585
     },
     {
       "path": "fcsave.js",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "18a2297d1426922dd73d098e8707b5ecfb1293d54d4589d8c991c16146dcf0f5",
+      "sha256": "6be7debad9928ab56ed50ea91b7c70c4950a17104a980ba5ba3a573466589192",
       "size": 23
     }
   ]
