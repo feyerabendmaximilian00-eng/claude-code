@@ -4,8 +4,11 @@ Scouting, Vereins-DNA und Kaderplanung für den Karrieremodus von EA SPORTS FC 2
 
 ## Installieren
 
-1. `Kaderlabor-Windows-x64.zip` entpacken, zum Beispiel nach `C:\Programme\Kaderlabor` oder auf den Desktop.
-2. `Kaderlabor.exe` starten.
+Daten liegen weiter unter `%APPDATA%\Kaderlabor` (der interne Programmname bleibt „Kaderlabor“), ein Umstieg von der alten Kaderlabor.exe übernimmt also alles.
+
+
+1. `Glubb-DNA-Windows-x64.zip` entpacken, zum Beispiel nach `C:\Programme\Glubb-DNA`.
+2. `Glubb-DNA.exe` starten. Beim ersten Start legt die App eine Desktop-Verknüpfung und einen Startmenü-Eintrag „Glubb-DNA“ an.
 3. Windows SmartScreen meldet beim ersten Start eventuell „Unbekannter Herausgeber“, weil die App nicht signiert ist. Dann auf **Weitere Informationen → Trotzdem ausführen** klicken.
 
 ## Wo deine Daten gespeichert werden
@@ -45,7 +48,7 @@ Voraussetzung: Node.js 20 oder neuer.
 ```bash
 npm install
 npm start          # App starten (auf dem aktuellen Betriebssystem)
-npm run pack:win   # Windows-x64-Version nach dist/Kaderlabor-win32-x64 bauen
+npm run pack:win   # Windows-x64-Version nach dist/Glubb-DNA-win32-x64 bauen (Glubb-DNA.exe)
 ```
 
 Die Seite selbst liegt in `web/kaderlabor.html` (identisch mit der Web-Version). `npm run build:page` erzeugt daraus `code/app/index.html` mit dem Claude-Adapter (`code/app/claude-shim.js`). `main.js` ist der feste Starter mit dem Updater, der eigentliche Programmcode liegt in `code/`.
