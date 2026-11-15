@@ -1,8 +1,8 @@
 {
-  "version": "1.9.2",
+  "version": "1.9.3",
   "minLauncher": "1",
-  "released": "2026-11-15T04:28:49.526Z",
-  "notes": "Spielerprofile mit Rosendiagrammen, Typ-Plaketten und Vereins-DNA; App-Symbol im Stil des 1. FCN",
+  "released": "2026-11-15T04:30:31.325Z",
+  "notes": "Umbenannt in Glubb-DNA",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,18 +21,18 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "ab44e60c16f8b5d7aef0c301f49a300e06b88abac24e1885bb30463f0ee1d887",
-      "size": 556608
+      "sha256": "297eb603c65d9003af4a77bb9bad455acbb29c4409b94cd2efa593e66ac9c1a6",
+      "size": 556597
     },
     {
       "path": "app/settings.html",
-      "sha256": "645c67da632a495cc720e7c47e19038f22e6ae474465420ea4832bebbb817620",
-      "size": 3290
+      "sha256": "af25f3c12fc25b5754ea13d27714008c3daa6fbb506965f3e15471ef970b914f",
+      "size": 3304
     },
     {
       "path": "app-main.js",
-      "sha256": "aba8dc47c6d368251cc77029df3a9cff8e952367941464eba21950993253897a",
-      "size": 24260
+      "sha256": "adf8dfc1514f36b920ad68ed238dc97ed4b7935f21c26541ce0c9e6c7717794b",
+      "size": 24606
     },
     {
       "path": "fcsave.js",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "f29a86a428644266b69f9644f3b9cfd593c42f8de10e0a9b15e9bc3bf1dbb06c",
+      "sha256": "18a2297d1426922dd73d098e8707b5ecfb1293d54d4589d8c991c16146dcf0f5",
       "size": 23
     }
   ]

@@ -1,4 +1,4 @@
-// Kaderlabor – Programmcode (wird vom Starter geladen und kann sich selbst aktualisieren)
+// Glubb-DNA (früher Kaderlabor) – Programmcode (wird vom Starter geladen und kann sich selbst aktualisieren)
 module.exports = function start(ctx) {
 const { app, BrowserWindow, Menu, ipcMain, shell, safeStorage, dialog } = require("electron");
 const path = require("path");
@@ -275,7 +275,7 @@ function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1440, height: 920, minWidth: 420, minHeight: 600, show: false,
     backgroundColor: "#072830",
-    title: "Kaderlabor",
+    title: "Glubb-DNA",
     icon: path.join(CODE, "app", "icon.png"),
     autoHideMenuBar: true, // Menü mit Alt einblenden
     webPreferences: { preload: path.join(CODE, "preload.js"), contextIsolation: true, nodeIntegration: false, sandbox: true },
@@ -326,11 +326,15 @@ function createShortcuts(interactive) {
     // Symbol an einen festen Ort kopieren, damit die Verknüpfung auch nach Updates ein Symbol hat
     const icon = path.join(app.getPath("userData"), "kaderlabor.ico");
     fs.copyFileSync(path.join(CODE, "app", "icon.ico"), icon);
-    const opts = { target: process.execPath, cwd: path.dirname(process.execPath), description: "Kaderlabor – Kaderanalyse für den FC-27-Karrieremodus", icon, iconIndex: 0, appUserModelId: "Kaderlabor" };
+    const opts = { target: process.execPath, cwd: path.dirname(process.execPath), description: "Glubb-DNA – Scouting und Kaderplanung für den FC-27-Karrieremodus", icon, iconIndex: 0, appUserModelId: "Kaderlabor" };
     const targets = [
-      path.join(app.getPath("desktop"), "Kaderlabor.lnk"),
-      path.join(app.getPath("appData"), "Microsoft", "Windows", "Start Menu", "Programs", "Kaderlabor.lnk"),
+      path.join(app.getPath("desktop"), "Glubb-DNA.lnk"),
+      path.join(app.getPath("appData"), "Microsoft", "Windows", "Start Menu", "Programs", "Glubb-DNA.lnk"),
     ];
+    // alte Verknüpfungen unter dem früheren Namen entfernen
+    for (const old of [path.join(app.getPath("desktop"), "Kaderlabor.lnk"), path.join(app.getPath("appData"), "Microsoft", "Windows", "Start Menu", "Programs", "Kaderlabor.lnk")]) {
+      try { if (fs.existsSync(old)) fs.unlinkSync(old); } catch {}
+    }
     let ok = 0;
     for (const t of targets) {
       fs.mkdirSync(path.dirname(t), { recursive: true });
@@ -364,7 +368,7 @@ function buildMenu() {
       { label: "claude.ai-Ansicht (Browser)", type: "radio", checked: online, click: () => setMode("online") },
       { type: "separator" },
       { label: "Bei claude.ai anmelden …", enabled: online, click: () => mainWindow && mainWindow.loadURL("https://claude.ai/login") },
-      { label: "Zurück zum Kaderlabor", enabled: online, click: () => mainWindow && mainWindow.loadURL(onlineUrl()) },
+      { label: "Zurück zu Glubb-DNA", enabled: online, click: () => mainWindow && mainWindow.loadURL(onlineUrl()) },
       { type: "separator" },
       { label: "API-Schlüssel festlegen …", click: openSettings },
       { label: "API-Schlüssel entfernen", click: async () => {
@@ -383,7 +387,7 @@ function buildMenu() {
     { label: "Hilfe", submenu: [
       { label: "Nach Updates suchen …", click: () => ctx.checkForUpdates({ interactive: true, win: mainWindow }) },
       { type: "separator" },
-      { label: "Über Kaderlabor", click: () => dialog.showMessageBox(mainWindow, { type: "info", title: "Über Kaderlabor", message: `Kaderlabor ${ctx.codeVersion}`,
+      { label: "Über Glubb-DNA", click: () => dialog.showMessageBox(mainWindow, { type: "info", title: "Über Glubb-DNA", message: `Glubb-DNA ${ctx.codeVersion}`,
         detail: "Kaderanalyse für den FC-27-Karrieremodus.\nKein offizielles Produkt von EA SPORTS.\n\nDie App läuft mit eigener Oberfläche und spricht im Hintergrund über die Claude-API mit Claude (eigener API-Schlüssel). Deine Daten liegen auf diesem PC.\n\nF11 = Vollbild an/aus, Alt = Menü anzeigen." }) },
     ] },
   ];
@@ -401,7 +405,7 @@ else {
     buildMenu(); createMainWindow();
     if (!readSettings().shortcutCreated) createShortcuts(false);
     // neues Symbol (FCN-Logo) einmalig in bestehende Verknüpfungen übernehmen
-    else if (readSettings().iconVersion !== "fcn1") { createShortcuts(false); const st2 = readSettings(); st2.iconVersion = "fcn1"; writeSettings(st2); }
+    else if (readSettings().iconVersion !== "glubb1") { createShortcuts(false); const st2 = readSettings(); st2.iconVersion = "glubb1"; writeSettings(st2); }
     // FC 27: Ordner vorbelegen, beobachten und beim Start den neuesten Spielstand prüfen
     { const s = readSettings(); if (!s.fcFolder && fcDefaultFolder()) { s.fcFolder = fcDefaultFolder(); writeSettings(s); } }
     fcWatch();

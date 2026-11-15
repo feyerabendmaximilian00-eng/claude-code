@@ -1,6 +1,6 @@
-# Kaderlabor – Windows-App
+# Glubb-DNA (früher Kaderlabor) – Windows-App
 
-Kaderanalyse für den Karrieremodus von EA SPORTS FC 27 als eigenständiges Windows-Programm. Kein offizielles Produkt von EA SPORTS.
+Scouting, Vereins-DNA und Kaderplanung für den Karrieremodus von EA SPORTS FC 27 als eigenständiges Windows-Programm. Kein offizielles Produkt von EA SPORTS.
 
 ## Installieren
 
