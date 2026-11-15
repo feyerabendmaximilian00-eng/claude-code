@@ -1,8 +1,8 @@
 {
-  "version": "1.8.5",
+  "version": "1.8.6",
   "minLauncher": "1",
-  "released": "2026-11-15T03:57:49.537Z",
-  "notes": "Kaffeetasse und Kugelschreiber mit Vereinslogo (Fotos), größeres Polaroid",
+  "released": "2026-11-15T03:58:57.082Z",
+  "notes": "Kugelschreiber liegt auf dem Notizblock",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "eb0ee856ccafd048c5f7406398a5b1b7ba37f641d51a278282b8b3e53dfcbbf1",
-      "size": 515636
+      "sha256": "7ec77b55e71cd60a890e35f3ff3a271366b2239b8ea39dad9701d57707726bbd",
+      "size": 515809
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "60d2f7388bb05017bdf53632f42a78d52291fedf5ed26c228a3295e20db1bfbe",
+      "sha256": "ce77015763ade804fff5395f1a0cfbc2b38922d7f13982994265b0db44746e45",
       "size": 23
     }
   ]
