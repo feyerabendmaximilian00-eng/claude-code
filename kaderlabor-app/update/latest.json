@@ -1,8 +1,8 @@
 {
-  "version": "1.8.6",
+  "version": "1.8.7",
   "minLauncher": "1",
-  "released": "2026-11-15T03:58:57.082Z",
-  "notes": "Kugelschreiber liegt auf dem Notizblock",
+  "released": "2026-11-15T04:03:12.356Z",
+  "notes": "Tasse entfernt, zweites Polaroid mit Nordkurven-Choreo",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "7ec77b55e71cd60a890e35f3ff3a271366b2239b8ea39dad9701d57707726bbd",
-      "size": 515809
+      "sha256": "3951ed785dc65512aa82280517504fac8deba5d446ae6ca80db412ee46c857b8",
+      "size": 540791
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "ce77015763ade804fff5395f1a0cfbc2b38922d7f13982994265b0db44746e45",
+      "sha256": "807564692e7b2ba57b330576b9e070c23abad28567bb849e08e842f3de3513c0",
       "size": 23
     }
   ]
