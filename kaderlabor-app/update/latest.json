@@ -1,8 +1,8 @@
 {
-  "version": "1.9.5",
+  "version": "1.9.6",
   "minLauncher": "1",
-  "released": "2026-11-15T04:38:51.893Z",
-  "notes": "Scouting achtet auf die A-Position; DNA-Skala angehoben, 100 erreichbar",
+  "released": "2026-11-15T04:42:55.414Z",
+  "notes": "Formationen ohne Hängende Spitze: Stürmer statt HS wie in FC 27",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "7b69eb6a5b909a74918846d01e6a8a378d87cdb035dee710e62fb231970bc9a3",
-      "size": 557702
+      "sha256": "5c78fb6d6f70a7c2955e347cfd00ee6c66e6cd7b6d2fcc836d209fdb32147da5",
+      "size": 557707
     },
     {
       "path": "app/settings.html",
@@ -31,12 +31,12 @@
     },
     {
       "path": "app-main.js",
-      "sha256": "f4de1dfcee543c9af25630628c327b726898e9e0b49a8d3cfa70f92c13da21fc",
+      "sha256": "f454a81df80b38cc9b1ba8a6beb5a9272acded4b0ad45e09bf0e3f5495dd285d",
       "size": 25585
     },
     {
       "path": "fcsave.js",
-      "sha256": "0fb670b5739f85c4f7c6273f834136beb350e4c87b5e6d0d4d1855aa28e41f51",
+      "sha256": "d8db4fb872465402e7fa3ce744d4c29cc6ff85faf036dd3990239fd7992e1890",
       "size": 14898
     },
     {
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "16b80339a4a6d078c0b4f977c3f7b28cf3d8ba0156fe820e98650d53dc519121",
+      "sha256": "57facc9667153bfb307327b7c31a52fbe51d7fdca80f777a250078f109760531",
       "size": 23
     }
   ]

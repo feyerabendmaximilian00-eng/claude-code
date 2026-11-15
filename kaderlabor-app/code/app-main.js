@@ -146,7 +146,7 @@ async function fcSync(reason) {
   // gleicher Spielstand wird übersprungen – außer die Namen fehlten beim letzten Mal
   const lastNamed = s.fcLastMeta ? s.fcLastMeta.named / Math.max(1, s.fcLastMeta.players) : 1;
   // Nach einem App-Update, das das Auslesen verbessert, denselben Spielstand einmal neu einlesen
-  const FC_PARSER = "6";
+  const FC_PARSER = "7";
   const parserChanged = s.fcParser !== FC_PARSER;
   if (reason === "auto" && s.fcLastMtime && newest.mtimeMs <= s.fcLastMtime && !parserChanged && !(namesNow && (!hadNames || lastNamed < 0.5))) return;
   fcBusy = true; fcSend("fc:status", { ...fcStatus(), busy: true });

@@ -23,7 +23,7 @@ const P = {
   gender: ["EveZ", 0],
 };
 const POS = {0:"TW",1:"IV",2:"RAV",3:"RV",4:"IV",5:"IV",6:"IV",7:"LV",8:"LAV",9:"ZDM",10:"ZDM",11:"ZDM",12:"RM",13:"ZM",14:"ZM",15:"ZM",16:"LM",
-  17:"ZOM",18:"ZOM",19:"ZOM",20:"HS",21:"HS",22:"HS",23:"RF",24:"ST",25:"ST",26:"ST",27:"LF"};
+  17:"ZOM",18:"ZOM",19:"ZOM",20:"ST",21:"ST",22:"ST",23:"RF",24:"ST",25:"ST",26:"ST",27:"LF"};
 const NATION = {1:"Albanien",2:"Andorra",3:"Armenien",4:"Österreich",5:"Aserbaidschan",6:"Belarus",7:"Belgien",8:"Bosnien und Herzegowina",9:"Bulgarien",
   10:"Kroatien",11:"Zypern",12:"Tschechien",13:"Dänemark",14:"England",15:"Montenegro",16:"Färöer",17:"Finnland",18:"Frankreich",19:"Nordmazedonien",
   20:"Georgien",21:"Deutschland",22:"Griechenland",23:"Ungarn",24:"Island",25:"Irland",26:"Israel",27:"Italien",28:"Lettland",29:"Liechtenstein",
