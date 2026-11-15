@@ -1,8 +1,8 @@
 {
-  "version": "1.5.8",
+  "version": "1.5.9",
   "minLauncher": "1",
-  "released": "2026-11-15T02:53:30.298Z",
-  "notes": "Transfer-Rechner: Nationalitätsfaktor (Heimatland, gleiche Sprache, Europa, Rest der Welt)",
+  "released": "2026-11-15T03:01:17.523Z",
+  "notes": "Transfer-Rechner: keine Spielerinnen und keine vereinslosen Reservespieler mehr, neue Marktwertkurve, Aufschlag für Leistungsträger, stärkerer Nationalitätsfaktor",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "e46b0435de980fc56f12e798c940ccaa94490526b3ed0629d2948a68b6467273",
-      "size": 296664
+      "sha256": "b87d8a8ffe6b51179b1688e8b9ad1f8cc13949b541bfaf5df57744c0c377d737",
+      "size": 297947
     },
     {
       "path": "app/settings.html",
@@ -31,13 +31,13 @@
     },
     {
       "path": "app-main.js",
-      "sha256": "c55924da6e93a31b18bb81354fc896af2d2e9ee5f4be78249ebef06cf459fd0c",
+      "sha256": "b921d23534a782b666c34f9fbae599ccd2e64bfebb32479c90feaef015916ae6",
       "size": 24025
     },
     {
       "path": "fcsave.js",
-      "sha256": "1aa0838680d68025353560b1ffdb9d01b478acbc78faad768fc912f2de1bbe18",
-      "size": 13925
+      "sha256": "d24aeece21901cdd0292fbfa62e5d30355884e90d601063774eac1ba8229e16e",
+      "size": 14862
     },
     {
       "path": "preload.js",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "33123ec5b07ad4e0a68ecc604095fa49d207560ed574bb5d9bb3c9ba3bd3c98e",
+      "sha256": "ce1ac505198a82f57456c9b7574930a902c2b2bac8e8b846b8a89d15aba123e5",
       "size": 23
     }
   ]

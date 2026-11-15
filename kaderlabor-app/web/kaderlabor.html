@@ -2507,13 +2507,24 @@ $("#tf-results").addEventListener("click", e => {
 
 
 /* ---------- Transfer-Rechner: Algorithmus ohne Claude ---------- */
-const POS_VALUE = {GK:.7, CB:.9, LB:.85, RB:.85, LWB:.85, RWB:.85, CDM:.95, CM:1, CAM:1.05, LM:1, RM:1, LW:1.1, RW:1.1, CF:1.1, ST:1.15};
-// Marktwert-Schätzung in Mio. €: exponentiell mit GES, Aufschlag für junge Spieler mit Potenzial, Abschlag ab 30
+// Marktwert-Schätzung in Mio. € nach FC-Wertkurve: Stützpunkte je GES (Spieler im besten Alter),
+// junge Spieler zählen einen Teil ihres Potenzials mit, ab 28 sinkt der Wert, Torhüter und Verteidiger sind günstiger
+const VAL_PTS = [[45,.05],[50,.1],[55,.25],[60,.6],[65,1.5],[68,2.6],[70,3.8],[72,5.5],[74,8],[76,11.5],[78,16],[80,23],[82,32],[84,44],[86,60],[88,80],[90,105],[92,135],[94,165],[96,200],[99,250]];
+function valAt(o){
+  if (o <= VAL_PTS[0][0]) return VAL_PTS[0][1];
+  for (let k = 1; k < VAL_PTS.length; k++){
+    const [x1, y1] = VAL_PTS[k - 1], [x2, y2] = VAL_PTS[k];
+    if (o <= x2) return Math.exp(Math.log(y1) + (Math.log(y2) - Math.log(y1)) * (o - x1) / (x2 - x1));
+  }
+  return VAL_PTS[VAL_PTS.length - 1][1];
+}
 function estValue(p){
   const gap = Math.max(0, (p.pot || p.ovr) - p.ovr), a = p.age;
-  const ageF = a <= 21 ? 1 + Math.min(gap, 15) * .05 : a <= 23 ? 1.1 + Math.min(gap, 10) * .03 : a <= 26 ? 1.1 : a <= 29 ? 1 : a === 30 ? .75 : a === 31 ? .6 : a === 32 ? .45 : .3;
-  const v = .6 * Math.exp((p.ovr - 60) * .2) * ageF * (POS_VALUE[p.pos] ?? 1);
-  return v >= 10 ? Math.round(v * 2) / 2 : Math.max(.1, Math.round(v * 10) / 10);
+  const k = a <= 19 ? .5 : a <= 21 ? .4 : a <= 23 ? .25 : a <= 25 ? .1 : 0;
+  const ageF = a <= 27 ? 1 : a === 28 ? .9 : a === 29 ? .8 : a === 30 ? .65 : a === 31 ? .55 : a === 32 ? .45 : a === 33 ? .36 : a === 34 ? .28 : .2;
+  const posF = ({GK: .75, CB: .9, LB: .9, RB: .9, LWB: .9, RWB: .9})[p.pos] ?? 1;
+  const v = valAt(p.ovr + Math.min(gap, 15) * k) * ageF * posF;
+  return v >= 10 ? Math.round(v * 2) / 2 : Math.max(.05, Math.round(v * 10) / 10);
 }
 // erwarteter GES nach n Saisons (Wachstum bis zum POT, Abbau ab 30)
 function projOvr(p, yrs = 2){
@@ -2535,18 +2546,21 @@ try { fcGameDate = localStorage.getItem("kaderlabor.fcdate"); } catch(e){}
 // Saisonende = Jahr, in dem die laufende Saison endet (Verträge laufen am 30.6. aus)
 function seasonEnd(){ const d = fcGameDate ? new Date(fcGameDate) : new Date(); return d.getMonth() >= 6 ? d.getFullYear() + 1 : d.getFullYear(); }
 // Ablöse: geschätzter Wert, angepasst an die Restlaufzeit; Ausstiegsklausel deckelt; vereinslos = ablösefrei
-function transferPrice(e){
+function transferPrice(e, ctx){
   const est = estValue(e);
   if (e.value != null) return {price: e.value, est, basis: "Marktwert aus der Datenbank"};
-  if (e.fcid && (!e.club || /vereinslos/i.test(e.league || ""))) return {price: 0, est, basis: "vereinslos"};
+  if (/free agents|vereinslos/i.test((e.league || "") + " " + (e.club || "")) || (e.fcid && !e.club)) return {price: 0, est, basis: "vereinslos"};
   let price = est, basis = "geschätzt";
+  // Leistungsträger (Top 3 seines Vereins): der Verein verlangt einen Aufschlag
+  const key = ctx && ctx.clubTop3 && e.club && ctx.clubTop3.get(e.club) <= e.ovr;
+  if (key){ price = est * 1.3; basis = "Leistungsträger, Verein verlangt Aufschlag"; }
   if (e.contract){
     const left = e.contract - seasonEnd();
     const m = (fcGameDate ? new Date(fcGameDate) : new Date()).getMonth();
     if (left <= 0 && m <= 5){ price = 0; basis = `Vertrag läuft im Juni ${e.contract} aus, Vorvertrag möglich`; }
     else if (left <= 0){ price = est * .5; basis = `Vertrag läuft ${e.contract} aus, ab Januar ablösefrei per Vorvertrag`; }
-    else if (left === 1){ price = est * .8; basis = "nur noch ein Jahr Vertrag nach dieser Saison"; }
-    else if (left >= 4){ price = est * 1.1; basis = "langer Vertrag"; }
+    else if (left === 1){ price = price * .8; basis = "nur noch ein Jahr Vertrag nach dieser Saison"; }
+    else if (left >= 4){ price = price * 1.1; basis = key ? basis + ", langer Vertrag" : "langer Vertrag"; }
   }
   if (e.release && e.release < price){ price = e.release; basis = "Ausstiegsklausel"; }
   return {price: price >= 10 ? Math.round(price * 2) / 2 : Math.round(price * 10) / 10, est, basis};
@@ -2581,9 +2595,9 @@ function nationFit(nat, home){
   if (!nat) return {n: .75, note: ""};
   if (nat === home) return {n: 1, note: `${nat}: keine Eingewöhnung, stärkt den einheimischen Kern`};
   const langs = Object.values(LANG).filter(l => l.includes(home));
-  if (langs.some(l => l.includes(nat))) return {n: .88, note: `${nat}: gleiche Sprache, schnelle Eingewöhnung`};
-  if (EUROPE.has(nat)) return {n: .72, note: ""};
-  return {n: .55, note: `${/^Nation \d+$/.test(nat) ? "Nicht aus Europa" : nat}: längere Eingewöhnung`};
+  if (langs.some(l => l.includes(nat))) return {n: .9, note: `${nat}: gleiche Sprache, schnelle Eingewöhnung`};
+  if (EUROPE.has(nat)) return {n: .65, note: `${nat}: Europäer, Eingewöhnung nötig`};
+  return {n: .35, note: `${/^Nation \d+$/.test(nat) ? "Nicht aus Europa" : nat}: lange Eingewöhnung, fremde Sprache und Kultur`};
 }
 function clubContext(){
   const P = state.players, ov = last.overall || 70;
@@ -2598,7 +2612,8 @@ function clubContext(){
   const byClub = new Map(), clubLeague = new Map();
   DB.forEach(e => { if (!e.club) return; if (!byClub.has(e.club)) byClub.set(e.club, []); byClub.get(e.club).push(e.ovr); if (!clubLeague.has(e.club)) clubLeague.set(e.club, e.league); });
   const top = v => { const t = [...v].sort((a, b) => b - a).slice(0, 14); return t.reduce((a, b) => a + b, 0) / t.length; };
-  const strength = new Map(); byClub.forEach((v, k) => { if (v.length >= 11) strength.set(k, top(v)); });
+  const strength = new Map(), clubTop3 = new Map();
+  byClub.forEach((v, k) => { if (v.length >= 11) strength.set(k, top(v)); const s3 = [...v].sort((a, b) => b - a); clubTop3.set(k, s3[Math.min(2, s3.length - 1)]); });
   const own = P.length ? top(P.map(p => p.ovr)) : ov;
   const league = club ? (clubLeague.get(club) || "") : "";
   let rank = null, size = null;
@@ -2608,7 +2623,7 @@ function clubContext(){
   let profile = "etabliert";
   if (rank){ if (rank <= Math.max(2, Math.round(size * .2))) profile = "spitze"; else if (rank > size - Math.max(3, Math.round(size * .2))) profile = "abstieg"; }
   if (xiAge && xiAge < 24.5 && profile !== "abstieg") profile = "ausbildung";
-  return {club, league, home: homeNation(league), own, strength, rank, size, profile, xiAge, n: P.length, maxOvr: Math.max(...P.map(p => p.ovr), ov),
+  return {club, league, home: homeNation(league), own, strength, clubTop3, rank, size, profile, xiAge, n: P.length, maxOvr: Math.max(...P.map(p => p.ovr), ov),
     wageTop: wages.length ? wages[wages.length - 1] : null, wageMid: wages.length ? wages[Math.floor(wages.length * .75)] : null};
 }
 function clubFit(e, ctx, pos, isNeed){
@@ -2639,7 +2654,7 @@ function clubFit(e, ctx, pos, isNeed){
   if (ctx.n >= 32) notes.push(`Kader mit ${ctx.n} Spielern voll: erst verkaufen`);
   const nf = nationFit(e.nat, ctx.home);
   if (nf.note) notes.push(nf.note);
-  return {score: 100 * feas * full * (w * .3 + a * .25 + d * .2 + nf.n * .25), feas, nat: nf.n, notes};
+  return {score: 100 * feas * full * (w * .25 + a * .2 + d * .15 + nf.n * .4), feas, nat: nf.n, notes};
 }
 let calcRes = [];
 function runCalc(){
@@ -2659,9 +2674,10 @@ function runCalc(){
   const pool = [];
   for (const e of DB){
     if (e.age > maxAge || inSquadName(e.name) || (ctx.club && e.club === ctx.club)) continue;
+    if (/^Spieler \d+$/.test(e.name) || /women|frauen|wsl|femenina|féminine/i.test(e.league || "")) continue;
     if (league && !(String(e.league) + " " + String(e.club)).toLowerCase().includes(league)) continue;
     if (posSel !== "auto" && fitAt(e, posSel) < e.ovr - 3) continue;
-    const tp = transferPrice(e), est = tp.est, price = tp.price;
+    const tp = transferPrice(e, ctx), est = tp.est, price = tp.price;
     if (price > B) continue;
     if (focus === "free" && price > 0 && !(e.contract && e.contract <= seasonEnd())) continue;
     if (fitAt(e, e.pos) < ov - 14) continue;
@@ -2669,7 +2685,7 @@ function runCalc(){
       ? (s => ({d: fitAt(e, posSel) - (s && s.p ? s.fit : 40), pos: posSel}))(last.xi.filter(x => x.pos === posSel).sort((a, b) => a.fit - b.fit)[0])
       : quickImpact(e);
     const pf = clubFit(e, ctx, q.pos || e.pos, true).feas;
-    const pre = (.4 + .6 * pf) * Math.max(q.d, 0) * 2 * (W.now + W.need) * 3 + (projOvr(e) - ov) * W.future * 3 - price / B * W.value * 12 + (needPos.includes(q.pos) ? 4 * W.need * 5 : 0);
+    const pre = (.4 + .6 * pf) * (.55 + .45 * nationFit(e.nat, ctx.home).n) * Math.max(q.d, 0) * 2 * (W.now + W.need) * 3 + (projOvr(e) - ov) * W.future * 3 - price / B * W.value * 12 + (needPos.includes(q.pos) ? 4 * W.need * 5 : 0);
     pool.push({e, est, price, pre, basis: tp.basis});
   }
   if (!pool.length){ st.className = "status err"; st.textContent = (focus === "free" ? "Keine vereinslosen Spieler und keine mit auslaufendem Vertrag gefunden (dafür braucht es den FC-27-Abgleich). " : "") + "Niemand in deiner Datenbank passt zu Budget, Alter, Liga und Position. Lockere die Filter."; out.innerHTML = ""; calcRes = []; return; }
@@ -2692,7 +2708,7 @@ function runCalc(){
     s.club = cf.score;
     // ein Spieler, der nicht kommen will, hilft nicht: Wechselchance dämpft die Gesamtnote
     // Nationalität wirkt zusätzlich leicht auf die Gesamtnote (Eingewöhnung, einheimischer Kern)
-    const total = Object.keys(W).reduce((t, k) => t + W[k] * s[k], 0) * (.55 + .45 * cf.feas) * (.9 + .1 * cf.nat);
+    const total = Object.keys(W).reduce((t, k) => t + W[k] * s[k], 0) * (.55 + .45 * cf.feas) * (.55 + .45 * cf.nat);
     return {e, im, s, total, proj, est: x.est, price: x.price, basis: x.basis, slotPos, wageRef, clubNotes: cf.notes};
   }).sort((a, b) => b.total - a.total).slice(0, 10);
   st.className = "status";

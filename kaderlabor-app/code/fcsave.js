@@ -19,6 +19,8 @@ const P = {
   // Karriere: Vertragsende (Jahr − 2000), Wochengehalt in €, Ausstiegsklausel in € (0 = keine).
   // Geprüft an Haaland 2034, Yamal 2031, Musiala 2030, Kimmich 2029. Einen Marktwert speichert das Spiel nicht.
   contractvaliduntil: ["qvmK", 2000], wage: ["cmGX", 0], releaseclause: ["pSzm", 0],
+  // 1 = Spielerin (Frauenligen), geprüft an Putellas, Bonmatí, Schüller, Gwinn, Kerr, J. Wirtz
+  gender: ["EveZ", 0],
 };
 const POS = {0:"TW",1:"IV",2:"RAV",3:"RV",4:"IV",5:"IV",6:"IV",7:"LV",8:"LAV",9:"ZDM",10:"ZDM",11:"ZDM",12:"RM",13:"ZM",14:"ZM",15:"ZM",16:"LM",
   17:"ZOM",18:"ZOM",19:"ZOM",20:"HS",21:"HS",22:"HS",23:"RF",24:"ST",25:"ST",26:"ST",27:"LF"};
@@ -150,7 +152,12 @@ function readSave(file, names, opts = {}) {
   const teams = new Map(), leagues = new Map(), teamLeague = new Map(), links = new Map();
   if (teamsT) for (let i = 0; i < teamsT.nvalid; i++) teams.set(teamsT.get(i, "mCXg"), teamsT.get(i, "AUsv"));
   if (leaguesT) for (let i = 0; i < leaguesT.nvalid; i++) leagues.set(leaguesT.get(i, "aQrQ"), leaguesT.get(i, "HEQX"));
-  if (ltl) for (let i = 0; i < ltl.nvalid; i++) teamLeague.set(ltl.get(i, "mCXg"), ltl.get(i, "aQrQ"));
+  // ein Verein steht oft in mehreren Wettbewerben: die heimische Liga bevorzugen, nicht Pokale/Kontinentalwettbewerbe
+  const CUP = /libertadores|sudamericana|champions|europa|conference|cup|pokal|copa|international|friendly|super ?cup|trophy/i;
+  if (ltl) for (let i = 0; i < ltl.nvalid; i++) {
+    const t = ltl.get(i, "mCXg"), l = ltl.get(i, "aQrQ"), cur = teamLeague.get(t);
+    if (cur == null || (CUP.test(leagues.get(cur) || "") && !CUP.test(leagues.get(l) || ""))) teamLeague.set(t, l);
+  }
   if (tpl) for (let i = 0; i < tpl.nvalid; i++) { const pid = tpl.get(i, "ykFq") - 1; if (!links.has(pid)) links.set(pid, []); links.get(pid).push(tpl.get(i, "mCXg")); }
 
   // Spieldatum (Karriere) für das Alter, sonst Datum der Datei
@@ -166,8 +173,12 @@ function readSave(file, names, opts = {}) {
   const rows = [];
   for (let i = 0; i < players.nvalid; i++) {
     const pid = g(i, "playerid");
+    // Spielerinnen gehören nicht in den Männer-Karrieremodus
+    if (players.has("EveZ") && g(i, "gender") === 1) continue;
     const clubIds = (links.get(pid) || []).filter(t => teamLeague.has(t));
-    const club = clubIds.find(t => leagues.has(teamLeague.get(t))) ?? clubIds[0];
+    // nur Vereinsmannschaften; wer an keinem Verein hängt (nur Nationalteam oder gar nicht), existiert in der Karriere nicht
+    const club = clubIds.find(t => leagues.has(teamLeague.get(t)) && !/^International/i.test(leagues.get(teamLeague.get(t))));
+    if (club == null || /women|frauen|wsl|femenina|féminine/i.test(leagues.get(teamLeague.get(club)) || "")) continue;
     const lgRaw = club != null ? leagues.get(teamLeague.get(club)) : null;
     const lgName = lgRaw ? lgRaw.replace(/ \(\d\)$/, "") : null;
     const league = lgName ? (GERMAN[lgName] || lgName) : "Vereinslos";
