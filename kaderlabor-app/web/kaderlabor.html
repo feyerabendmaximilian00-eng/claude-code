@@ -987,6 +987,18 @@ body.prof-open{overflow:hidden}
 .rs-lab{font-size:15px;fill:var(--ink-2);font-family:var(--font-body)} .rs-val{fill:var(--ink);font-weight:500}
 .nmlink{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
 .nmlink:hover{color:var(--accent);text-decoration:underline}
+
+/* Eigene Transferziele */
+.crit{margin-top:12px;border:1px solid var(--line);border-radius:var(--r-md);padding:12px 16px;background:var(--surface-2)}
+.crit summary{cursor:pointer;font-weight:500}
+.crit-grid{margin-top:12px}
+.crit .chk{display:flex;align-items:center;gap:8px;align-self:end;min-height:44px}
+.tgt-saved{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.tgt-saved:empty{display:none}
+.tgt{display:inline-flex;align-items:center;border:1px solid var(--line-strong);border-radius:999px;overflow:hidden;background:var(--surface-2)}
+.tgt button{border:0;background:none;color:var(--ink);font:inherit;font-size:14px;padding:6px 12px;cursor:pointer;min-height:36px}
+.tgt button:hover{background:var(--accent-soft)}
+.tgt .tgt-x{padding:6px 10px;color:var(--ink-3);border-left:1px solid var(--line)}
 /* Gewichte: nur 400 und 500 */
 b,strong,label,select,legend,summary,.points li b,.tkcard b,.pd-name,.pc-nm,.bc-nm,.tcard b,.qdb-list b,.banner strong{font-weight:500}
 h1,h2,h3,h4{font-weight:400}
@@ -1417,6 +1429,34 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
           <input id="tf-league" type="text" placeholder="z. B. Bundesliga" maxlength="40">
         </label>
       </form>
+      <div class="tgt-saved" id="tgt-saved"></div>
+      <details class="crit" id="tf-crit">
+        <summary>Eigenes Transferziel festlegen <span class="muted" id="crit-n"></span></summary>
+        <div class="tfilters crit-grid">
+          <label for="tf-cmin">Mindest-GES<input id="tf-cmin" type="number" min="40" max="99" placeholder="z. B. 72" inputmode="numeric"></label>
+          <label for="tf-cpot">Mindest-POT<input id="tf-cpot" type="number" min="40" max="99" placeholder="z. B. 78" inputmode="numeric"></label>
+          <label for="tf-cagemin">Mindestalter<input id="tf-cagemin" type="number" min="15" max="40" placeholder="z. B. 19" inputmode="numeric"></label>
+          <label for="tf-cwage">Max. Gehalt (Tsd. €/Woche)<input id="tf-cwage" type="number" min="0" step="0.5" placeholder="z. B. 15" inputmode="decimal"></label>
+          <label for="tf-ccon">Vertrag endet spätestens<input id="tf-ccon" type="number" min="2025" max="2040" placeholder="z. B. 2029" inputmode="numeric"></label>
+          <label for="tf-cnat">Herkunft<select id="tf-cnat"><option value="">Alle</option><option value="home">Nur Heimatland</option><option value="lang">Heimatland + gleiche Sprache</option><option value="eu">Europa</option></select></label>
+          <label for="tf-cfoot">Starker Fuß<select id="tf-cfoot"><option value="">Egal</option><option value="L">Links</option><option value="R">Rechts</option></select></label>
+          <label for="tf-cprim" class="chk"><input id="tf-cprim" type="checkbox"> Nur A-Position</label>
+        </div>
+        <div class="eyebrow" style="margin-top:12px">Mindestwerte</div>
+        <div class="tfilters crit-grid">
+          <label for="tf-c-pac">Tempo<input id="tf-c-pac" type="number" min="1" max="99" inputmode="numeric"></label>
+          <label for="tf-c-sho">Schuss<input id="tf-c-sho" type="number" min="1" max="99" inputmode="numeric"></label>
+          <label for="tf-c-pas">Passen<input id="tf-c-pas" type="number" min="1" max="99" inputmode="numeric"></label>
+          <label for="tf-c-dri">Dribbling<input id="tf-c-dri" type="number" min="1" max="99" inputmode="numeric"></label>
+          <label for="tf-c-def">Verteidigung<input id="tf-c-def" type="number" min="1" max="99" inputmode="numeric"></label>
+          <label for="tf-c-phy">Physis<input id="tf-c-phy" type="number" min="1" max="99" inputmode="numeric"></label>
+        </div>
+        <div class="row" style="margin-top:12px;gap:8px">
+          <input id="tgt-name" type="text" maxlength="40" placeholder="Name, z. B. Schneller IV bis 8 Mio." style="flex:1;min-width:200px">
+          <button class="btn" type="button" id="tgt-save">Als Transferziel speichern</button>
+          <button class="btn" type="button" id="crit-reset">Kriterien zurücksetzen</button>
+        </div>
+      </details>
       <p class="small muted" id="tf-finfo" style="margin:8px 0 0"></p>
       <div class="row" style="margin-top:12px"><span class="status" id="calc-status" aria-live="polite"></span></div>
       <p class="calc-club small" id="calc-club" hidden></p>
@@ -1902,7 +1942,8 @@ try {
     state = {players: saved.players.map(normalizePlayer), formation: FORMATIONS[saved.formation] ? saved.formation : "4-3-3", overrides: saved.overrides || {}, isSample: !!saved.isSample,
       useDyn: saved.useDyn !== false, roles: saved.roles && typeof saved.roles === "object" ? saved.roles : {}, style: saved.style || "auto",
       shadow: saved.shadow && typeof saved.shadow === "object" ? saved.shadow : null, notes: String(saved.notes || ""),
-      budget: saved.budget && typeof saved.budget === "object" ? saved.budget : null, budgetV: saved.budgetV || 0};
+      budget: saved.budget && typeof saved.budget === "object" ? saved.budget : null, budgetV: saved.budgetV || 0,
+      targets: Array.isArray(saved.targets) ? saved.targets : []};
   }
 } catch(e){}
 var lastLocalState = null;
@@ -3117,6 +3158,7 @@ function runCalc(){
   const t0 = performance.now();
   const posSel = $("#tf-pos").value, focus = $("#tf-focus").value, ctx = clubContext();
   ctx.noTalent = focus === "exp";
+  const crit = readCrit(), critOn = critCount(crit) > 0;
   $("#tf-finfo").textContent = FOCUS_INFO[focus] || "";
   // sportliche Gewichte nach Fokus und Vereinsprofil; die Gesamtnote ist je zur Hälfte Vereins-DNA und sportlicher Nutzen
   const W = (() => { const b = CALC_W[focus] || CALC_W.now, m = ctx.phil ? ctx.phil.m : CLUB_PROFILE[ctx.profile].m, o = {};
@@ -3139,6 +3181,7 @@ function runCalc(){
     if (price > B) continue;
     if (focus === "free" && price > 0 && !(e.contract && e.contract <= seasonEnd())) continue;
     if (e.age < minAge) continue;
+    if (critOn && !critMatch(e, crit, ctx.home, posSel)) continue;
     if (fitAt(e, e.pos) < ov - 14) continue;
     const q = posSel !== "auto"
       ? (s => ({d: fitAt(e, posSel) - (s && s.p ? s.fit : 40), pos: posSel}))(last.xi.filter(x => x.pos === posSel).sort((a, b) => a.fit - b.fit)[0])
@@ -3148,7 +3191,7 @@ function runCalc(){
     const pre = (dna / 4 + (.4 + .6 * pf) * Math.max(q.d, 0) * 2 * (W.now + W.need) * 3 + (projOvr(e) - ov) * W.future * 3 - price / B * W.value * 12 + (needPos.includes(q.pos) ? 4 * W.need * 5 : 0)) * (posSel !== "auto" ? posMatch(e, posSel).f : posMatch(e, q.pos).f);
     pool.push({e, est, price, pre, dna, basis: tp.basis});
   }
-  if (!pool.length){ st.className = "status err"; st.textContent = (focus === "free" ? "Keine vereinslosen Spieler und keine mit auslaufendem Vertrag gefunden (dafür braucht es den FC-27-Abgleich). " : "") + "Niemand in deiner Datenbank passt zu Budget, Alter, Liga und Position. Lockere die Filter."; out.innerHTML = ""; calcRes = []; return; }
+  if (!pool.length){ st.className = "status err"; st.textContent = (critOn ? "Dein Transferziel ist sehr eng gefasst. " : "") + (focus === "free" ? "Keine vereinslosen Spieler und keine mit auslaufendem Vertrag gefunden (dafür braucht es den FC-27-Abgleich). " : "") + "Niemand in deiner Datenbank passt zu Budget, Alter, Liga und Position. Lockere die Filter."; out.innerHTML = ""; calcRes = []; return; }
   pool.sort((a, b) => b.pre - a.pre);
   // Vorfilter wie beim Schalke-Modell: zuerst nur Spieler über der DNA-Schwelle, aufgefüllt mit den nächstbesten
   const passN = pool.filter(x => x.dna >= TH).length;
@@ -3181,7 +3224,7 @@ function runCalc(){
     return {e, im, s, dn, pm, pmPos: slotPos || (posSel !== "auto" ? posSel : e.pos), phil: ctx.phil, philKey: ctx.philKey, pass: dn.dna >= TH, total, proj, est: x.est, price: x.price, basis: x.basis, slotPos, wageRef, clubNotes: cf.notes};
   }).sort((a, b) => (b.pass - a.pass) || b.total - a.total).slice(0, 10);
   st.className = "status";
-  st.textContent = `Markt gescannt: ${pool.length.toLocaleString("de-DE")} Spieler im Budget · ${passN.toLocaleString("de-DE")} mit Vereins-DNA ab ${TH} · 60 Kandidaten im Kader simuliert (${Math.round(performance.now() - t0)} ms)`;
+  st.textContent = `Markt gescannt${critOn ? " mit deinem Transferziel (" + critCount(crit) + " Kriterien)" : ""}: ${pool.length.toLocaleString("de-DE")} Spieler im Budget · ${passN.toLocaleString("de-DE")} mit Vereins-DNA ab ${TH} · 60 Kandidaten im Kader simuliert (${Math.round(performance.now() - t0)} ms)`;
   const pr = CLUB_PROFILE[ctx.profile];
   $("#calc-club").innerHTML = `<b>${esc(ctx.club || "Dein Verein")}</b>${ctx.league ? " · " + esc(ctx.league) : ""}`
     + (ctx.rank ? ` · Kaderstärke Platz ${ctx.rank} von ${ctx.size}` : "")
@@ -4146,7 +4189,9 @@ function applyStored(st, dbArr){
     state = {players: st.players.map(normalizePlayer), formation: FORMATIONS[st.formation] ? st.formation : "4-3-3", overrides: st.overrides || {}, isSample: !!st.isSample,
       useDyn: st.useDyn !== false, roles: st.roles && typeof st.roles === "object" ? st.roles : {}, style: st.style || "auto",
       shadow: st.shadow && typeof st.shadow === "object" ? st.shadow : null, notes: String(st.notes || ""),
-      budget: st.budget && typeof st.budget === "object" ? st.budget : null, budgetV: st.budgetV || 0};
+      budget: st.budget && typeof st.budget === "object" ? st.budget : null, budgetV: st.budgetV || 0,
+      targets: Array.isArray(st.targets) ? st.targets : []};
+    try { renderTargets(); } catch(e){}
     if (state.budgetV !== 2){ if (!state.budget || state.budget.src !== "save") state.budget = {cur: DEF_BUDGET, src: "standard", at: null}; state.budgetV = 2; }
     try { budgetReset(); } catch(e){}
     try { const ne = document.getElementById("notes"); if (ne && document.activeElement !== ne) ne.value = state.notes || ""; } catch(e){}
@@ -4763,6 +4808,58 @@ document.addEventListener("click", ev => {
     slSave(); sb.textContent = slHas(en.id) ? "Auf der Shortlist" : "Auf die Shortlist"; }
 });
 document.addEventListener("keydown", ev => { if (ev.key === "Escape" && !$("#prof").hidden) closeProfile(); });
+
+/* ---------- Eigene Transferziele: Kriterien und gespeicherte Ziele ---------- */
+const CRIT_STATS = ["pac","sho","pas","dri","def","phy"];
+const critNum = id => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : null; };
+function readCrit(){
+  const st = {}; CRIT_STATS.forEach(k => { const v = critNum("#tf-c-" + k); if (v != null) st[k] = v; });
+  return {ovr: critNum("#tf-cmin"), pot: critNum("#tf-cpot"), ageMin: critNum("#tf-cagemin"), wage: critNum("#tf-cwage"), contract: critNum("#tf-ccon"),
+    nat: $("#tf-cnat").value, foot: $("#tf-cfoot").value, prim: $("#tf-cprim").checked, stats: st};
+}
+function critCount(c){ return ["ovr","pot","ageMin","wage","contract"].filter(k => c[k] != null).length + (c.nat ? 1 : 0) + (c.foot ? 1 : 0) + (c.prim ? 1 : 0) + Object.keys(c.stats || {}).length; }
+function critMatch(e, c, home, posSel){
+  if (c.ovr != null && e.ovr < c.ovr) return false;
+  if (c.pot != null && e.pot < c.pot) return false;
+  if (c.ageMin != null && e.age < c.ageMin) return false;
+  if (c.wage != null && e.wage && e.wage > c.wage * 1000) return false;
+  if (c.contract != null && e.contract && e.contract > c.contract) return false;
+  if (c.foot && e.foot !== c.foot) return false;
+  if (c.prim && posSel && posSel !== "auto" && e.pos !== posSel) return false;
+  if (c.nat){ const n = nationFit(e.nat, home).n; if (c.nat === "home" ? n < 1 : c.nat === "lang" ? n < .9 : n < .65) return false; }
+  for (const [k, v] of Object.entries(c.stats || {})) if ((e[k] ?? 0) < v) return false;
+  return true;
+}
+function critLabel(){ const n = critCount(readCrit()); $("#crit-n").textContent = n ? `· ${n} Kriterien aktiv` : ""; }
+function writeCrit(t){
+  const c = t.crit || {};
+  $("#tf-cmin").value = c.ovr ?? ""; $("#tf-cpot").value = c.pot ?? ""; $("#tf-cagemin").value = c.ageMin ?? ""; $("#tf-cwage").value = c.wage ?? ""; $("#tf-ccon").value = c.contract ?? "";
+  $("#tf-cnat").value = c.nat || ""; $("#tf-cfoot").value = c.foot || ""; $("#tf-cprim").checked = !!c.prim;
+  CRIT_STATS.forEach(k => { $("#tf-c-" + k).value = (c.stats || {})[k] ?? ""; });
+  if (t.pos) $("#tf-pos").value = t.pos; if (t.age) $("#tf-age").value = t.age; if (t.focus) $("#tf-focus").value = t.focus;
+  critLabel();
+}
+function renderTargets(){
+  const box = $("#tgt-saved"), T = Array.isArray(state.targets) ? state.targets : [];
+  box.innerHTML = T.length ? `<span class="small muted">Deine Transferziele:</span> ` + T.map(t => `<span class="tgt"><button type="button" data-tgt="${esc(t.id)}" title="Laden und Markt scannen">${esc(t.name)}</button><button type="button" class="tgt-x" data-tgtdel="${esc(t.id)}" aria-label="${esc(t.name)} löschen">×</button></span>`).join("") : "";
+}
+$("#tf-crit").addEventListener("input", critLabel);
+$("#tf-crit").addEventListener("change", critLabel);
+$("#crit-reset").addEventListener("click", () => { writeCrit({crit: {}}); runCalc(); });
+$("#tgt-save").addEventListener("click", () => {
+  const c = readCrit(), pos = $("#tf-pos").value;
+  const name = $("#tgt-name").value.trim() || [pos !== "auto" ? DE[pos] : "Alle Positionen", c.ovr ? "GES " + c.ovr + "+" : "", c.pot ? "POT " + c.pot + "+" : "", "bis " + $("#tf-age").value + " J."].filter(Boolean).join(" · ");
+  if (!Array.isArray(state.targets)) state.targets = [];
+  state.targets.push({id: "t" + Date.now().toString(36), name: name.slice(0, 40), pos, age: $("#tf-age").value, focus: $("#tf-focus").value, crit: c});
+  $("#tgt-name").value = ""; save(); renderTargets();
+});
+$("#tgt-saved").addEventListener("click", e => {
+  const d = e.target.closest("[data-tgtdel]"); if (d){ state.targets = (state.targets || []).filter(t => t.id !== d.dataset.tgtdel); save(); renderTargets(); return; }
+  const b = e.target.closest("[data-tgt]"); if (!b) return;
+  const t = (state.targets || []).find(x => x.id === b.dataset.tgt); if (!t) return;
+  writeCrit(t); $("#tf-crit").open = true; runCalc();
+});
+renderTargets(); critLabel();
 
 $("#use-dyn").checked = state.useDyn !== false;
 showView(location.hash.slice(1) || "aufstellung", false);

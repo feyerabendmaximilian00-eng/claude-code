@@ -1,8 +1,8 @@
 {
-  "version": "1.9.6",
+  "version": "1.9.7",
   "minLauncher": "1",
-  "released": "2026-11-15T04:42:55.414Z",
-  "notes": "Formationen ohne Hängende Spitze: Stürmer statt HS wie in FC 27",
+  "released": "2026-11-15T12:44:47.781Z",
+  "notes": "Eigene Transferziele im Scouting (Position, GES, POT, Alter, Gehalt, Herkunft, Fuß, Mindestwerte) und Verknüpfungen für Glubb-DNA.exe",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "5c78fb6d6f70a7c2955e347cfd00ee6c66e6cd7b6d2fcc836d209fdb32147da5",
-      "size": 557707
+      "sha256": "345c0342d16aeb7cc7e9cdcbb002e264a073381507a594da09a23714cd910cff",
+      "size": 565734
     },
     {
       "path": "app/settings.html",
@@ -31,8 +31,8 @@
     },
     {
       "path": "app-main.js",
-      "sha256": "f454a81df80b38cc9b1ba8a6beb5a9272acded4b0ad45e09bf0e3f5495dd285d",
-      "size": 25585
+      "sha256": "d30071c32db040d64a7f779ea4a9018b96b1742cfbcade52178aa59cfce901e4",
+      "size": 26271
     },
     {
       "path": "fcsave.js",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "57facc9667153bfb307327b7c31a52fbe51d7fdca80f777a250078f109760531",
+      "sha256": "0cec36061a15bca485d7152459880f79b434af9dcb03d6023a38a926ac2db5cd",
       "size": 23
     }
   ]

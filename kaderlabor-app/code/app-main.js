@@ -416,7 +416,12 @@ else {
   app.whenReady().then(() => {
     if (process.platform === "win32") app.setAppUserModelId("Kaderlabor");
     buildMenu(); createMainWindow();
-    if (!readSettings().shortcutCreated) createShortcuts(false);
+    // Verknüpfungen fehlen oder zeigen noch auf ein anderes Programm (z. B. alte Kaderlabor.exe) → neu anlegen
+    const lnkStale = (() => { if (process.platform !== "win32") return false; const lp = path.join(app.getPath("desktop"), "Glubb-DNA.lnk"), old = path.join(app.getPath("desktop"), "Kaderlabor.lnk");
+      if (fs.existsSync(old)) return true;   // noch die alte Verknüpfung vorhanden
+      if (!fs.existsSync(lp)) return false;  // vom Nutzer gelöscht: nicht ungefragt neu anlegen
+      try { const l = shell.readShortcutLink(lp); return path.resolve(l.target).toLowerCase() !== path.resolve(process.execPath).toLowerCase(); } catch { return false; } })();
+    if (!readSettings().shortcutCreated || lnkStale) createShortcuts(false);
     // neues Symbol (FCN-Logo) einmalig in bestehende Verknüpfungen übernehmen
     else if (readSettings().iconVersion !== "glubb2") { createShortcuts(false); const st2 = readSettings(); st2.iconVersion = "glubb2"; writeSettings(st2); }
     // FC 27: Ordner vorbelegen, beobachten und beim Start den neuesten Spielstand prüfen
