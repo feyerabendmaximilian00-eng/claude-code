@@ -1,8 +1,8 @@
 {
-  "version": "1.5.9",
+  "version": "1.6.0",
   "minLauncher": "1",
-  "released": "2026-11-15T03:01:17.523Z",
-  "notes": "Transfer-Rechner: keine Spielerinnen und keine vereinslosen Reservespieler mehr, neue Marktwertkurve, Aufschlag für Leistungsträger, stärkerer Nationalitätsfaktor",
+  "released": "2026-11-15T03:05:22.474Z",
+  "notes": "Transfer-Rechner mit Vereins-DNA nach dem Vorbild des Schalke-Modells: DNA 0-100, Schwelle 70, Gesamtnote je zur Hälfte DNA und sportlicher Nutzen",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "b87d8a8ffe6b51179b1688e8b9ad1f8cc13949b541bfaf5df57744c0c377d737",
-      "size": 297947
+      "sha256": "46a6abe76762d8651bede02c0a02577794e6ba023e7c3f53edc4154200f7481c",
+      "size": 302651
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "ce1ac505198a82f57456c9b7574930a902c2b2bac8e8b846b8a89d15aba123e5",
+      "sha256": "9c9755a8b5ac5a390946d8431ec688969b1101443fd68f74168864c2c42ab41b",
       "size": 23
     }
   ]

@@ -724,7 +724,10 @@ tr.inxi td:first-child{box-shadow:inset 2px 0 0 var(--accent)}
 .ccard .meta{font-size:13px;color:var(--ink-3);margin-top:2px}
 .ccard ul{margin:12px 0 0;padding-left:18px;font-size:14px;color:var(--ink-2);line-height:1.6}
 .ccard .sc{text-align:right} .ccard .sc b{display:block;font-family:var(--font-display);font-weight:400;font-size:38px;line-height:1;letter-spacing:-.03em}
-.ccard.best .sc b{color:var(--accent)} .ccard .sc span{font-size:13px;color:var(--ink-3)}
+.ccard.best .sc b{color:var(--accent)}
+.ccard .dnab{display:inline-block;margin-top:8px;padding:2px 10px;border-radius:999px;border:1px solid var(--line-strong);font-size:13px;color:var(--ink-2);white-space:nowrap}
+.ccard .dnab.ok{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.ccard.below{opacity:.72} .ccard .sc span{display:block} .ccard .sc span{font-size:13px;color:var(--ink-3)}
 .cbars{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-top:12px}
 .calc-club{margin:8px 0 0;padding:12px 16px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface-2);line-height:1.6}
 .calc-club b{font-weight:500}
@@ -1084,7 +1087,7 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
         </div>
         <button class="btn primary" id="btn-calc" type="button">Besten Transfer berechnen</button>
       </div>
-      <p class="small muted" style="margin:8px 0 0;max-width:75ch">Der Rechner spielt jeden passenden Spieler deiner Datenbank in deinem Kader durch und bewertet fünf Dinge: Wirkung auf die Startelf, Transferbedarf, Entwicklung in zwei Jahren, Preis-Leistung, Wiederverkaufswert und wie gut er zu deinem Verein passt: Wechselchance, Gehaltsgefüge, Altersstruktur, Kadertiefe und Nationalität (Heimatland vor gleicher Sprache vor Europa). Wie stark jedes zählt, hängt vom Fokus und vom Profil deines Vereins ab. FC 27 speichert keinen Marktwert. Der Rechner schätzt ihn aus GES, POT, Alter und Position und verrechnet aus dem Spielstand Vertragsende, Gehalt und Ausstiegsklausel. Läuft ein Vertrag aus, wird der Spieler deutlich günstiger.</p>
+      <p class="small muted" style="margin:8px 0 0;max-width:75ch">Nach dem Vorbild des Schalke-Modells bekommt jeder Spieler eine Vereins-DNA von 0 bis 100: Passung zur Spielidee, Intensität und Mentalität (intensiv, aggressiv, mutig), Kultur (Heimat, Sprache, Altersstruktur) und Wirtschaft (Gehalt, Ablöse, Wechselchance). Empfohlen werden zuerst Spieler ab der DNA-Schwelle. Die Gesamtnote ist je zur Hälfte Vereins-DNA und sportlicher Nutzen: Wirkung auf die Startelf, Bedarf, Entwicklung, Preis-Leistung und Wiederverkauf, gewichtet nach Fokus und Vereinsprofil. FC 27 speichert keinen Marktwert. Der Rechner schätzt ihn aus GES, POT, Alter und Position und verrechnet aus dem Spielstand Vertragsende, Gehalt und Ausstiegsklausel. Läuft ein Vertrag aus, wird der Spieler deutlich günstiger.</p>
       <form class="tfilters" id="tf-form">
         <label for="tf-pos">Position
           <select id="tf-pos"><option value="auto">Automatisch (Transferbedarf)</option></select>
@@ -1102,6 +1105,9 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
             <option value="bargain">Schnäppchen / Preis-Leistung</option>
             <option value="free">Ablösefrei / Vertrag läuft aus</option>
           </select>
+        </label>
+        <label for="tf-dna">DNA-Schwelle
+          <input id="tf-dna" type="number" min="0" max="100" step="5" value="70" inputmode="numeric">
         </label>
         <label for="tf-league">Liga (optional)
           <input id="tf-league" type="text" placeholder="z. B. Bundesliga" maxlength="40">
@@ -2575,7 +2581,7 @@ function transferPrice(e, ctx){
   return {price: price >= 10 ? Math.round(price * 2) / 2 : Math.round(price * 10) / 10, est, basis};
 }
 const fmtWage = w => w >= 1000 ? `${(Math.round(w / 100) / 10).toLocaleString("de-DE")} Tsd. €/Woche` : `${w} €/Woche`;
-const CALC_LBL = {now:"Startelf", need:"Bedarf", future:"Zukunft", value:"Preis-Leistung", resale:"Wiederverkauf", club:"Vereinsfit"};
+const CALC_LBL = {dna:"Vereins-DNA", now:"Startelf", need:"Bedarf", future:"Zukunft", value:"Preis-Leistung", resale:"Wiederverkauf"};
 const fmtMio = v => v <= 0 ? "ablösefrei" : v.toLocaleString("de-DE", {maximumFractionDigits: 1}) + " Mio. €";
 
 /* Verein und Kader als Maßstab: Stärke im Ligavergleich, Gehaltsgefüge, Altersstruktur, Kadertiefe */
@@ -2632,7 +2638,8 @@ function clubContext(){
   let profile = "etabliert";
   if (rank){ if (rank <= Math.max(2, Math.round(size * .2))) profile = "spitze"; else if (rank > size - Math.max(3, Math.round(size * .2))) profile = "abstieg"; }
   if (xiAge && xiAge < 24.5 && profile !== "abstieg") profile = "ausbildung";
-  return {club, league, home: homeNation(league), own, strength, clubTop3, rank, size, profile, xiAge, n: P.length, maxOvr: Math.max(...P.map(p => p.ovr), ov),
+  const T = computeTactic(last), style = DNA_STYLE[T.st] ? T.st : "ausgewogen";
+  return {style, dnaRef: dnaRefs(style), club, league, home: homeNation(league), own, strength, clubTop3, rank, size, profile, xiAge, n: P.length, maxOvr: Math.max(...P.map(p => p.ovr), ov),
     wageTop: wages.length ? wages[wages.length - 1] : null, wageMid: wages.length ? wages[Math.floor(wages.length * .75)] : null};
 }
 function clubFit(e, ctx, pos, isNeed){
@@ -2663,7 +2670,45 @@ function clubFit(e, ctx, pos, isNeed){
   if (ctx.n >= 32) notes.push(`Kader mit ${ctx.n} Spielern voll: erst verkaufen`);
   const nf = nationFit(e.nat, ctx.home);
   if (nf.note) notes.push(nf.note);
-  return {score: 100 * feas * full * (w * .25 + a * .2 + d * .15 + nf.n * .4), feas, nat: nf.n, notes};
+  return {score: 100 * feas * full * (w * .25 + a * .2 + d * .15 + nf.n * .4), feas, nat: nf.n, w, a, d, notes};
+}
+
+/* Vereins-DNA nach dem Vorbild des Schalke-Modells („Schalke-DNA“, 0–100, verpflichtet wird erst ab 70):
+   Spielidee-Passung 30 % · Intensität & Mentalität 25 % · Kultur & Identität 25 % · Wirtschaft & Machbarkeit 20 % */
+const DNA_STYLE = {
+  pressing:   {n: "Pressing",   w: {sta: .25, agg: .2, acc: .15, int: .15, stk: .15, rea: .1}},
+  konter:     {n: "Konter",     w: {acc: .25, spd: .25, drib: .15, fin: .15, sta: .1, vis: .1}},
+  ballbesitz: {n: "Ballbesitz", w: {spas: .3, bc: .2, vis: .15, comp: .15, agi: .1, rea: .1}},
+  kompakt:    {n: "Kompakt",    w: {awr: .25, int: .2, str: .2, stk: .15, head: .1, comp: .1}},
+  ausgewogen: {n: "Ausgewogen", w: {sta: .2, rea: .2, spas: .2, comp: .15, str: .15, agg: .1}}
+};
+const DNA_INT = {sta: .35, agg: .3, rea: .2, comp: .15};   // intensiv, aggressiv, mutig
+const SUB_FACE = {acc:"pac",spd:"pac",fin:"sho",posi:"sho",spow:"sho",lsho:"sho",vol:"sho",pen:"sho",vis:"pas",cro:"pas",fk:"pas",spas:"pas",lpas:"pas",cur:"pas",
+  agi:"dri",bal:"dri",bc:"dri",drib:"dri",int:"def",head:"def",awr:"def",stk:"def",sli:"def",jum:"phy",sta:"phy",str:"phy",agg:"phy"};
+const subOf = (p, k) => p.sub && p.sub[k] != null ? p.sub[k] : SUB_FACE[k] ? p[SUB_FACE[k]] : p.ovr;
+const wsum = (p, w) => Object.entries(w).reduce((t, [k, x]) => t + subOf(p, k) * x, 0) / Object.values(w).reduce((a, b) => a + b, 0);
+const subMean = p => SUB_KEYS.reduce((t, k) => t + subOf(p, k), 0) / SUB_KEYS.length;
+function dnaRefs(st){
+  const g = {};
+  last.xi.filter(x => x.p).forEach(x => { const r = ROLE[x.pos]; (g[r] ||= []).push(x.p); if (r !== "GK") (g.ALL ||= []).push(x.p); });
+  const ref = {};
+  Object.entries(g).forEach(([r, ps]) => { ref[r] = r === "GK" ? {ovr: avg(ps, p => p.ovr)} : {play: avg(ps, p => wsum(p, DNA_STYLE[st].w)), int: avg(ps, p => wsum(p, DNA_INT))}; });
+  return ref;
+}
+function dnaOf(e, ctx, pos, x){
+  const c01 = v => clamp(v, 0, 1), role = ROLE[pos] || ROLE[e.pos];
+  let play, inten;
+  if (role === "GK"){ const r = ctx.dnaRef.GK ? ctx.dnaRef.GK.ovr : ctx.own; play = inten = c01(.5 + (e.ovr - r) / 12) * 100; }
+  else {
+    const ref = ctx.dnaRef[role] || ctx.dnaRef.ALL || {play: e.ovr, int: e.ovr}, m = subMean(e);
+    const ps = wsum(e, DNA_STYLE[ctx.style].w), is = wsum(e, DNA_INT);
+    // Niveau gegenüber deiner Startelf auf dieser Rolle + Spielertyp (wie stark das Profil in diese Richtung zeigt)
+    play = (c01(.45 + (ps - ref.play) / 14) * .5 + c01(.4 + (ps - m) / 12) * .5) * 100;
+    inten = (c01(.45 + (is - ref.int) / 14) * .5 + c01(.4 + (is - m) / 12) * .5) * 100;
+  }
+  const culture = (x.nat * .8 + x.age * .2) * 100;
+  const econ = x.feas * (x.wage * .5 + c01(1 - x.price / x.B) * .5) * 100;
+  return {dna: play * .3 + inten * .25 + culture * .25 + econ * .2, play, inten, culture, econ};
 }
 let calcRes = [];
 function runCalc(){
@@ -2672,10 +2717,11 @@ function runCalc(){
   if (!DB.length){ st.className = "status err"; st.textContent = "Deine Datenbank ist leer. Gleiche unter Datenbank mit FC 27 ab oder lade Spieler hoch."; out.innerHTML = ""; calcRes = []; return; }
   const t0 = performance.now();
   const posSel = $("#tf-pos").value, focus = $("#tf-focus").value, ctx = clubContext();
-  // Gewichte an den Verein anpassen, dazu 15 % Vereinsfit
+  // sportliche Gewichte nach Fokus und Vereinsprofil; die Gesamtnote ist je zur Hälfte Vereins-DNA und sportlicher Nutzen
   const W = (() => { const b = CALC_W[focus] || CALC_W.now, m = CLUB_PROFILE[ctx.profile].m, o = {};
     Object.keys(b).forEach(k => o[k] = b[k] * (m[k] ?? 1));
-    const sum = Object.values(o).reduce((x, y) => x + y, 0); Object.keys(o).forEach(k => o[k] = o[k] / sum * .85); o.club = .15; return o; })();
+    const sum = Object.values(o).reduce((x, y) => x + y, 0); Object.keys(o).forEach(k => o[k] = o[k] / sum); return o; })();
+  const TH = clamp(toInt($("#tf-dna").value) ?? 70, 0, 100);
   const bIn = parseFloat($("#tf-budget").value), B = Number.isFinite(bIn) && bIn > 0 ? bIn : 40;
   const maxAge = toInt($("#tf-age").value) ?? 40, league = $("#tf-league").value.trim().toLowerCase();
   const ov = last.overall || 70;
@@ -2693,15 +2739,19 @@ function runCalc(){
     const q = posSel !== "auto"
       ? (s => ({d: fitAt(e, posSel) - (s && s.p ? s.fit : 40), pos: posSel}))(last.xi.filter(x => x.pos === posSel).sort((a, b) => a.fit - b.fit)[0])
       : quickImpact(e);
-    const pf = clubFit(e, ctx, q.pos || e.pos, true).feas;
-    const pre = (.4 + .6 * pf) * (.55 + .45 * nationFit(e.nat, ctx.home).n) * Math.max(q.d, 0) * 2 * (W.now + W.need) * 3 + (projOvr(e) - ov) * W.future * 3 - price / B * W.value * 12 + (needPos.includes(q.pos) ? 4 * W.need * 5 : 0);
-    pool.push({e, est, price, pre, basis: tp.basis});
+    const pcf = clubFit(e, ctx, q.pos || e.pos, true), pf = pcf.feas;
+    const dna = dnaOf(e, ctx, q.pos || e.pos, {nat: pcf.nat, age: pcf.a, feas: pf, wage: pcf.w, price, B}).dna;
+    const pre = dna / 4 + (.4 + .6 * pf) * Math.max(q.d, 0) * 2 * (W.now + W.need) * 3 + (projOvr(e) - ov) * W.future * 3 - price / B * W.value * 12 + (needPos.includes(q.pos) ? 4 * W.need * 5 : 0);
+    pool.push({e, est, price, pre, dna, basis: tp.basis});
   }
   if (!pool.length){ st.className = "status err"; st.textContent = (focus === "free" ? "Keine vereinslosen Spieler und keine mit auslaufendem Vertrag gefunden (dafür braucht es den FC-27-Abgleich). " : "") + "Niemand in deiner Datenbank passt zu Budget, Alter, Liga und Position. Lockere die Filter."; out.innerHTML = ""; calcRes = []; return; }
   pool.sort((a, b) => b.pre - a.pre);
+  // Vorfilter wie beim Schalke-Modell: zuerst nur Spieler über der DNA-Schwelle, aufgefüllt mit den nächstbesten
+  const passN = pool.filter(x => x.dna >= TH).length;
+  const pick = [...pool.filter(x => x.dna >= TH), ...pool.filter(x => x.dna < TH)].slice(0, 60);
   const c01 = v => clamp(v, 0, 1);
   const wages = state.players.map(p => p.wage).filter(Boolean), wageRef = wages.length ? Math.max(...wages) : null;
-  calcRes = pool.slice(0, 60).map(x => {
+  calcRes = pick.map(x => {
     const e = x.e, im = impactOf({...e, id: "calc-" + e.id});
     const slotPos = im.slot ? im.slot.pos : null, proj = projOvr(e), a = e.age;
     const s = {
@@ -2714,25 +2764,28 @@ function runCalc(){
       resale: a <= 21 ? 100 : a <= 23 ? 85 : a <= 25 ? 70 : a <= 27 ? 50 : a <= 29 ? 30 : a <= 31 ? 12 : 0
     };
     const cf = clubFit(e, ctx, slotPos || e.pos, !!slotPos && needPos.includes(slotPos));
-    s.club = cf.score;
-    // ein Spieler, der nicht kommen will, hilft nicht: Wechselchance dämpft die Gesamtnote
-    // Nationalität wirkt zusätzlich leicht auf die Gesamtnote (Eingewöhnung, einheimischer Kern)
-    const total = Object.keys(W).reduce((t, k) => t + W[k] * s[k], 0) * (.55 + .45 * cf.feas) * (.55 + .45 * cf.nat);
-    return {e, im, s, total, proj, est: x.est, price: x.price, basis: x.basis, slotPos, wageRef, clubNotes: cf.notes};
-  }).sort((a, b) => b.total - a.total).slice(0, 10);
+    const dn = dnaOf(e, ctx, slotPos || e.pos, {nat: cf.nat, age: cf.a, feas: cf.feas, wage: cf.w, price: x.price, B});
+    s.dna = dn.dna;
+    const sport = Object.keys(W).reduce((t, k) => t + W[k] * s[k], 0) * (cf.d < 1 ? .85 + .15 * cf.d : 1);
+    // wer nicht wechseln will oder sich lange eingewöhnen muss, hilft weniger: beides dämpft die Gesamtnote zusätzlich
+    const total = (dn.dna * .5 + sport * .5) * (.6 + .4 * cf.feas) * (.65 + .35 * cf.nat);
+    return {e, im, s, dn, pass: dn.dna >= TH, total, proj, est: x.est, price: x.price, basis: x.basis, slotPos, wageRef, clubNotes: cf.notes};
+  }).sort((a, b) => (b.pass - a.pass) || b.total - a.total).slice(0, 10);
   st.className = "status";
-  st.textContent = `${pool.length} Spieler im Budget durchgerechnet, die besten 60 im kompletten Kader simuliert (${Math.round(performance.now() - t0)} ms).`;
+  st.textContent = `${pool.length} Spieler im Budget durchgerechnet, ${passN} erreichen die Vereins-DNA ${TH}+, die besten 60 im kompletten Kader simuliert (${Math.round(performance.now() - t0)} ms).`;
   const pr = CLUB_PROFILE[ctx.profile];
   $("#calc-club").innerHTML = `<b>${esc(ctx.club || "Dein Verein")}</b>${ctx.league ? " · " + esc(ctx.league) : ""}`
     + (ctx.rank ? ` · Kaderstärke Platz ${ctx.rank} von ${ctx.size}` : "")
     + (ctx.xiAge ? ` · Ø Alter Startelf ${r1(ctx.xiAge).replace(".", ",")}` : "")
     + (ctx.wageTop ? ` · Topgehalt ${fmtWage(ctx.wageTop)}` : "") + ` · ${ctx.n} Spieler · Heimatland ${esc(ctx.home)}`
-    + `<br><span class="muted">Profil: ${pr.t}. ${pr.d}${ctx.club ? "" : " Für Ligaplatz und Wechselchance den Spielstand abgleichen."}</span>`;
+    + `<br><span class="muted">Profil: ${pr.t}. ${pr.d}${ctx.club ? "" : " Für Ligaplatz und Wechselchance den Spielstand abgleichen."}</span>`
+    + `<br><span class="muted">Vereins-DNA: Spielidee ${DNA_STYLE[ctx.style].n} (aus dem Taktik-Assistenten) · intensiv, aggressiv, mutig · Heimat und Sprache · Gehalt und Wechselchance. Schwelle ${TH}.</span>`;
   $("#calc-club").hidden = false;
   renderCalc();
 }
 function calcReasons(r){
-  const e = r.e, im = r.im, out = [];
+  const e = r.e, im = r.im, out = [], d = r.dn;
+  out.push(`Vereins-DNA ${r0(d.dna)}${r.pass ? "" : " (unter der Schwelle)"}: Spielidee ${r0(d.play)} · Intensität ${r0(d.inten)} · Kultur ${r0(d.culture)} · Wirtschaft ${r0(d.econ)}`);
   if (im.slot && im.dOverall > .05) out.push(`Startelf-Schnitt ${im.dOverall >= 0 ? "+" : ""}${r1(im.dOverall)} als ${DE[im.slot.pos]} (Positionswert ${im.slot.fit})`);
   else if (im.slot) out.push(`Würde als ${DE[im.slot.pos]} starten, Schnitt fast unverändert`);
   else out.push(`Kein Stammplatz, Kadertiefe ${im.dDepth >= 0 ? "+" : ""}${r0(im.dDepth)}`);
@@ -2753,10 +2806,10 @@ function renderCalc(){
   if (!calcRes.length){ out.innerHTML = ""; return; }
   out.innerHTML = calcRes.map((r, i) => {
     const e = r.e, d = r.im.dOverall, cls = d > .05 ? "up" : d < -.05 ? "down" : "flat";
-    return `<article class="ccard${i === 0 ? " best" : ""}">
+    return `<article class="ccard${i === 0 && r.pass ? " best" : ""}${r.pass ? "" : " below"}">
       <div class="rk num">${i + 1}</div>
       <div style="min-width:0">
-        ${i === 0 ? '<div class="eyebrow" style="color:var(--accent)">Sinnvollster Transfer</div>' : ""}
+        ${i === 0 && r.pass ? '<div class="eyebrow" style="color:var(--accent)">Sinnvollster Transfer</div>' : !r.pass ? '<div class="eyebrow">Unter der DNA-Schwelle</div>' : ""}
         <div class="nm">${esc(e.name)}</div>
         <div class="meta">${DE[e.pos]}${e.alt.length ? "/" + e.alt.map(x => DE[x]).join("/") : ""} · ${e.age} J. · GES ${e.ovr} · POT ${e.pot}${e.club ? " · " + esc(e.club) : ""}${e.league ? " · " + esc(e.league) : ""}</div>
         <ul>${calcReasons(r).map(t => `<li>${esc(t)}</li>`).join("")}</ul>
@@ -2764,7 +2817,7 @@ function renderCalc(){
         <div class="row" style="margin-top:12px;gap:12px"><button class="btn" type="button" data-calcadd="${esc(e.id)}">Zum Kader hinzufügen</button>
           <span class="small"><span class="delta num ${cls}">${d >= 0 ? "+" : ""}${r1(d)}</span> Gesamt · ${e.value != null || r.price <= 0 ? "" : "≈ "}${fmtMio(r.price)}</span></div>
       </div>
-      <div class="sc"><b class="num">${r0(r.total)}</b><span>von 100</span></div>
+      <div class="sc"><b class="num">${r0(r.total)}</b><span>von 100</span><span class="dnab${r.pass ? " ok" : ""}">DNA ${r0(r.s.dna)}</span></div>
     </article>`;
   }).join("");
 }
