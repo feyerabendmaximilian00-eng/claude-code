@@ -1,8 +1,8 @@
 {
-  "version": "1.8.0",
+  "version": "1.8.1",
   "minLauncher": "1",
-  "released": "2026-11-15T03:37:12.203Z",
-  "notes": "Schattenkader für kommende Saisons; Schreibtisch mit Ordner, Registern, Kalender, Baustellen, Notizblock und Statusleiste",
+  "released": "2026-11-15T03:41:18.891Z",
+  "notes": "Budget: aktuelles Budget voreingestellt, mehr nur durch manuelles Erhöhen",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "b19b76fdfd45a88dec32116dd4883b477dc26c5072620691edddc4e6d92a34f1",
-      "size": 354824
+      "sha256": "2be4841c506a704c174d04ea5f29c3c2e65280cdc9f016c4f412399743d293ff",
+      "size": 358214
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "5c5c922803471976147fd019a9c2cefec821a5229da80295ff6ed62efe092781",
+      "sha256": "e02fc0b9ed6d03142d8d6781463c9cb514aa7148112cb72ec45e97986fff7e8b",
       "size": 23
     }
   ]

@@ -926,6 +926,10 @@ body{background:#2a1911}
   .binder{display:flex;flex-direction:column;gap:16px}
 }
 @media (prefers-reduced-motion:reduce){.notepad{transition:none}}
+
+.budgetfld .bstep{display:flex;gap:6px} .budgetfld .bstep input{flex:1;min-width:0}
+.bsrc{display:block;font-size:13px;color:var(--ink-3);font-weight:400;margin-top:4px;line-height:1.4}
+.bsrc .bup{color:var(--gold)} .bsrc .linkbtn{font-size:13px;padding:0;border:0;background:none;cursor:pointer}
 /* Gewichte: nur 400 und 500 */
 b,strong,label,select,legend,summary,.points li b,.tkcard b,.pd-name,.pc-nm,.bc-nm,.tcard b,.qdb-list b,.banner strong{font-weight:500}
 h1,h2,h3,h4{font-weight:400}
@@ -1321,8 +1325,9 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
         <label for="tf-pos">Position
           <select id="tf-pos"><option value="auto">Automatisch (Transferbedarf)</option></select>
         </label>
-        <label for="tf-budget">Budget (Mio. €)
-          <input id="tf-budget" type="number" min="0" max="500" step="1" value="40" inputmode="numeric">
+        <label for="tf-budget" class="budgetfld">Budget (Mio. €)
+          <span class="bstep"><input id="tf-budget" type="number" min="0" max="999" step="0.5" value="40" inputmode="decimal"><button type="button" class="btn sm" id="tf-bup" aria-label="Budget um 1 Mio. € erhöhen" title="Budget manuell erhöhen">+1</button></span>
+          <small class="bsrc" id="tf-bsrc"></small>
         </label>
         <label for="tf-age">Max. Alter
           <input id="tf-age" type="number" min="16" max="40" step="1" value="29" inputmode="numeric">
@@ -1831,7 +1836,8 @@ try {
   if (saved && Array.isArray(saved.players)){
     state = {players: saved.players.map(normalizePlayer), formation: FORMATIONS[saved.formation] ? saved.formation : "4-3-3", overrides: saved.overrides || {}, isSample: !!saved.isSample,
       useDyn: saved.useDyn !== false, roles: saved.roles && typeof saved.roles === "object" ? saved.roles : {}, style: saved.style || "auto",
-      shadow: saved.shadow && typeof saved.shadow === "object" ? saved.shadow : null, notes: String(saved.notes || "")};
+      shadow: saved.shadow && typeof saved.shadow === "object" ? saved.shadow : null, notes: String(saved.notes || ""),
+      budget: saved.budget && typeof saved.budget === "object" ? saved.budget : null};
   }
 } catch(e){}
 var lastLocalState = null;
@@ -4039,7 +4045,9 @@ function applyStored(st, dbArr){
   if (st && Array.isArray(st.players)){
     state = {players: st.players.map(normalizePlayer), formation: FORMATIONS[st.formation] ? st.formation : "4-3-3", overrides: st.overrides || {}, isSample: !!st.isSample,
       useDyn: st.useDyn !== false, roles: st.roles && typeof st.roles === "object" ? st.roles : {}, style: st.style || "auto",
-      shadow: st.shadow && typeof st.shadow === "object" ? st.shadow : null, notes: String(st.notes || "")};
+      shadow: st.shadow && typeof st.shadow === "object" ? st.shadow : null, notes: String(st.notes || ""),
+      budget: st.budget && typeof st.budget === "object" ? st.budget : null};
+    try { budgetReset(); } catch(e){}
     try { const ne = document.getElementById("notes"); if (ne && document.activeElement !== ne) ne.value = state.notes || ""; } catch(e){}
   }
   if (Array.isArray(dbArr)) DB = dbArr.filter(x => x && x.name).map(x => ({...normalizePlayer(x), club: x.club || "", value: x.value ?? null, league: x.league || ""}));
@@ -4198,6 +4206,7 @@ let fcClubRows = null, fcClubName = "";
 const fcNorm = t => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
 function applyFcData(payload){
   const rows = payload.rows || [], meta = payload.meta || {};
+  if (Number.isFinite(meta.budget) && meta.budget >= 0) try { budgetSet(meta.budget / 1e6, "save", meta.gameDate); } catch(e){}
   if (meta.gameDate){ fcGameDate = meta.gameDate; try { localStorage.setItem("kaderlabor.fcdate", meta.gameDate); } catch(e){} }
   DB = rows.map(r => ({...normalizePlayer({...r, id: undefined}), club: r.club || "", value: null, league: r.league || ""}));
   // eigenen Kader zuordnen: zuerst über die FC-Spieler-ID, dann über den Namen (ohne Akzente, auch Teilnamen)
@@ -4508,6 +4517,32 @@ notesEl.addEventListener("input", () => { state.notes = notesEl.value.slice(0, 2
 function npToggle(open){ const np = $("#notepad"); open = open ?? !np.classList.contains("open"); np.classList.toggle("open", open); $("#np-toggle").setAttribute("aria-expanded", open); if (open && matchMedia("(pointer:fine)").matches) notesEl.focus(); }
 $("#np-toggle").addEventListener("click", () => npToggle());
 $("#np-close").addEventListener("click", () => npToggle(false));
+
+/* ---------- Budget: aktuelles Budget voreingestellt, mehr nur durch manuelles Erhöhen ---------- */
+const bIn = $("#tf-budget");
+const curBudget = () => state.budget && Number.isFinite(+state.budget.cur) ? +state.budget.cur : null;
+function budgetLabel(){
+  const cur = curBudget(), v = parseFloat(bIn.value), el = $("#tf-bsrc");
+  if (cur == null){ el.innerHTML = `Aktuelles Budget unbekannt · <button type="button" class="linkbtn" id="tf-bset">als aktuelles Budget merken</button>`; return; }
+  const src = state.budget.src === "save" ? "aus dem Spielstand" : "von dir festgelegt";
+  if (Number.isFinite(v) && v > cur + 1e-9) el.innerHTML = `<span class="bup">Manuell erhöht: +${fmtMio(Math.round((v - cur) * 10) / 10)}</span> · aktuell ${fmtMio(cur)} · <button type="button" class="linkbtn" id="tf-breset">zurücksetzen</button>`;
+  else if (Number.isFinite(v) && v < cur - 1e-9) el.innerHTML = `Unter dem aktuellen Budget (${fmtMio(cur)}) · <button type="button" class="linkbtn" id="tf-breset">zurücksetzen</button>`;
+  else el.innerHTML = `Aktuelles Budget, ${src}${state.budget.at ? " (" + new Date(state.budget.at).toLocaleDateString("de-DE") + ")" : ""} · <button type="button" class="linkbtn" id="tf-bset">ändern</button>`;
+}
+function budgetReset(){ const cur = curBudget(); if (cur != null) bIn.value = String(cur); budgetLabel(); }
+function budgetSet(v, src, at){ state.budget = {cur: Math.round(v * 10) / 10, src, at: at || null}; save(); budgetReset(); }
+$("#tf-bup").addEventListener("click", () => { const v = parseFloat(bIn.value) || 0; bIn.value = String(Math.round((v + 1) * 10) / 10); budgetLabel(); });
+bIn.addEventListener("input", budgetLabel);
+$("#tf-bsrc").addEventListener("click", e => {
+  if (e.target.id === "tf-breset"){ budgetReset(); return; }
+  if (e.target.id === "tf-bset"){
+    const cur = curBudget(), v = parseFloat(bIn.value);
+    if (cur != null && Number.isFinite(v) && Math.abs(v - cur) < 1e-9){ bIn.focus(); bIn.select(); $("#tf-bsrc").textContent = "Neues aktuelles Budget eintragen und Enter drücken."; bIn.dataset.setting = "1"; return; }
+    if (Number.isFinite(v) && v >= 0) budgetSet(v, "user", (typeof fcGameDate === "string" && fcGameDate) || null);
+  }
+});
+bIn.addEventListener("keydown", e => { if (e.key === "Enter" && bIn.dataset.setting === "1"){ e.preventDefault(); delete bIn.dataset.setting; const v = parseFloat(bIn.value); if (Number.isFinite(v) && v >= 0) budgetSet(v, "user", (typeof fcGameDate === "string" && fcGameDate) || null); } });
+budgetReset();
 
 $("#use-dyn").checked = state.useDyn !== false;
 showView(location.hash.slice(1) || "aufstellung", false);
