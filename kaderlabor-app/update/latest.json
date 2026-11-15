@@ -1,8 +1,8 @@
 {
-  "version": "1.6.0",
+  "version": "1.6.1",
   "minLauncher": "1",
-  "released": "2026-11-15T03:05:22.474Z",
-  "notes": "Transfer-Rechner mit Vereins-DNA nach dem Vorbild des Schalke-Modells: DNA 0-100, Schwelle 70, Gesamtnote je zur Hälfte DNA und sportlicher Nutzen",
+  "released": "2026-11-15T03:09:41.478Z",
+  "notes": "Transfer-Rechner: Vereinsphilosophie, bei Nürnberg automatisch Nürnberger Weg mit JTA-Ansatz (junge Transfers, Weiterverkauf, Ligadominanz, unterschätzte Märkte)",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "46a6abe76762d8651bede02c0a02577794e6ba023e7c3f53edc4154200f7481c",
-      "size": 302651
+      "sha256": "d32d2e59359eedf64f30ad73726fce559cc370494ee2c3bfab1c93fc7f86e9c7",
+      "size": 307244
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "9c9755a8b5ac5a390946d8431ec688969b1101443fd68f74168864c2c42ab41b",
+      "sha256": "d646932e8b2c95426f6ad2719f21cd363697bd8eb9e13e0b2e6825055aad4efd",
       "size": 23
     }
   ]

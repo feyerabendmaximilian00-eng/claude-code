@@ -1106,6 +1106,15 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
             <option value="free">Ablösefrei / Vertrag läuft aus</option>
           </select>
         </label>
+        <label for="tf-phil">Vereinsphilosophie
+          <select id="tf-phil">
+            <option value="auto">Automatisch (Nürnberg: JTA-Weg)</option>
+            <option value="fcn">Nürnberger Weg mit JTA-Daten</option>
+            <option value="ausbildung">Ausbildungsverein</option>
+            <option value="erfolg">Sofort-Erfolg</option>
+            <option value="none">Keine (nur Tabellenlage)</option>
+          </select>
+        </label>
         <label for="tf-dna">DNA-Schwelle
           <input id="tf-dna" type="number" min="0" max="100" step="5" value="70" inputmode="numeric">
         </label>
@@ -2614,6 +2623,29 @@ function nationFit(nat, home){
   if (EUROPE.has(nat)) return {n: .65, note: `${nat}: Europäer, Eingewöhnung nötig`};
   return {n: .35, note: `${/^Nation \d+$/.test(nat) ? "Nicht aus Europa" : nat}: lange Eingewöhnung, fremde Sprache und Kultur`};
 }
+
+/* Vereinsphilosophie. Bei Nürnberg automatisch: „Nürnberger Weg mit JTA-Daten“. Der FCN scoutet seit Juni 2025 mit
+   Jamestown Analytics (JTA). Deren Algorithmus ist nicht öffentlich; nachgebildet wird der bekannte Ansatz:
+   Leistung im Verhältnis zur Ligastärke, unterbewertete Spieler aus kleineren Märkten, jung kaufen, entwickeln, mit Gewinn verkaufen. */
+const PHIL = {
+  fcn:       {t: "Nürnberger Weg mit JTA-Daten", d: "Datenbasiertes Scouting wie mit Jamestown Analytics: Spieler, die ihre Liga überragen, aus unterschätzten Märkten, jung, entwicklungsfähig und mit Gewinn wieder verkaufbar (wie Uzun und Brown). Ablösefreie und günstige Spieler bevorzugt.", m: {now: .65, need: 1, future: 2, value: 1.3, resale: 2.2}, talent: .35, ageCap: 23},
+  ausbildung:{t: "Ausbildungsverein", d: "Junge Spieler mit Potenzial und Wiederverkaufswert zählen mehr.", m: {now: .85, future: 1.4, value: 1.15, resale: 1.5}, talent: .2},
+  erfolg:    {t: "Sofort-Erfolg", d: "Fertige Spieler, die direkt helfen. Entwicklung zählt kaum.", m: {now: 1.3, future: .6, resale: .6}, talent: 0}
+};
+const BIG5 = /premier league|spain primera|serie a|^bundesliga$|ligue 1/i;
+function talentOf(e, price, ctx){
+  const c01 = v => clamp(v, 0, 1), a = e.age;
+  const ageS = a <= 20 ? 1 : a === 21 ? .95 : a === 22 ? .9 : a === 23 ? .8 : a === 24 ? .65 : a === 25 ? .5 : a === 26 ? .35 : a === 27 ? .25 : .1;
+  const fut = estValue({...e, ovr: projOvr(e), age: a + 2});   // Wert in zwei Jahren
+  const gain = (fut - price) / Math.max(price, 1);
+  const talent = (ageS * .45 + c01(((e.pot || e.ovr) - e.ovr) / 10) * .3 + c01(gain / 1.5) * .25) * 100;
+  // JTA-Ansatz: Wie stark überragt er seine Liga, und kommt er aus einem unterschätzten Markt?
+  const ls = ctx && ctx.leagueStr ? ctx.leagueStr.get(e.league) : null;
+  const dom = ls == null ? .5 : c01(.5 + (e.ovr - ls) / 10);
+  const market = BIG5.test(e.league || "") ? .2 : /bundesliga|3\. liga/i.test(e.league || "") ? .5 : 1;
+  const under = (dom * .6 + market * .4) * 100;
+  return {talent, under, ls, fut};
+}
 function clubContext(){
   const P = state.players, ov = last.overall || 70;
   let club = fcClubName || "";
@@ -2639,7 +2671,12 @@ function clubContext(){
   if (rank){ if (rank <= Math.max(2, Math.round(size * .2))) profile = "spitze"; else if (rank > size - Math.max(3, Math.round(size * .2))) profile = "abstieg"; }
   if (xiAge && xiAge < 24.5 && profile !== "abstieg") profile = "ausbildung";
   const T = computeTactic(last), style = DNA_STYLE[T.st] ? T.st : "ausgewogen";
-  return {style, dnaRef: dnaRefs(style), club, league, home: homeNation(league), own, strength, clubTop3, rank, size, profile, xiAge, n: P.length, maxOvr: Math.max(...P.map(p => p.ovr), ov),
+  const phSel = $("#tf-phil") ? $("#tf-phil").value : "auto";
+  const philKey = phSel === "auto" ? (/n(ü|ue)rnberg/i.test(club) ? "fcn" : profile === "ausbildung" ? "ausbildung" : null) : phSel === "none" ? null : phSel;
+  // Ligastärke = Schnitt der Vereinsstärken je Liga
+  const lsum = new Map(); strength.forEach((v, k) => { const l = clubLeague.get(k); if (!l) return; const o = lsum.get(l) || [0, 0]; o[0] += v; o[1]++; lsum.set(l, o); });
+  const leagueStr = new Map([...lsum].filter(([, o]) => o[1] >= 4).map(([l, o]) => [l, o[0] / o[1]]));
+  return {style, philKey, phil: philKey ? PHIL[philKey] : null, leagueStr, dnaRef: dnaRefs(style), club, league, home: homeNation(league), own, strength, clubTop3, rank, size, profile, xiAge, n: P.length, maxOvr: Math.max(...P.map(p => p.ovr), ov),
     wageTop: wages.length ? wages[wages.length - 1] : null, wageMid: wages.length ? wages[Math.floor(wages.length * .75)] : null};
 }
 function clubFit(e, ctx, pos, isNeed){
@@ -2708,7 +2745,10 @@ function dnaOf(e, ctx, pos, x){
   }
   const culture = (x.nat * .8 + x.age * .2) * 100;
   const econ = x.feas * (x.wage * .5 + c01(1 - x.price / x.B) * .5) * 100;
-  return {dna: play * .3 + inten * .25 + culture * .25 + econ * .2, play, inten, culture, econ};
+  const tw = ctx.phil ? ctx.phil.talent : 0, t = talentOf(e, x.price, ctx);
+  const data = ctx.philKey === "fcn" ? t.talent * .6 + t.under * .4 : t.talent;
+  const base = play * .3 + inten * .25 + culture * .25 + econ * .2;
+  return {dna: base * (1 - tw) + data * tw, play, inten, culture, econ, talent: t.talent, under: t.under, ls: t.ls, fut: t.fut};
 }
 let calcRes = [];
 function runCalc(){
@@ -2718,7 +2758,7 @@ function runCalc(){
   const t0 = performance.now();
   const posSel = $("#tf-pos").value, focus = $("#tf-focus").value, ctx = clubContext();
   // sportliche Gewichte nach Fokus und Vereinsprofil; die Gesamtnote ist je zur Hälfte Vereins-DNA und sportlicher Nutzen
-  const W = (() => { const b = CALC_W[focus] || CALC_W.now, m = CLUB_PROFILE[ctx.profile].m, o = {};
+  const W = (() => { const b = CALC_W[focus] || CALC_W.now, m = ctx.phil ? ctx.phil.m : CLUB_PROFILE[ctx.profile].m, o = {};
     Object.keys(b).forEach(k => o[k] = b[k] * (m[k] ?? 1));
     const sum = Object.values(o).reduce((x, y) => x + y, 0); Object.keys(o).forEach(k => o[k] = o[k] / sum); return o; })();
   const TH = clamp(toInt($("#tf-dna").value) ?? 70, 0, 100);
@@ -2768,8 +2808,10 @@ function runCalc(){
     s.dna = dn.dna;
     const sport = Object.keys(W).reduce((t, k) => t + W[k] * s[k], 0) * (cf.d < 1 ? .85 + .15 * cf.d : 1);
     // wer nicht wechseln will oder sich lange eingewöhnen muss, hilft weniger: beides dämpft die Gesamtnote zusätzlich
-    const total = (dn.dna * .5 + sport * .5) * (.6 + .4 * cf.feas) * (.65 + .35 * cf.nat);
-    return {e, im, s, dn, pass: dn.dna >= TH, total, proj, est: x.est, price: x.price, basis: x.basis, slotPos, wageRef, clubNotes: cf.notes};
+    const total = (dn.dna * .5 + sport * .5) * (.6 + .4 * cf.feas) * (.65 + .35 * cf.nat)
+      // Nürnberger Weg: junge Transfers; ältere Spieler nur als Ausnahme
+      * (ctx.phil && ctx.phil.ageCap && e.age > ctx.phil.ageCap ? Math.max(.6, 1 - (e.age - ctx.phil.ageCap) * .07) : 1);
+    return {e, im, s, dn, phil: ctx.phil, philKey: ctx.philKey, pass: dn.dna >= TH, total, proj, est: x.est, price: x.price, basis: x.basis, slotPos, wageRef, clubNotes: cf.notes};
   }).sort((a, b) => (b.pass - a.pass) || b.total - a.total).slice(0, 10);
   st.className = "status";
   st.textContent = `${pool.length} Spieler im Budget durchgerechnet, ${passN} erreichen die Vereins-DNA ${TH}+, die besten 60 im kompletten Kader simuliert (${Math.round(performance.now() - t0)} ms).`;
@@ -2778,14 +2820,17 @@ function runCalc(){
     + (ctx.rank ? ` · Kaderstärke Platz ${ctx.rank} von ${ctx.size}` : "")
     + (ctx.xiAge ? ` · Ø Alter Startelf ${r1(ctx.xiAge).replace(".", ",")}` : "")
     + (ctx.wageTop ? ` · Topgehalt ${fmtWage(ctx.wageTop)}` : "") + ` · ${ctx.n} Spieler · Heimatland ${esc(ctx.home)}`
-    + `<br><span class="muted">Profil: ${pr.t}. ${pr.d}${ctx.club ? "" : " Für Ligaplatz und Wechselchance den Spielstand abgleichen."}</span>`
-    + `<br><span class="muted">Vereins-DNA: Spielidee ${DNA_STYLE[ctx.style].n} (aus dem Taktik-Assistenten) · intensiv, aggressiv, mutig · Heimat und Sprache · Gehalt und Wechselchance. Schwelle ${TH}.</span>`;
+    + (ctx.phil ? `<br><span>Vereinsphilosophie: ${ctx.phil.t}. ${ctx.phil.d}</span>` : "")
+    + `<br><span class="muted">${ctx.phil ? "Tabellenlage" : "Profil"}: ${pr.t}.${ctx.phil ? "" : " " + pr.d}${ctx.club ? "" : " Für Ligaplatz und Wechselchance den Spielstand abgleichen."}</span>`
+    + `<br><span class="muted">Vereins-DNA: Spielidee ${DNA_STYLE[ctx.style].n} (aus dem Taktik-Assistenten) · intensiv, aggressiv, mutig · Heimat und Sprache · Gehalt und Wechselchance${ctx.phil && ctx.phil.talent ? " · Talent, Weiterverkauf" + (ctx.philKey === "fcn" ? ", Ligadominanz und unterschätzte Märkte" : "") : ""}. Schwelle ${TH}.</span>`;
   $("#calc-club").hidden = false;
   renderCalc();
 }
 function calcReasons(r){
   const e = r.e, im = r.im, out = [], d = r.dn;
-  out.push(`Vereins-DNA ${r0(d.dna)}${r.pass ? "" : " (unter der Schwelle)"}: Spielidee ${r0(d.play)} · Intensität ${r0(d.inten)} · Kultur ${r0(d.culture)} · Wirtschaft ${r0(d.econ)}`);
+  out.push(`Vereins-DNA ${r0(d.dna)}${r.pass ? "" : " (unter der Schwelle)"}: Spielidee ${r0(d.play)} · Intensität ${r0(d.inten)} · Kultur ${r0(d.culture)} · Wirtschaft ${r0(d.econ)}${r.phil && r.phil.talent ? " · Talent " + r0(d.talent) : ""}${r.philKey === "fcn" ? " · Datenwert " + r0(d.under) : ""}`);
+  if (r.philKey === "fcn" && d.ls != null && e.ovr - d.ls >= 3) out.push(`Überragt seine Liga: GES ${e.ovr} bei Ligaschnitt ${r0(d.ls)}${BIG5.test(e.league || "") ? "" : ", aus einem unterschätzten Markt"}`);
+  if (r.phil && r.phil.talent) out.push(d.fut > r.price * 1.15 ? `Weiterverkauf: in zwei Jahren etwa ${fmtMio(d.fut)} wert, ${r.price > 0 ? "rund " + fmtMio(Math.round((d.fut - r.price) * 10) / 10) + " Gewinn" : "voller Gewinn, da ablösefrei"}` : `Weiterverkauf: in zwei Jahren etwa ${fmtMio(d.fut)} wert, kaum Gewinn`);
   if (im.slot && im.dOverall > .05) out.push(`Startelf-Schnitt ${im.dOverall >= 0 ? "+" : ""}${r1(im.dOverall)} als ${DE[im.slot.pos]} (Positionswert ${im.slot.fit})`);
   else if (im.slot) out.push(`Würde als ${DE[im.slot.pos]} starten, Schnitt fast unverändert`);
   else out.push(`Kein Stammplatz, Kadertiefe ${im.dDepth >= 0 ? "+" : ""}${r0(im.dDepth)}`);
