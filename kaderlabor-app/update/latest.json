@@ -1,8 +1,8 @@
 {
-  "version": "1.8.2",
+  "version": "1.8.3",
   "minLauncher": "1",
-  "released": "2026-11-15T03:44:51.197Z",
-  "notes": "Holzschreibtisch, Vereinslogo des 1. FCN und Stadionfoto auf dem Tisch",
+  "released": "2026-11-15T03:48:13.269Z",
+  "notes": "Holzhintergrund in der App repariert, Schatten der Widgets, größeres Polaroid",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "2beabf07136a163abee5a607a6b0221897e0aa1b0e07d84b9f1d3c6965a0f5f9",
-      "size": 477230
+      "sha256": "fa8de35b362237cc20f887a713657a783ed01d50aed31de31a1e00fb3d226fbc",
+      "size": 477355
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "f8b8cde64c4b5150514a08034ef2d34ae6b9ca553920c11bd0a83f39ec1006f0",
+      "sha256": "eeb9993c2d81a91dbeb7aef557a1d20d2cd1dc5eeb1a3989f7d63bc32417e716",
       "size": 23
     }
   ]
