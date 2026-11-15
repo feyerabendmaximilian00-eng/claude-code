@@ -1,8 +1,8 @@
 {
-  "version": "1.9.7",
+  "version": "1.9.8",
   "minLauncher": "1",
-  "released": "2026-11-15T12:44:47.781Z",
-  "notes": "Eigene Transferziele im Scouting (Position, GES, POT, Alter, Gehalt, Herkunft, Fuß, Mindestwerte) und Verknüpfungen für Glubb-DNA.exe",
+  "released": "2026-11-15T13:09:43.967Z",
+  "notes": "Spielerprofile je Position; Torhüter mit echten Torwartwerten (Reflexe, Hechtsprung, Fangen, Stellungsspiel, Abschlag)",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "345c0342d16aeb7cc7e9cdcbb002e264a073381507a594da09a23714cd910cff",
-      "size": 565734
+      "sha256": "f78145633ba6092725a7bb2bc07a69b3fa213a17a80339c6f4d367425e5e52e4",
+      "size": 571232
     },
     {
       "path": "app/settings.html",
@@ -31,13 +31,13 @@
     },
     {
       "path": "app-main.js",
-      "sha256": "d30071c32db040d64a7f779ea4a9018b96b1742cfbcade52178aa59cfce901e4",
+      "sha256": "49fbc29bbc95ffe42a86db97e7168b88bafd1ef443ccc6d1e185848f4e980937",
       "size": 26271
     },
     {
       "path": "fcsave.js",
-      "sha256": "d8db4fb872465402e7fa3ce744d4c29cc6ff85faf036dd3990239fd7992e1890",
-      "size": 14898
+      "sha256": "ce1da2f7a7379861d76dab4440bd2e039dc167d863237ef4a1673d1f6b9d5a37",
+      "size": 15357
     },
     {
       "path": "preload.js",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "0cec36061a15bca485d7152459880f79b434af9dcb03d6023a38a926ac2db5cd",
+      "sha256": "5ef852b59e874a2f4aefa08988431ad20ce625e893513f14578ba0811cb907d4",
       "size": 23
     }
   ]

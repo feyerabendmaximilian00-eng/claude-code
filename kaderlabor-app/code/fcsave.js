@@ -21,6 +21,8 @@ const P = {
   contractvaliduntil: ["qvmK", 2000], wage: ["cmGX", 0], releaseclause: ["pSzm", 0],
   // 1 = Spielerin (Frauenligen), geprüft an Putellas, Bonmatí, Schüller, Gwinn, Kerr, J. Wirtz
   gender: ["EveZ", 0],
+  // Torwartwerte (nur bei Torhütern hoch), Zuordnung über Zusammenhänge mit Gesamtwert, Reaktion, Größe/Stärke ermittelt
+  gkdiving: ["eYFI", 1], gkhandling: ["xrSG", 1], gkkicking: ["kqda", 1], gkreflexes: ["yfhq", 1], gkpositioning: ["GBGj", 1],
 };
 const POS = {0:"TW",1:"IV",2:"RAV",3:"RV",4:"IV",5:"IV",6:"IV",7:"LV",8:"LAV",9:"ZDM",10:"ZDM",11:"ZDM",12:"RM",13:"ZM",14:"ZM",15:"ZM",16:"LM",
   17:"ZOM",18:"ZOM",19:"ZOM",20:"ST",21:"ST",22:"ST",23:"RF",24:"ST",25:"ST",26:"ST",27:"LF"};
@@ -198,6 +200,7 @@ function readSave(file, names, opts = {}) {
       row[k] = Math.round(s / t);
     }
     for (const [k, col] of Object.entries(SUBS)) row.sub[k] = g(i, col);
+    if (players.has("eYFI")) { row.sub.div = g(i, "gkdiving"); row.sub.han = g(i, "gkhandling"); row.sub.kic = g(i, "gkkicking"); row.sub.ref = g(i, "gkreflexes"); row.sub.gpos = g(i, "gkpositioning"); }
     if (players.has("qvmK")) {
       const cy = g(i, "contractvaliduntil"), wage = g(i, "wage"), rc = g(i, "releaseclause");
       if (cy > 2000 && club != null) row.contract = cy;

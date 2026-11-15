@@ -1008,6 +1008,9 @@ body.prof-open{overflow:hidden}
 .tgt button{border:0;background:none;color:var(--ink);font:inherit;font-size:14px;padding:6px 12px;cursor:pointer;min-height:36px}
 .tgt button:hover{background:var(--accent-soft)}
 .tgt .tgt-x{padding:6px 10px;color:var(--ink-3);border-left:1px solid var(--line)}
+
+.prof-grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:640px){.prof-grid.four{grid-template-columns:1fr}}
 /* Gewichte: nur 400 und 500 */
 b,strong,label,select,legend,summary,.points li b,.tkcard b,.pd-name,.pc-nm,.bc-nm,.tcard b,.qdb-list b,.banner strong{font-weight:500}
 h1,h2,h3,h4{font-weight:400}
@@ -1651,7 +1654,9 @@ const SUBS = {
   phy:[["jum","Sprungkraft",.05,["jumping"]],["sta","Ausdauer",.25,["stamina"]],["str","Stärke",.5,["strength","kraft"]],["agg","Aggressivität",.2,["aggression"]]]
 };
 const SUB_KEYS = Object.values(SUBS).flat().map(x => x[0]);
-const SUB_LABEL = Object.fromEntries(Object.values(SUBS).flat().map(x => [x[0], x[1]]));
+const GK_SUB = {div: "Hechtsprung", han: "Fangen", kic: "Abschlag", ref: "Reflexe", gpos: "Stellungsspiel"};
+const GK_KEYS = Object.keys(GK_SUB);
+const SUB_LABEL = Object.fromEntries([...Object.values(SUBS).flat().map(x => [x[0], x[1]]), ...Object.entries(GK_SUB)]);
 function fromSubs(k, sub){
   let sw = 0, sv = 0;
   SUBS[k].forEach(([sk,,w]) => { if (sub[sk] != null && w > 0){ sw += w; sv += w * sub[sk]; } });
@@ -1892,6 +1897,7 @@ function normalizePlayer(raw){
   p.sub = {};
   const rs = (raw.sub && typeof raw.sub === "object") ? raw.sub : {};
   SUB_KEYS.forEach(sk => { const v = toInt(rs[sk] ?? raw[sk]); if (v != null) p.sub[sk] = clamp(v, 1, 99); });
+  GK_KEYS.forEach(sk => { const v = toInt(rs[sk] ?? raw[sk]); if (v != null) p.sub[sk] = clamp(v, 1, 99); });
   STATS.forEach(k => {
     const v = toInt(raw[k]);
     const d = fromSubs(k, p.sub);
@@ -3117,7 +3123,7 @@ const DNA_STYLE = {
 const DNA_INT = {sta: .35, agg: .3, rea: .2, comp: .15};   // intensiv, aggressiv, mutig
 const SUB_FACE = {acc:"pac",spd:"pac",fin:"sho",posi:"sho",spow:"sho",lsho:"sho",vol:"sho",pen:"sho",vis:"pas",cro:"pas",fk:"pas",spas:"pas",lpas:"pas",cur:"pas",
   agi:"dri",bal:"dri",bc:"dri",drib:"dri",int:"def",head:"def",awr:"def",stk:"def",sli:"def",jum:"phy",sta:"phy",str:"phy",agg:"phy"};
-const subOf = (p, k) => p.sub && p.sub[k] != null ? p.sub[k] : SUB_FACE[k] ? p[SUB_FACE[k]] : p.ovr;
+const subOf = (p, k) => p.sub && p.sub[k] != null ? p.sub[k] : SUB_FACE[k] ? p[SUB_FACE[k]] : GK_SUB[k] ? (p.pos === "GK" ? p.ovr : 12) : p.ovr;
 const wsum = (p, w) => Object.entries(w).reduce((t, [k, x]) => t + subOf(p, k) * x, 0) / Object.values(w).reduce((a, b) => a + b, 0);
 const subMean = p => SUB_KEYS.reduce((t, k) => t + subOf(p, k), 0) / SUB_KEYS.length;
 function dnaRefs(st){
@@ -3130,7 +3136,14 @@ function dnaRefs(st){
 function dnaOf(e, ctx, pos, x){
   const c01 = v => clamp(v, 0, 1), role = ROLE[pos] || ROLE[e.pos];
   let play, inten;
-  if (role === "GK"){ const r = ctx.dnaRef.GK ? ctx.dnaRef.GK.ovr : ctx.own; play = inten = c01(.5 + (e.ovr - r) / 12) * 100; }
+  if (role === "GK"){
+    // Spielidee beim Torwart: Torwartwerte; bei Ballbesitz/Pressing zählen Abschlag und Ruhe am Ball mehr
+    const kw = ctx.style === "ballbesitz" || ctx.style === "pressing" ? .3 : .15;
+    const gs = p => (subOf(p, "ref") + subOf(p, "div") + subOf(p, "han") + subOf(p, "gpos")) / 4 * (1 - kw) + subOf(p, "kic") * kw;
+    const gi = p => (subOf(p, "rea") + subOf(p, "comp") + subOf(p, "gpos")) / 3;
+    const xiGk = last.xi.find(x => x.p && x.pos === "GK"), rg = xiGk ? gs(xiGk.p) : (ctx.dnaRef.GK ? ctx.dnaRef.GK.ovr : ctx.own), ri = xiGk ? gi(xiGk.p) : rg;
+    play = c01(.5 + (gs(e) - rg) / 12) * 100; inten = c01(.5 + (gi(e) - ri) / 12) * 100;
+  }
   else {
     const ref = ctx.dnaRef[role] || ctx.dnaRef.ALL || {play: e.ovr, int: e.ovr}, m = subMean(e);
     const ps = wsum(e, DNA_STYLE[ctx.style].w), is = wsum(e, DNA_INT);
@@ -4704,6 +4717,37 @@ bIn.addEventListener("keydown", e => { if (e.key === "Enter" && bIn.dataset.sett
 budgetReset();
 
 /* ---------- Spielerprofil: Steckbrief, Typ-Plaketten, Rosendiagramme (Perzentile je Rolle) ---------- */
+const PROF_BY_ROLE = {
+  GK: [["Reflexe & Shotstopping", ["ref","div","rea","agi","jum"]], ["Strafraum & Stellungsspiel", ["gpos","han","jum","str","comp"]],
+       ["Spieleröffnung", ["kic","spas","lpas","vis","comp"]], ["Athletik", ["acc","spd","agi","jum","str"]]],
+  CB: [["Duelle · Defensiv", ["stk","sli","int","agg","str"]], ["Luftduelle", ["head","jum","str","agg"]], ["Defensivverhalten", ["awr","int","rea","comp","posi"]],
+       ["Spieleröffnung", ["spas","lpas","vis","comp","bc"]], ["Athletik", ["acc","spd","agi","bal","jum","sta","str"]], ["Ballführung", ["bc","drib","comp","agi"]]],
+  FB: [["Athletik", ["acc","spd","agi","bal","sta","str"]], ["Duelle · Defensiv", ["stk","sli","int","awr","agg"]], ["Flanken & Offensivspiel", ["cro","cur","acc","spd","drib","sta"]],
+       ["Passen", ["spas","lpas","vis","cro"]], ["Ballführung", ["bc","drib","comp","agi"]], ["Defensivverhalten", ["awr","int","rea","comp"]]],
+  CDM: [["Duelle · Defensiv", ["stk","sli","int","agg","str"]], ["Defensivverhalten", ["awr","int","rea","comp","posi"]], ["Passen", ["spas","lpas","vis","cur"]],
+        ["Ballführung", ["bc","drib","comp","agi"]], ["Athletik", ["sta","str","acc","spd","jum"]], ["Luftduelle", ["head","jum","str"]]],
+  CM: [["Passen", ["spas","lpas","vis","cro","cur"]], ["Ballführung", ["bc","drib","comp","agi","bal"]], ["Spielintelligenz", ["vis","posi","rea","comp","awr"]],
+       ["Abschluss", ["fin","spow","lsho","vol"]], ["Arbeit gegen den Ball", ["sta","agg","int","stk"]], ["Athletik", ["acc","spd","agi","sta","str"]]],
+  CAM: [["Kreation", ["vis","spas","lpas","cur","fk"]], ["Ballführung", ["bc","drib","agi","bal","comp"]], ["Abschluss", ["fin","spow","lsho","vol","posi"]],
+        ["Spielintelligenz", ["posi","rea","comp","vis"]], ["Athletik", ["acc","spd","agi","bal"]], ["Arbeit gegen den Ball", ["sta","agg","int"]]],
+  WIDE: [["Tempo & Athletik", ["acc","spd","agi","bal","sta"]], ["Ballführung", ["drib","bc","agi","comp"]], ["Flanken & Kreation", ["cro","cur","vis","spas","fk"]],
+         ["Abschluss", ["fin","spow","lsho","vol","posi"]], ["Spielintelligenz", ["posi","rea","comp","vis"]], ["Arbeit gegen den Ball", ["sta","agg","int","stk"]]],
+  CF: [["Abschluss", ["fin","spow","lsho","vol","pen","posi"]], ["Ballführung", ["bc","drib","agi","bal","comp"]], ["Kombinationsspiel", ["spas","vis","posi","rea"]],
+       ["Tempo & Athletik", ["acc","spd","agi","str","jum"]], ["Luftduelle", ["head","jum","str"]], ["Arbeit gegen den Ball", ["sta","agg","int"]]],
+  ST: [["Abschluss", ["fin","spow","lsho","vol","pen","posi"]], ["Luftduelle", ["head","jum","str","agg"]], ["Tempo & Athletik", ["acc","spd","agi","bal","str"]],
+       ["Ballführung", ["bc","drib","agi","comp"]], ["Kombinationsspiel", ["spas","vis","posi","rea"]], ["Arbeit gegen den Ball", ["sta","agg","int","stk"]]]
+};
+const PROF_TYPES_BY_ROLE = {
+  GK: [["Shotstopper", {ref:.4, div:.4, rea:.2}], ["Strafraumbeherrscher", {han:.35, gpos:.35, jum:.15, str:.15}], ["Mitspielender Torwart", {kic:.4, spas:.3, lpas:.2, comp:.1}], ["Ruhepol", {comp:.4, gpos:.3, han:.3}]],
+  CB: ["Abwehrchef", "Zweikämpfer", "Kopfballstark", "Aufbauspieler", "Balljäger", "Tiefenläufer"],
+  FB: ["Flankengeber", "Tiefenläufer", "Balljäger", "Zweikämpfer", "Ballmagnet", "Spielmacher"],
+  CDM: ["Abwehrchef", "Balljäger", "Zweikämpfer", "Aufbauspieler", "Spielmacher", "Kopfballstark"],
+  CM: ["Spielmacher", "Balljäger", "Ballmagnet", "Aufbauspieler", "Knipser", "Tiefenläufer"],
+  CAM: ["Spielmacher", "Ballmagnet", "Knipser", "Tiefenläufer", "Flankengeber", "Balljäger"],
+  WIDE: ["Tiefenläufer", "Ballmagnet", "Flankengeber", "Knipser", "Spielmacher", "Balljäger"],
+  CF: ["Knipser", "Ballmagnet", "Spielmacher", "Tiefenläufer", "Kopfballstark", "Balljäger"],
+  ST: ["Knipser", "Kopfballstark", "Tiefenläufer", "Ballmagnet", "Zweikämpfer", "Balljäger"]
+};
 const PROF_GROUPS = [
   ["Athletik", ["acc","spd","agi","bal","jum","sta","str"]],
   ["Technik · Ballführung", ["bc","drib","comp","rea","agi"]],
@@ -4720,10 +4764,12 @@ const PROF_TYPES = [
   ["Tiefenläufer", {acc:.3, spd:.35, posi:.2, sta:.15}],
   ["Zweikämpfer", {stk:.35, str:.3, head:.15, agg:.2}],
   ["Abwehrchef", {awr:.35, int:.25, head:.2, comp:.2}],
-  ["Flankengeber", {cro:.45, sta:.2, acc:.2, cur:.15}]
+  ["Flankengeber", {cro:.45, sta:.2, acc:.2, cur:.15}],
+  ["Kopfballstark", {head:.45, jum:.3, str:.25}],
+  ["Aufbauspieler", {spas:.35, lpas:.3, comp:.2, vis:.15}]
 ];
 const pctCache = {};
-const SHORT = {acc:"Antritt",spd:"Sprint",agi:"Bewegl.",bal:"Balance",jum:"Sprungkraft",sta:"Ausdauer",str:"Stärke",bc:"Ballkontr.",drib:"Dribbling",comp:"Ruhe",rea:"Reaktion",
+const SHORT = {div:"Hechtsprung",han:"Fangen",kic:"Abschlag",ref:"Reflexe",gpos:"Stellung TW",acc:"Antritt",spd:"Sprint",agi:"Bewegl.",bal:"Balance",jum:"Sprungkraft",sta:"Ausdauer",str:"Stärke",bc:"Ballkontr.",drib:"Dribbling",comp:"Ruhe",rea:"Reaktion",
   spas:"Kurzpass",lpas:"Langpass",vis:"Übersicht",cro:"Flanken",cur:"Effet",fk:"Freistoß",fin:"Abschluss",spow:"Schusskraft",lsho:"Fernschuss",vol:"Volley",pen:"Elfmeter",head:"Kopfball",
   stk:"Tackling",sli:"Grätsche",int:"Abfangen",agg:"Aggress.",awr:"Def. Bew.",posi:"Stellung"};
 // Vergleichsgruppe: gleiche Rolle in deiner Liga (aussagekräftiger), sonst alle Spieler dieser Rolle
@@ -4736,7 +4782,7 @@ function rolePeers(role){
   let peers = league ? src.filter(e => ok(e) && e.league === league) : [];
   let scope = league ? `${league}` : "";
   if (peers.length < 25){ peers = src.filter(ok); scope = "alle Ligen"; }
-  const sorted = {}; SUB_KEYS.forEach(k => { sorted[k] = peers.map(e => e.sub[k]).filter(v => v != null).sort((a, b) => a - b); });
+  const sorted = {}; [...SUB_KEYS, ...GK_KEYS].forEach(k => { sorted[k] = peers.map(e => e.sub[k]).filter(v => v != null).sort((a, b) => a - b); });
   return pctCache[key] = {n: DB.length, sorted, count: peers.length, scope};
 }
 function pctOf(arr, v){
@@ -4746,8 +4792,8 @@ function pctOf(arr, v){
   return (lo + (eq - lo) / 2) / arr.length;
 }
 const pctColor = q => `hsl(${Math.round(clamp(q, 0, 1) * 118)} 58% ${46 + Math.round(clamp(q, 0, 1) * 4)}%)`;
-function roseSvg(title, keys, p, peers){
-  const W = 380, H = 290, cx = 190, cy = 146, R0 = 12, R = 76, n = keys.length, step = Math.PI * 2 / n;
+function roseSvg(title, keys, p, peers, wide){
+  const W = wide ? 440 : 380, H = 290, cx = W / 2, cy = 146, R0 = 12, R = 76, n = keys.length, step = Math.PI * 2 / n;
   const pt = (r, a) => [cx + r * Math.sin(a), cy - r * Math.cos(a)];
   const rings = [.25, .5, .75, 1].map(f => `<circle cx="${cx}" cy="${cy}" r="${(R0 + (R - R0) * f).toFixed(1)}" class="rs-ring"/>`).join("");
   const petals = keys.map((k, i) => {
@@ -4773,7 +4819,9 @@ function openProfile(src, id){
   let dna = null;
   try { if (last){ const ctx = clubContext(), B = parseFloat($("#tf-budget").value) || DEF_BUDGET, tp = transferPrice(e, ctx), cf = clubFit(e, ctx, e.pos, false);
     dna = dnaOf(e, ctx, e.pos, {nat: cf.nat, age: cf.a, feas: src === "own" ? 1 : cf.feas, wage: cf.w, price: src === "own" ? 0 : tp.price, B}); } } catch(err){}
-  const types = PROF_TYPES.map(([n, w]) => [n, Math.round(avg(Object.keys(w), k => pctOf(peers.sorted[k], subOf(e, k)) * w[k]) * Object.keys(w).length * 100)]).sort((a, b) => b[1] - a[1]);
+  const typeDefs = role === "GK" ? PROF_TYPES_BY_ROLE.GK : (PROF_TYPES_BY_ROLE[role] || PROF_TYPES.map(t => t[0])).map(n => PROF_TYPES.find(t => t[0] === n)).filter(Boolean);
+  const groups = PROF_BY_ROLE[role] || PROF_GROUPS;
+  const types = typeDefs.map(([n, w]) => [n, Math.round(avg(Object.keys(w), k => pctOf(peers.sorted[k], subOf(e, k)) * w[k]) * Object.keys(w).length * 100)]).sort((a, b) => b[1] - a[1]);
   const est = estValue(e), tp = (() => { try { return transferPrice(e, null); } catch(err){ return {price: est}; } })();
   const facts = [
     ["Position", DE[e.pos] + (e.alt.length ? " (" + e.alt.map(x => DE[x]).join(", ") + ")" : "")],
@@ -4799,8 +4847,8 @@ function openProfile(src, id){
       </aside>
       <section class="prof-main">
         <div class="prof-badges">${types.slice(0, 6).map(([n, v]) => `<span class="pbadge"><i>${n}</i><b class="num" style="background:${pctColor(v / 100)}">${v}</b></span>`).join("")}</div>
-        <div class="prof-grid">${PROF_GROUPS.map(([t, ks]) => roseSvg(t, ks, e, peers)).join("")}</div>
-        <p class="small muted" style="margin:8px 0 0">Blütenblatt = Perzentil im Vergleich zu Spielern derselben Rolle (${esc(peers.scope)}, Rand = 100 %). Farbe von Rot (schwach) über Gelb zu Grün (stark). Zahl am Rand = Einzelwert aus FC 27.${role === "GK" ? " Torwartwerte speichert der Spielstand nicht einzeln, gezeigt werden die Feldspielerwerte." : ""}</p>
+        <div class="prof-grid${groups.length === 4 ? " four" : ""}">${groups.map(([t, ks]) => roseSvg(t, ks, e, peers, groups.length === 4)).join("")}</div>
+        <p class="small muted" style="margin:8px 0 0">Blütenblatt = Perzentil im Vergleich zu Spielern derselben Rolle (${esc(peers.scope)}, Rand = 100 %). Farbe von Rot (schwach) über Gelb zu Grün (stark). Zahl am Rand = Einzelwert aus FC 27. Diagramme und Typen richten sich nach der Position (${esc(DE[e.pos])}).${role === "GK" && !(e.sub && e.sub.div != null) ? " Für diesen Torwart liegen noch keine Torwartwerte vor (Spielstand neu abgleichen)." : ""}</p>
       </section>
     </div></div>`;
   ov.hidden = false; document.body.classList.add("prof-open");
