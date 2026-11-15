@@ -1,8 +1,8 @@
 {
-  "version": "1.8.4",
+  "version": "1.8.5",
   "minLauncher": "1",
-  "released": "2026-11-15T03:50:27.612Z",
-  "notes": "Kugelschreiber mit Vereinslogo als Schreibtisch-Detail",
+  "released": "2026-11-15T03:57:49.537Z",
+  "notes": "Kaffeetasse und Kugelschreiber mit Vereinslogo (Fotos), größeres Polaroid",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "d2d6f1677fc69b444365378c3e97ae25ee87edd1bc25795453f0b23ca47502a2",
-      "size": 492671
+      "sha256": "eb0ee856ccafd048c5f7406398a5b1b7ba37f641d51a278282b8b3e53dfcbbf1",
+      "size": 515636
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "a5aba806c1fb6af7a9423da8536d0e4228b14228de948bf2c7bf4a1534b41de8",
+      "sha256": "60d2f7388bb05017bdf53632f42a78d52291fedf5ed26c228a3295e20db1bfbe",
       "size": 23
     }
   ]
