@@ -1,8 +1,8 @@
 {
-  "version": "1.7.0",
+  "version": "1.7.1",
   "minLauncher": "1",
-  "released": "2026-11-15T03:18:27.981Z",
-  "notes": "Scouting-Zentrale: Seitenleiste mit Vereinskarte, Statusleiste mit Saison und Kennzahlen, Dossiers mit DNA-Ring, Shortlist",
+  "released": "2026-11-15T03:28:27.950Z",
+  "notes": "Alter wird mit dem Spieldatum aktualisiert (Geburtsdatum aus dem Spielstand); Farben des 1. FCN; Schreibtisch-Hintergrund",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "c5c8b218de8ef161716a89743fa02354cdf35c9a2f67012f8384ce3ee30cffc5",
-      "size": 320170
+      "sha256": "aef3ef26777ac72a2d538d5ff5a880248856384eaef6044862310bf64a411a87",
+      "size": 326409
     },
     {
       "path": "app/settings.html",
@@ -31,13 +31,13 @@
     },
     {
       "path": "app-main.js",
-      "sha256": "b921d23534a782b666c34f9fbae599ccd2e64bfebb32479c90feaef015916ae6",
+      "sha256": "bff55a7eb6ce026ad0438bcc38fecc0f9ba58731d5ef7b7386ae4ebda9c98c60",
       "size": 24025
     },
     {
       "path": "fcsave.js",
-      "sha256": "d24aeece21901cdd0292fbfa62e5d30355884e90d601063774eac1ba8229e16e",
-      "size": 14862
+      "sha256": "0fb670b5739f85c4f7c6273f834136beb350e4c87b5e6d0d4d1855aa28e41f51",
+      "size": 14898
     },
     {
       "path": "preload.js",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "f1935b61b63bbbe70530ce505b902dd8af05dd34fc4f9ebfd4a3d9a642b74b98",
+      "sha256": "ee273de9a6b73e604d9ee1dfbcb24c134418bcba71a00da6c460b7390a4813d5",
       "size": 23
     }
   ]

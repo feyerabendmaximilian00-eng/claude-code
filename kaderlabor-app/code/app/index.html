@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#161c1a;min-height:100%}:root{color-scheme:dark;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>html,body{background:#2a1911;min-height:100%}:root{color-scheme:dark;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <script src="claude-shim.js"></script>
 </head>
 <body>
@@ -799,6 +799,48 @@ body{margin:0}
 .slk{display:flex;flex-direction:column;align-items:flex-end;min-width:64px} .slk span{font-size:13px;color:var(--ink-3)} .slk b{font-family:var(--font-display);font-weight:400;font-size:18px}
 .slact{display:flex;gap:8px}
 @media (max-width:760px){.slrow{grid-template-columns:64px minmax(0,1fr);}.slk{align-items:flex-start}.slact{grid-column:1 / -1}}
+
+/* ===== 1. FC Nürnberg: Club-Rot, Schwarz, Weiß – Arbeitsplatz auf dem Schreibtisch ===== */
+:root{
+  --bg:#141112; --surface:#1d1a1b; --surface-hi:#1d1a1b; --surface-2:#252122; --solid:#1d1a1b;
+  --line:rgba(244,238,236,.12); --line-strong:rgba(244,238,236,.24);
+  --ink:#f4eeec; --ink-2:#bdb3b1; --ink-3:#978c8a;
+  --accent:#e03550; --accent-ink:#ffffff; --accent-soft:rgba(224,53,80,.15);
+  --bad:#d9772f; --bad-ink:#f2a46c; --bad-soft:rgba(217,119,47,.18);
+  --leather:#171213;
+  --desk:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='900'%20height='900'%3E%3Cfilter%20id='g'%20x='0'%20y='0'%20width='100%25'%20height='100%25'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.0018%200.055'%20numOctaves='4'%20seed='3'/%3E%3CfeColorMatrix%20values='0%200%200%200%200.11%20%200%200%200%200%200.06%20%200%200%200%200%200.035%20%201.1%200%200%200%20-0.35'/%3E%3C/filter%3E%3Cfilter%20id='f'%20x='0'%20y='0'%20width='100%25'%20height='100%25'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.012%200.6'%20numOctaves='2'%20seed='9'/%3E%3CfeColorMatrix%20values='0%200%200%200%200.05%20%200%200%200%200%200.025%20%200%200%200%200%200.015%20%200%200%200%200.35%200'/%3E%3C/filter%3E%3Crect%20width='900'%20height='900'%20fill='%233b2617'/%3E%3Crect%20width='900'%20height='900'%20filter='url%28%23g%29'/%3E%3Crect%20width='900'%20height='900'%20filter='url%28%23f%29'/%3E%3C/svg%3E") 0 0/900px 900px, #2a1911;
+}
+:root[data-theme="light"]{
+  --bg:#f1ebe6; --surface:#ffffff; --surface-hi:#ffffff; --surface-2:#f8f4f1; --solid:#ffffff;
+  --line:rgba(27,20,21,.13); --line-strong:rgba(27,20,21,.26);
+  --ink:#1b1415; --ink-2:#554a4b; --ink-3:#6b6061;
+  --accent:#b01730; --accent-ink:#ffffff; --accent-soft:rgba(176,23,48,.1);
+  --bad:#b4561b; --bad-ink:#a24b14; --bad-soft:rgba(180,86,27,.12);
+  --leather:#2a1f1f;
+  --desk:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='900'%20height='900'%3E%3Cfilter%20id='g'%20x='0'%20y='0'%20width='100%25'%20height='100%25'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.0018%200.055'%20numOctaves='4'%20seed='3'/%3E%3CfeColorMatrix%20values='0%200%200%200%200.45%20%200%200%200%200%200.29%20%200%200%200%200%200.16%20%201.1%200%200%200%20-0.35'/%3E%3C/filter%3E%3Cfilter%20id='f'%20x='0'%20y='0'%20width='100%25'%20height='100%25'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.012%200.6'%20numOctaves='2'%20seed='9'/%3E%3CfeColorMatrix%20values='0%200%200%200%200.32%20%200%200%200%200%200.2%20%200%200%200%200%200.11%20%200%200%200%200.35%200'/%3E%3C/filter%3E%3Crect%20width='900'%20height='900'%20fill='%23b88a5c'/%3E%3Crect%20width='900'%20height='900'%20filter='url%28%23g%29'/%3E%3Crect%20width='900'%20height='900'%20filter='url%28%23f%29'/%3E%3C/svg%3E") 0 0/900px 900px, #b88a5c;
+}
+body{background:#2a1911}
+:root[data-theme="light"] body{background:#b88a5c}
+/* Schreibtisch: Nussbaum mit warmem Licht der Schreibtischlampe */
+.sky{background:radial-gradient(1200px 800px at 85% -10%,rgba(255,214,160,.16),transparent 60%),radial-gradient(900px 700px at 10% 110%,rgba(0,0,0,.45),transparent 70%),var(--desk)!important}
+:root[data-theme="light"] .sky{background:radial-gradient(1200px 800px at 85% -10%,rgba(255,240,210,.35),transparent 60%),var(--desk)!important}
+/* Akten auf dem Tisch */
+.panel,.banner{box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 14px 32px rgba(0,0,0,.42),0 2px 6px rgba(0,0,0,.3)}
+:root[data-theme="light"] .panel,:root[data-theme="light"] .banner{box-shadow:0 12px 28px rgba(60,35,20,.22),0 2px 6px rgba(60,35,20,.18)}
+.btn.primary,a.btn.primary,header.top .btn.primary{color:#fff}
+.crest{background:var(--accent);color:#fff;border-color:transparent}
+@media (min-width:1100px){
+  .wrap>.rail{background:var(--leather);border-right:1px solid rgba(0,0,0,.5);box-shadow:6px 0 24px rgba(0,0,0,.35)}
+  .clubcard{background:rgba(255,255,255,.03)}
+  .cmdbar{background:var(--leather);border-bottom:1px solid rgba(0,0,0,.5);box-shadow:0 8px 24px rgba(0,0,0,.35);color:#f4eeec}
+  .cmdbar .cb-crumb{color:#a99d9b} .cmdbar .kpi{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1)} .cmdbar .kpi span{color:#a99d9b}
+}
+.cmdbar,.mainnav{background:var(--leather)}
+/* Lederflächen bleiben auch im hellen Modus dunkel */
+:root[data-theme="light"] .rail .brand h1{color:#f4eeec}
+:root[data-theme="light"] .rail,:root[data-theme="light"] .cmdbar,:root[data-theme="light"] .mainnav{--ink:#f4eeec;--ink-2:#c9bfbd;--ink-3:#a39896;--line:rgba(244,238,236,.14);--line-strong:rgba(244,238,236,.28);
+  --surface:#1d1a1b;--surface-2:#252122;--bg:#141112;--accent:#e03550;--accent-soft:rgba(224,53,80,.2);color:var(--ink);color-scheme:dark}
+@media (max-width:1099px){.mainnav{color:#f4eeec} .cmdbar{padding:12px 0} .cmdbar{background:transparent} .kpi{background:var(--surface)}}
 /* Gewichte: nur 400 und 500 */
 b,strong,label,select,legend,summary,.points li b,.tkcard b,.pd-name,.pc-nm,.bc-nm,.tcard b,.qdb-list b,.banner strong{font-weight:500}
 h1,h2,h3,h4{font-weight:400}
@@ -1608,7 +1650,9 @@ function normalizePlayer(raw){
     pos, alt, age: clamp(toInt(raw.age) ?? 25, 15, 45), ovr, pot, foot: (f.startsWith("l") ? "L" : "R"),
     nat: String(raw.nat || "").trim().slice(0, 30), est: [], fcid: toInt(raw.fcid),
     contract: (c => c != null && c > 2000 && c < 2100 ? c : null)(toInt(raw.contract)), wage: (w => Number.isFinite(w) && w > 0 ? Math.round(w) : null)(Number(raw.wage)),
-    release: (r => Number.isFinite(r) && r > 0 ? r : null)(Number(raw.release)), dyn: (() => { const d = toInt(raw.dyn); return d == null ? null : clamp(d, 30, 99); })()};
+    release: (r => Number.isFinite(r) && r > 0 ? r : null)(Number(raw.release)),
+    born: /^\d{4}-\d{2}-\d{2}$/.test(String(raw.born || "")) ? String(raw.born) : null,
+    ageRef: /^\d{4}-\d{2}-\d{2}/.test(String(raw.ageRef || "")) ? String(raw.ageRef).slice(0, 10) : null, dyn: (() => { const d = toInt(raw.dyn); return d == null ? null : clamp(d, 30, 99); })()};
   const tpl = TPL[ROLE[pos]];
   p.sub = {};
   const rs = (raw.sub && typeof raw.sub === "object") ? raw.sub : {};
@@ -1624,6 +1668,27 @@ function normalizePlayer(raw){
   return p;
 }
 
+
+/* Alter laufend halten: mit Geburtsdatum exakt zum Spieldatum, sonst ab dem Stand, an dem das Alter galt, hochzählen */
+function ageOn(born, ref){
+  const b = new Date(born + "T00:00:00Z"); let a = ref.getUTCFullYear() - b.getUTCFullYear();
+  if (ref.getUTCMonth() < b.getUTCMonth() || (ref.getUTCMonth() === b.getUTCMonth() && ref.getUTCDate() < b.getUTCDate())) a--;
+  return a;
+}
+function refreshAges(list, dateStr){
+  if (!dateStr) return 0;
+  const ref = new Date(String(dateStr).slice(0, 10) + "T00:00:00Z"); if (isNaN(ref)) return 0;
+  let n = 0;
+  for (const p of list){
+    let a = p.age;
+    if (p.born) a = ageOn(p.born, ref);
+    else if (p.ageRef){ const yrs = Math.floor((ref - new Date(p.ageRef + "T00:00:00Z")) / (365.2425 * 864e5)); if (yrs > 0){ a = p.age + yrs; p.ageRef = String(dateStr).slice(0, 10); } }
+    else p.ageRef = String(dateStr).slice(0, 10);
+    a = clamp(a, 15, 45);
+    if (a !== p.age){ p.age = a; n++; }
+  }
+  return n;
+}
 /* ---------- Beispielkader (erfundene Spieler) ---------- */
 const SAMPLE = [
   ["Jonas Reiter","TW",28,81,83,"R","Deutschland"],["Lukas Brandt","TW",21,72,79,"R","Deutschland"],["Milan Hofer","TW",33,65,65,"R","Österreich"],
@@ -1981,6 +2046,7 @@ function renderTable(A){
 
 function renderAll(withTable = true){
   if (!FORMATIONS[state.formation]) state.formation = "4-3-3";
+  if (!state.isSample) try { const gd = localStorage.getItem("kaderlabor.fcdate"); if (gd) refreshAges(state.players, gd); } catch(e){}
   $("#formation").innerHTML = FORMATION_GROUPS.map(([g, fn]) => `<optgroup label="${g}">${Object.keys(FORMATIONS).filter(fn).map(f => `<option ${f===state.formation?"selected":""}>${f}</option>`).join("")}</optgroup>`).join("");
   $("#sample-banner").hidden = !state.isSample;
   const A = analyze(); last = A;
@@ -4037,6 +4103,7 @@ function applyFcData(payload){
     return c.length === 1 ? c[0] : null;
   };
   let updated = 0, missing = [];
+  refreshAges(DB, meta.gameDate);
   if (!state.isSample){
     state.players = state.players.map(p => {
       const r = find(p);
@@ -4046,6 +4113,7 @@ function applyFcData(payload){
     });
   }
   fcClubName = myClub;
+  if (!state.isSample) refreshAges(state.players, meta.gameDate);
   try { if (myClub) localStorage.setItem("kaderlabor.club", myClub); } catch(e){}
   fcClubRows = myClub ? rows.filter(r => r.club === myClub) : null;
   saveDB(); lastLocalState = null; save(); renderAll();

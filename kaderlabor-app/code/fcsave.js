@@ -190,7 +190,7 @@ function readSave(file, names, opts = {}) {
     const b = new Date(epoch + g(i, "birthdate") * 86400000);
     let age = ref.getFullYear() - b.getUTCFullYear();
     if (ref.getMonth() < b.getUTCMonth() || (ref.getMonth() === b.getUTCMonth() && ref.getDate() < b.getUTCDate())) age--;
-    const row = { fcid: pid, name, club: teams.get(club) || "", league, pos: pos[0], alt: pos.slice(1, 4), age,
+    const row = { fcid: pid, name, club: teams.get(club) || "", league, pos: pos[0], alt: pos.slice(1, 4), age, born: b.toISOString().slice(0, 10),
       ovr: g(i, "overallrating"), pot: g(i, "potential"), foot: g(i, "preferredfoot") === 2 ? "L" : "R",
       nat: NATION[g(i, "nationality")] || `Nation ${g(i, "nationality")}`, sub: {} };
     for (const [k, w] of Object.entries(FACE)) {
