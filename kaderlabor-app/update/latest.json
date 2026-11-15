@@ -1,8 +1,8 @@
 {
-  "version": "1.8.8",
+  "version": "1.8.9",
   "minLauncher": "1",
-  "released": "2026-11-15T04:04:36.335Z",
-  "notes": "Polaroids ohne Überlappung, Klebeband mittig",
+  "released": "2026-11-15T04:08:30.256Z",
+  "notes": "Standardbudget 10 Mio. Euro für Scouting und Schattenkader",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "03e1cf45b54a39890f1fe9b484d4a7df29343f84d5f9261d0737beb7941ae6e3",
-      "size": 540787
+      "sha256": "c715c60fa65e4a59a1dde346d12c8363f1826adbc6ce8a10b54c7231c0a8014c",
+      "size": 541354
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "f6211f79b12ac919c5b5da094857de6cc61e70cee3d8451a029fd62ab6b832b6",
+      "sha256": "225d0c01a1b04473d9f3ea956b1f01d7888e8753527320924bdd676c08288773",
       "size": 23
     }
   ]

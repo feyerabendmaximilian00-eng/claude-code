@@ -1359,7 +1359,7 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
           <select id="tf-pos"><option value="auto">Automatisch (Transferbedarf)</option></select>
         </label>
         <label for="tf-budget" class="budgetfld">Budget (Mio. €)
-          <span class="bstep"><input id="tf-budget" type="number" min="0" max="999" step="0.5" value="40" inputmode="decimal"><button type="button" class="btn sm" id="tf-bup" aria-label="Budget um 1 Mio. € erhöhen" title="Budget manuell erhöhen">+1</button></span>
+          <span class="bstep"><input id="tf-budget" type="number" min="0" max="999" step="0.5" value="10" inputmode="decimal"><button type="button" class="btn sm" id="tf-bup" aria-label="Budget um 1 Mio. € erhöhen" title="Budget manuell erhöhen">+1</button></span>
           <small class="bsrc" id="tf-bsrc"></small>
         </label>
         <label for="tf-age">Max. Alter
@@ -1864,6 +1864,7 @@ const SAMPLE = [
 
 /* ---------- Zustand ---------- */
 const KEY = "kaderlabor.v1";
+const DEF_BUDGET = 10; // Standardbudget in Mio. €
 let state = {players: SAMPLE.map(p => ({...p})), formation: "4-3-3", overrides: {}, isSample: true};
 try {
   const saved = JSON.parse(localStorage.getItem(KEY) || "null");
@@ -1871,7 +1872,7 @@ try {
     state = {players: saved.players.map(normalizePlayer), formation: FORMATIONS[saved.formation] ? saved.formation : "4-3-3", overrides: saved.overrides || {}, isSample: !!saved.isSample,
       useDyn: saved.useDyn !== false, roles: saved.roles && typeof saved.roles === "object" ? saved.roles : {}, style: saved.style || "auto",
       shadow: saved.shadow && typeof saved.shadow === "object" ? saved.shadow : null, notes: String(saved.notes || ""),
-      budget: saved.budget && typeof saved.budget === "object" ? saved.budget : null};
+      budget: saved.budget && typeof saved.budget === "object" ? saved.budget : null, budgetV: saved.budgetV || 0};
   }
 } catch(e){}
 var lastLocalState = null;
@@ -2723,7 +2724,7 @@ function impactOf(cand){
   return {dOverall: A2.overall - last.overall, dDepth: A2.depth - last.depth, dSyn: A2.syn - last.syn, slot, fit: fitAt(cand, cand.pos)};
 }
 function transferPrompt(A){
-  const posSel = $("#tf-pos").value, budget = toInt($("#tf-budget").value) ?? 40, maxAge = toInt($("#tf-age").value) ?? 29;
+  const posSel = $("#tf-pos").value, budget = toInt($("#tf-budget").value) ?? DEF_BUDGET, maxAge = toInt($("#tf-age").value) ?? 29;
   const focus = {now:"sofortige Verstärkung der Startelf", talent:"junge Talente mit hohem Potenzial (POT), dürfen anfangs knapp unter Startelf-Niveau liegen", bargain:"bestes Preis-Leistungs-Verhältnis, unterbewertete Spieler", free:"Spieler mit auslaufendem Vertrag oder ablösefrei, günstig zu holen"}[$("#tf-focus").value];
   const league = $("#tf-league").value.trim();
   const needs = posSel === "auto"
@@ -3066,7 +3067,7 @@ function runCalc(){
     Object.keys(b).forEach(k => o[k] = b[k] * (m[k] ?? 1));
     const sum = Object.values(o).reduce((x, y) => x + y, 0); Object.keys(o).forEach(k => o[k] = o[k] / sum); return o; })();
   const TH = clamp(toInt($("#tf-dna").value) ?? 70, 0, 100);
-  const bIn = parseFloat($("#tf-budget").value), B = Number.isFinite(bIn) && bIn > 0 ? bIn : 40;
+  const bIn = parseFloat($("#tf-budget").value), B = Number.isFinite(bIn) && bIn > 0 ? bIn : DEF_BUDGET;
   const maxAge = toInt($("#tf-age").value) ?? 40, league = $("#tf-league").value.trim().toLowerCase();
   const ov = last.overall || 70;
   const needPos = posSel !== "auto" ? [posSel] : last.plan.needs.map(n => n.pos);
@@ -4080,7 +4081,8 @@ function applyStored(st, dbArr){
     state = {players: st.players.map(normalizePlayer), formation: FORMATIONS[st.formation] ? st.formation : "4-3-3", overrides: st.overrides || {}, isSample: !!st.isSample,
       useDyn: st.useDyn !== false, roles: st.roles && typeof st.roles === "object" ? st.roles : {}, style: st.style || "auto",
       shadow: st.shadow && typeof st.shadow === "object" ? st.shadow : null, notes: String(st.notes || ""),
-      budget: st.budget && typeof st.budget === "object" ? st.budget : null};
+      budget: st.budget && typeof st.budget === "object" ? st.budget : null, budgetV: st.budgetV || 0};
+    if (state.budgetV !== 2){ if (!state.budget || state.budget.src !== "save") state.budget = {cur: DEF_BUDGET, src: "standard", at: null}; state.budgetV = 2; }
     try { budgetReset(); } catch(e){}
     try { const ne = document.getElementById("notes"); if (ne && document.activeElement !== ne) ne.value = state.notes || ""; } catch(e){}
   }
@@ -4442,7 +4444,7 @@ function shSuggest(pos, q){
   if (typeof DB !== "undefined"){
     const slIds = new Set(SL.map(x => x.id));
     const own = new Set(state.players.map(p => p.name.toLowerCase()));
-    const B = parseFloat($("#tf-budget").value) || 40;
+    const B = parseFloat($("#tf-budget").value) || DEF_BUDGET;
     let pool = DB.filter(e => !own.has(e.name.toLowerCase()) && !/^Spieler \d+$/.test(e.name) && (ql ? e.name.toLowerCase().includes(ql) : (slIds.has(e.id) || (e.age + off <= 30 && fitAt(e, pos) >= e.ovr - 3))));
     if (!ql) pool = pool.map(e => ({e, f: shProj(e, pos, off).fit - transferPrice(e, null).price / Math.max(B, 1) * 6 + (slIds.has(e.id) ? 4 : 0)})).sort((a, b) => b.f - a.f).slice(0, 8).map(x => x.e);
     pool.slice(0, ql ? 12 : 8).forEach(e => add(slIds.has(e.id) ? "sl" : "db", e));
@@ -4474,7 +4476,7 @@ function renderShRes(q){
 }
 function shAuto(){
   const sh = shState(), F = FORMATIONS[sh.formation], off = sh.off, Y = seasonYear(off);
-  const B = parseFloat($("#tf-budget").value) || 40;
+  const B = parseFloat($("#tf-budget").value) || DEF_BUDGET;
   const own = state.players.filter(p => !(p.contract && p.contract <= Y) && p.age + off <= 34);
   const pairs = [];
   F.forEach(([pos], i) => own.forEach(p => pairs.push({i, p, f: shProj(p, pos, off).fit})));
@@ -4556,14 +4558,16 @@ $("#np-close").addEventListener("click", () => npToggle(false));
 
 /* ---------- Budget: aktuelles Budget voreingestellt, mehr nur durch manuelles Erhöhen ---------- */
 const bIn = $("#tf-budget");
-const curBudget = () => state.budget && Number.isFinite(+state.budget.cur) ? +state.budget.cur : null;
+if (state.budgetV !== 2){ if (!state.budget || state.budget.src !== "save") state.budget = {cur: DEF_BUDGET, src: "standard", at: null}; state.budgetV = 2; }
+const curBudget = () => state.budget == null ? DEF_BUDGET : state.budget && Number.isFinite(+state.budget.cur) ? +state.budget.cur : null;
 function budgetLabel(){
   const cur = curBudget(), v = parseFloat(bIn.value), el = $("#tf-bsrc");
-  if (cur == null){ el.innerHTML = `Aktuelles Budget unbekannt · <button type="button" class="linkbtn" id="tf-bset">als aktuelles Budget merken</button>`; return; }
-  const src = state.budget.src === "save" ? "aus dem Spielstand" : "von dir festgelegt";
+  if (cur == null){ el.innerHTML = `Standardbudget ${fmtMio(DEF_BUDGET)} · <button type="button" class="linkbtn" id="tf-bset">als aktuelles Budget merken</button>`; return; }
+  const bs = state.budget || {src: "standard"};
+  const src = bs.src === "save" ? "aus dem Spielstand" : bs.src === "standard" ? "Standardbudget" : "von dir festgelegt";
   if (Number.isFinite(v) && v > cur + 1e-9) el.innerHTML = `<span class="bup">Manuell erhöht: +${fmtMio(Math.round((v - cur) * 10) / 10)}</span> · aktuell ${fmtMio(cur)} · <button type="button" class="linkbtn" id="tf-breset">zurücksetzen</button>`;
   else if (Number.isFinite(v) && v < cur - 1e-9) el.innerHTML = `Unter dem aktuellen Budget (${fmtMio(cur)}) · <button type="button" class="linkbtn" id="tf-breset">zurücksetzen</button>`;
-  else el.innerHTML = `Aktuelles Budget, ${src}${state.budget.at ? " (" + new Date(state.budget.at).toLocaleDateString("de-DE") + ")" : ""} · <button type="button" class="linkbtn" id="tf-bset">ändern</button>`;
+  else el.innerHTML = `Aktuelles Budget, ${src}${bs.at ? " (" + new Date(bs.at).toLocaleDateString("de-DE") + ")" : ""} · <button type="button" class="linkbtn" id="tf-bset">ändern</button>`;
 }
 function budgetReset(){ const cur = curBudget(); if (cur != null) bIn.value = String(cur); budgetLabel(); }
 function budgetSet(v, src, at){ state.budget = {cur: Math.round(v * 10) / 10, src, at: at || null}; save(); budgetReset(); }
