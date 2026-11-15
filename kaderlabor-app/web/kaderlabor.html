@@ -741,31 +741,6 @@ body{margin:0}
 .method summary{margin-top:8px;font-size:14px;color:var(--ink-2);cursor:pointer}
 .panel{padding:20px}
 .panel h3{font-size:20px}
-@media (min-width:1100px){
-  .wrap{display:grid;grid-template-columns:264px minmax(0,1fr);row-gap:16px;column-gap:0;max-width:none;padding:0 0 48px}
-  .wrap>*{grid-column:2;margin-inline:32px;min-width:0}
-  .wrap>.rail{grid-column:1;grid-row:1 / span 60;margin:0;position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;overflow-x:clip;display:flex;flex-direction:column;gap:20px;padding:24px 16px;border-right:1px solid var(--line);background:var(--surface)}
-  .rail header.top{display:flex;flex-direction:column;align-items:stretch;gap:16px;padding:0;margin:0}
-  .rail .brand{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
-  .rail .brand h1{font-size:26px}
-  .clubcard{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg)}
-  .crest{width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-family:var(--font-display);font-size:15px;border:1px solid var(--line-strong)}
-  .cc-txt{min-width:0;display:flex;flex-direction:column} .cc-txt b{font-weight:500;font-size:15px;line-height:1.3} .cc-txt small{font-size:13px;color:var(--ink-3)}
-  .rail .toprow{display:flex;flex-direction:column;align-items:stretch;gap:8px}
-  .rail .toprow .btn{width:100%;justify-content:center;text-align:center}
-  .rail .mainnav{position:static;margin:0!important;padding:0!important;border:0;background:none;display:flex;flex-direction:column;align-items:stretch;flex:1;gap:16px;top:auto}
-  .rail .navin{flex-direction:column;overflow:visible;gap:2px;flex:none}
-  .rail .navin a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--r-sm)}
-  .rail .navin a::after{display:none}
-  .rail .navin a:hover{background:color-mix(in srgb,var(--ink) 5%,transparent)!important}
-  .rail .navin a[aria-selected="true"]{background:var(--accent-soft)!important;color:var(--ink);box-shadow:inset 2px 0 0 var(--accent)!important}
-  .rail .nb{margin-left:auto}
-  .rail .navright{margin-top:auto;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:16px}
-  .rail .navsum{display:none}
-  .rail .savestate{font-size:13px}
-  .cmdbar{position:sticky;top:0;z-index:15;margin-inline:0!important;padding:16px 32px;background:var(--bg);border-bottom:1px solid var(--line)}
-  body::before{display:none}
-}
 @media (max-width:1099px){
   .rail{display:contents}
   .navin .ni{display:none}
@@ -820,18 +795,128 @@ body{background:#2a1911}
 :root[data-theme="light"] .panel,:root[data-theme="light"] .banner{box-shadow:0 12px 28px rgba(60,35,20,.22),0 2px 6px rgba(60,35,20,.18)}
 .btn.primary,a.btn.primary,header.top .btn.primary{color:#fff}
 .crest{background:var(--accent);color:#fff;border-color:transparent}
-@media (min-width:1100px){
-  .wrap>.rail{background:var(--leather);border-right:1px solid rgba(0,0,0,.5);box-shadow:6px 0 24px rgba(0,0,0,.35)}
-  .clubcard{background:rgba(255,255,255,.03)}
-  .cmdbar{background:var(--leather);border-bottom:1px solid rgba(0,0,0,.5);box-shadow:0 8px 24px rgba(0,0,0,.35);color:#f4eeec}
-  .cmdbar .cb-crumb{color:#a99d9b} .cmdbar .kpi{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1)} .cmdbar .kpi span{color:#a99d9b}
-}
 .cmdbar,.mainnav{background:var(--leather)}
 /* Lederflächen bleiben auch im hellen Modus dunkel */
 :root[data-theme="light"] .rail .brand h1{color:#f4eeec}
 :root[data-theme="light"] .rail,:root[data-theme="light"] .cmdbar,:root[data-theme="light"] .mainnav{--ink:#f4eeec;--ink-2:#c9bfbd;--ink-3:#a39896;--line:rgba(244,238,236,.14);--line-strong:rgba(244,238,236,.28);
   --surface:#1d1a1b;--surface-2:#252122;--bg:#141112;--accent:#e03550;--accent-soft:rgba(224,53,80,.2);color:var(--ink);color-scheme:dark}
 @media (max-width:1099px){.mainnav{color:#f4eeec} .cmdbar{padding:12px 0} .cmdbar{background:transparent} .kpi{background:var(--surface)}}
+/* ===== Schreibtisch mit Ordner (nach der Vorlage, modern): Widgets links, Ordner mit Registern, Notizblock rechts, Statusleiste unten ===== */
+:root{--page:#1f1b1c;--page-edge:#2a2526;--ring:#8b8582}
+:root[data-theme="light"]{--page:#fbf8f3;--page-edge:#e7e0d6;--ring:#b9b2a8}
+.wgt,.wcal{display:none}
+.notepad{position:fixed;top:16px;right:16px;bottom:16px;width:min(340px,calc(100vw - 32px));z-index:40;display:flex;flex-direction:column;
+  background:#f7f3ea repeating-linear-gradient(transparent 0 27px,rgba(80,110,150,.22) 27px 28px) 0 52px/100% 28px local;color:#2a2223;border-radius:6px 14px 14px 6px;
+  box-shadow:0 18px 40px rgba(0,0,0,.45);transform:translateX(calc(100% + 32px));transition:transform 220ms var(--ease-enter);color-scheme:light}
+.notepad.open{transform:none}
+.notepad::before{content:"";position:absolute;left:36px;top:0;bottom:0;width:1px;background:rgba(200,30,50,.45)}
+.np-h{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 12px 48px;height:52px;box-sizing:border-box;border-bottom:1px solid rgba(0,0,0,.08)}
+.np-h b{font-family:var(--font-display);font-weight:400;font-size:20px;color:#2a2223}
+.np-x{width:36px;height:36px;border:0;background:none;font-size:22px;color:#6b6061;cursor:pointer;border-radius:8px}
+.notepad textarea{flex:1;resize:none;border:0!important;background:transparent!important;color:#2a2223!important;font:16px/28px var(--font-body);padding:0 16px 0 48px!important;outline:none;box-shadow:none!important}
+.np-f{padding:8px 16px 12px 48px;color:#6b6061;font-size:13px}
+.dock{display:none}
+/* Schattenkader */
+.sh-ctl{align-items:flex-end;flex-wrap:wrap}
+.sh-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:16px}
+.sh-sum .kpi small{font-size:13px;color:var(--ink-3)}
+.sh-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,1fr);gap:20px;margin-top:16px;align-items:start}
+@media (max-width:900px){.sh-grid{grid-template-columns:1fr}}
+.sh-pitch{aspect-ratio:68/100}
+.sh-pitch .chip.ext .pc-av{border-color:var(--accent)}
+.sh-pitch .pc-nm em{font-style:normal;color:var(--gold);margin-left:4px}
+.sh-edit{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding:16px}
+.sh-hint b{font-weight:500}
+.sh-eh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.sh-eh h4{margin:2px 0 0;font-family:var(--font-display);font-weight:400;font-size:20px}
+.btn.sm{min-height:36px;padding:4px 12px;font-size:14px}
+.shlist{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.shc{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface)}
+.shc:first-child{border-color:var(--accent)}
+.shc .rk{font-family:var(--font-display);font-size:20px;color:var(--ink-3)}
+.shc b{font-weight:500} .shc small{display:block;font-size:13px;color:var(--ink-3)} .shc .risk{color:var(--bad-ink)}
+.shc-a{display:flex;gap:6px;align-items:center} .wish{font-size:13px;color:var(--accent);padding:0 6px}
+.srctag{font-size:13px;color:var(--ink-3);border:1px solid var(--line);border-radius:999px;padding:0 8px;white-space:nowrap}
+.srctag.sl{color:var(--accent);border-color:var(--accent-soft)} .srctag.db{color:var(--ink-2)}
+.shres{list-style:none;margin:8px 0 0;padding:0;max-height:360px;overflow:auto;display:flex;flex-direction:column;gap:4px}
+.shres-h{padding:4px 0}
+.shres button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:left;padding:8px 12px;border:1px solid transparent;border-radius:var(--r-sm);background:transparent;color:var(--ink);cursor:pointer;font:inherit}
+.shres button:hover{border-color:var(--line-strong);background:var(--surface)}
+.shres b{font-weight:500} .shres small{display:block;font-size:13px;color:var(--ink-3)} .shres-f{font-family:var(--font-display);font-size:20px}
+.sh-risk .plan-list li{font-size:14px}
+@media (min-width:1100px){
+  html,body{height:100%;overflow:hidden}
+  .wrap{display:grid;grid-template-columns:240px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;height:100vh;max-width:none;padding:16px 20px 0;gap:0 20px;box-sizing:border-box}
+  .wrap>*{min-width:0;margin:0}
+  .wrap>.rail{grid-column:1;grid-row:1 / 4;overflow-y:auto;overflow-x:clip;display:flex;flex-direction:column;gap:12px;padding:0 0 16px;scrollbar-width:none}
+  .rail header.top{display:flex;flex-direction:column;align-items:stretch;gap:12px;padding:0;margin:0}
+  .rail .brand{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:4px 4px 0}
+  .rail .brand h1{font-size:26px;color:#f4eeec}
+  .rail .brand .tag{color:#d8cdcb;border-color:rgba(255,255,255,.2)}
+  .rail .wgt,.rail .clubcard{display:flex;background:var(--leather);border:1px solid rgba(0,0,0,.45);border-radius:var(--r-md);box-shadow:0 10px 24px rgba(0,0,0,.35);color:#f4eeec;--ink:#f4eeec;--ink-2:#c9bfbd;--ink-3:#a39896;--line:rgba(244,238,236,.14)}
+  .clubcard{align-items:center;gap:12px;padding:12px}
+  .crest{width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;font-family:var(--font-display);font-size:15px}
+  .cc-txt{min-width:0;display:flex;flex-direction:column} .cc-txt b{font-weight:500;font-size:15px;line-height:1.3} .cc-txt small{font-size:13px;color:var(--ink-3)}
+  .wcal{flex-direction:column;align-items:center;padding:0 0 12px;overflow:hidden;text-align:center}
+  .wcal-wd{display:block;width:100%;padding:6px 0;background:var(--accent);color:#fff;font-size:13px;font-weight:500}
+  .wcal b{font-family:var(--font-display);font-weight:400;font-size:52px;line-height:1.1;margin-top:4px}
+  .wcal span:not(.wcal-wd){font-size:15px} .wcal small{font-size:13px;color:var(--ink-3)}
+  .wissues{flex-direction:column;padding:12px}
+  .wgt-h{font-size:13px;color:var(--ink-3);margin-bottom:6px}
+  .wissues ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+  .wissues li{font-size:14px;line-height:1.4;padding-left:12px;position:relative}
+  .wissues li::before{content:"";position:absolute;left:0;top:7px;width:5px;height:5px;border-radius:50%;background:var(--bad-ink)}
+  .wissues a{color:var(--ink);text-decoration:none} .wissues a:hover{text-decoration:underline}
+  .rail .toprow{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+  .rail .toprow .btn{width:100%;justify-content:center;text-align:center}
+  .rail .toprow .btn:not(.primary){background:var(--leather);color:#f4eeec;border-color:rgba(255,255,255,.18)}
+  /* Register */
+  .wrap>.mainnav{grid-column:2;grid-row:1;position:static;margin:0!important;padding:0 4px 0 44px!important;background:none!important;border:0!important;box-shadow:none!important;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;color:#f4eeec}
+  .mainnav .navin{gap:4px;align-items:flex-end;overflow-x:auto}
+  .mainnav .navin a{display:flex;align-items:center;gap:6px;padding:10px 12px 10px;border-radius:10px 10px 0 0;background:var(--leather)!important;color:#c9bfbd;font-size:14px;white-space:nowrap;box-shadow:0 -2px 10px rgba(0,0,0,.25)!important;border:1px solid rgba(0,0,0,.4);border-bottom:0}
+  .mainnav .navin a::after{display:none}
+  .mainnav .navin a:hover{color:#fff}
+  .mainnav .navin a[aria-selected="true"]{background:var(--page)!important;color:var(--ink);padding-bottom:13px;margin-bottom:-1px;position:relative;z-index:2;border-color:var(--page-edge)}
+  .mainnav .navin a[aria-selected="true"] .ni{color:var(--accent)}
+  .mainnav .navright{display:flex;align-items:center;gap:8px;padding-bottom:8px}
+  .mainnav .navsum{display:none}
+  .mainnav #nb-db{display:none}
+  .mainnav .savestate{color:#d8cdcb;font-size:0;gap:0}
+  .mainnav .themebtn{background:var(--leather);border-color:rgba(255,255,255,.15);color:#f4eeec}
+  /* Ordner */
+  .wrap>.binder{grid-column:2;grid-row:2;overflow-y:auto;overflow-x:hidden;position:relative;border-radius:4px 14px 14px 4px;border:1px solid var(--page-edge);
+    padding:0 28px 32px 64px;display:flex;flex-direction:column;gap:16px;scroll-padding-top:110px;
+    background:radial-gradient(circle at 26px 50%,#0d0b0b 0 5px,var(--ring) 5.5px 7px,transparent 7.5px) 0 0/52px 72px repeat-y,
+      linear-gradient(90deg,rgba(0,0,0,.28),rgba(0,0,0,.08) 44px,transparent 52px),var(--page);
+    box-shadow:0 24px 60px rgba(0,0,0,.55),0 4px 12px rgba(0,0,0,.35)}
+  .binder>.cmdbar{position:sticky;top:0;z-index:15;margin:0 -28px 0 -12px!important;padding:16px 28px 12px 12px;background:var(--page)!important;border-bottom:1px solid var(--line);box-shadow:none!important;color:var(--ink)}
+  .binder>.cmdbar .kpis{display:none}
+  .binder>.cmdbar .cb-crumb{color:var(--ink-3)}
+  .binder .panel{box-shadow:0 1px 2px rgba(0,0,0,.18)!important;background:var(--surface)}
+  .binder>.view,.binder>.banner{flex:none}
+  body::before{display:none}
+  /* Notizblock als Spalte ab 1500px */
+  .wrap>.notepad{grid-row:1 / 3}
+  /* Statusleiste */
+  .wrap>.dock{grid-column:2;grid-row:3;display:flex;gap:8px;padding:12px 0 16px;overflow-x:auto;scrollbar-width:none}
+  .dw{flex:1 1 0;min-width:110px;background:var(--leather);border:1px solid rgba(0,0,0,.45);border-radius:var(--r-sm);padding:8px 12px;color:#f4eeec;box-shadow:0 8px 18px rgba(0,0,0,.3)}
+  .dw span{display:block;font-size:13px;color:#a39896} .dw b{font-family:var(--font-display);font-weight:400;font-size:20px;line-height:1.3}
+  .dw i{display:block;height:3px;border-radius:2px;background:rgba(255,255,255,.12);margin-top:4px;overflow:hidden} .dw u{display:block;height:100%;background:var(--accent)}
+}
+@media (min-width:1100px) and (max-width:1399px),(min-width:1500px) and (max-width:1749px){.mainnav .navin .ni{display:none}}
+:root[data-theme="light"] .binder>.cmdbar{--ink:#1b1415;--ink-2:#554a4b;--ink-3:#6b6061;--line:rgba(27,20,21,.13);color:#1b1415}
+:root[data-theme="light"] .mainnav .navin a[aria-selected="true"]{color:#1b1415}
+@media (min-width:1500px){
+  .wrap{grid-template-columns:240px minmax(0,1fr) 300px}
+  .wrap>.notepad{position:relative;top:auto;right:auto;bottom:auto;grid-column:3;grid-row:1 / 4;transform:none;width:auto;margin:44px 0 16px;transition:none}
+  .wrap>.dock{grid-column:2}
+  #np-toggle,.np-x{display:none}
+}
+@media (max-width:1099px){
+  .wrap>.mainnav{position:sticky}
+  .binder{display:flex;flex-direction:column;gap:16px}
+}
+@media (prefers-reduced-motion:reduce){.notepad{transition:none}}
 /* Gewichte: nur 400 und 500 */
 b,strong,label,select,legend,summary,.points li b,.tkcard b,.pd-name,.pc-nm,.bc-nm,.tcard b,.qdb-list b,.banner strong{font-weight:500}
 h1,h2,h3,h4{font-weight:400}
@@ -851,6 +936,7 @@ h1,h2,h3,h4{font-weight:400}
       <h1>Kader<span>labor</span></h1>
       <span class="tag">Sportvorstand · FC 27</span>
     </div>
+    <div class="wgt wcal" id="wcal" aria-label="Kalender"><span class="wcal-wd" id="wcal-wd">Kalender</span><b class="num" id="wcal-day">–</b><span id="wcal-m">Spielstand abgleichen</span><small id="wcal-s"></small></div>
     <div class="clubcard" id="clubcard"><div class="crest" id="crest" aria-hidden="true">KL</div><div class="cc-txt"><b id="cc-name">Dein Verein</b><small id="cc-meta">Karrieremodus</small></div></div>
     <div class="row toprow">
       <button class="btn" id="btn-copy" type="button">Kader als CSV kopieren</button>
@@ -858,26 +944,30 @@ h1,h2,h3,h4{font-weight:400}
     </div>
   </header>
 
+    <div class="wgt wissues" id="w-issues"><div class="wgt-h">Baustellen</div><ul id="w-issues-list"></ul></div>
+  </aside>
   <nav class="mainnav" aria-label="Bereiche">
     <div class="navin" role="tablist">
       <a href="#aufstellung" data-nav="aufstellung" role="tab"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/><circle cx="12" cy="12" r="3"/></svg><span>Matchplan</span></a>
       <a href="#analyse" data-nav="analyse" role="tab"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11M10 20V5M16 20v-6M2 20h20"/></svg><span>Kaderanalyse</span> <span class="nb" id="nb-analyse"></span></a>
       <a href="#taktik" data-nav="taktik" role="tab"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 8l8 8M14 6h4v4"/></svg><span>Taktik</span> <span class="nb" id="nb-taktik"></span></a>
       <a href="#kader" data-nav="kader" role="tab"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M16 5a3 3 0 0 1 0 6M21 20c0-2-1-4-3-4.5"/></svg><span>Kader</span> <span class="nb" id="nb-kader"></span></a>
+      <a href="#schatten" data-nav="schatten" role="tab"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M6 20V9l6-5 6 5v11"/><path d="M10 20v-5h4v5"/></svg><span>Schattenkader</span></a>
       <a href="#transfers" data-nav="transfers" role="tab"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span>Scouting</span> <span class="nb" id="nb-short"></span></a>
-      <a href="#datenbank" data-nav="datenbank" role="tab"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg><span>Spielerdatenbank</span> <span class="nb" id="nb-db"></span></a>
+      <a href="#datenbank" data-nav="datenbank" role="tab"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg><span>Datenbank</span> <span class="nb" id="nb-db"></span></a>
       <a href="#bericht" data-nav="bericht" role="tab" id="nav-bericht" hidden><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l3 3v15H6zM9 11h6M9 15h6"/></svg><span>Scoutbericht</span></a>
     </div>
     <div class="navright">
       <span class="savestate" id="savestate" aria-live="polite" title="Speicherstatus"></span>
       <span class="navsum num" id="navsum"></span>
+      <button class="themebtn" id="np-toggle" type="button" aria-label="Notizblock öffnen" aria-expanded="false" title="Notizblock"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></button>
       <button class="themebtn" id="theme-toggle" type="button" aria-label="Dunkles Design einschalten" title="Hell / Dunkel">
         <svg id="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         <svg id="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" hidden><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
       </button>
     </div>
   </nav>
-  </aside>
+  <main class="binder" id="binder">
   <div class="cmdbar" id="cmdbar" data-enter="2">
     <div class="cb-l"><div class="cb-crumb" id="cb-crumb">Karrieremodus</div><h2 id="cb-title">Matchplan</h2></div>
     <div class="kpis" id="kpis"></div>
@@ -1170,6 +1260,26 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
     </div>
   </section>
   </div>
+  <div class="view" id="v-schatten" data-view="schatten" role="tabpanel" aria-label="Schattenkader" hidden>
+    <section class="panel" aria-labelledby="sh-h">
+      <div class="row" style="justify-content:space-between;align-items:flex-end;gap:16px">
+        <div><div class="eyebrow">Kaderplanung</div><h3 id="sh-h">Schattenkader</h3>
+          <p class="small muted" style="margin:4px 0 0;max-width:64ch">Plane die Mannschaft für eine kommende Saison: pro Position eine Wunschlösung und bis zu zwei Alternativen aus deinem Kader, der Shortlist oder der Datenbank. Werte und Alter sind auf die Zielsaison hochgerechnet.</p></div>
+        <div class="row sh-ctl">
+          <label class="fld" for="sh-season">Zielsaison<select id="sh-season"></select></label>
+          <label class="fld" for="sh-form">Formation<select id="sh-form"></select></label>
+          <button class="btn primary" id="sh-auto" type="button">Automatisch planen</button>
+          <button class="btn" id="sh-clear" type="button">Leeren</button>
+        </div>
+      </div>
+      <div class="sh-sum" id="sh-sum"></div>
+      <div class="sh-grid">
+        <div class="pitchbox"><div class="pitch sh-pitch" id="sh-pitch"></div></div>
+        <div class="sh-edit" id="sh-edit"></div>
+      </div>
+      <div class="sh-risk" id="sh-risk"></div>
+    </section>
+  </div>
   <div class="view" id="v-transfers" data-view="transfers" role="tabpanel" aria-label="Scouting" hidden>
     <section class="panel" aria-labelledby="sl-h" id="shortlist-panel" style="margin-bottom:16px">
       <div class="row" style="justify-content:space-between">
@@ -1370,6 +1480,13 @@ Tim Muster;ST/HS;29;81;81;R"></textarea>
       <div class="report" id="report"><p class="muted small">Claude liest die Analyse oben und schreibt dir eine taktische Einschätzung mit konkreten Spielerprofilen für das nächste Transferfenster.</p></div>
     </section>
   </div>
+  </main>
+  <aside class="notepad" id="notepad" aria-label="Notizblock">
+    <div class="np-h"><b>Notizblock</b><button class="np-x" id="np-close" type="button" aria-label="Notizblock schließen">×</button></div>
+    <textarea id="notes" spellcheck="true" placeholder="Gespräche, Beobachtungen, Fristen …"></textarea>
+    <small class="np-f" id="np-f">Wird mit deinem Kader gespeichert.</small>
+  </aside>
+  <footer class="dock" id="dock" aria-label="Status"></footer>
 </div>
 
 <script>
@@ -1704,7 +1821,8 @@ try {
   const saved = JSON.parse(localStorage.getItem(KEY) || "null");
   if (saved && Array.isArray(saved.players)){
     state = {players: saved.players.map(normalizePlayer), formation: FORMATIONS[saved.formation] ? saved.formation : "4-3-3", overrides: saved.overrides || {}, isSample: !!saved.isSample,
-      useDyn: saved.useDyn !== false, roles: saved.roles && typeof saved.roles === "object" ? saved.roles : {}, style: saved.style || "auto"};
+      useDyn: saved.useDyn !== false, roles: saved.roles && typeof saved.roles === "object" ? saved.roles : {}, style: saved.style || "auto",
+      shadow: saved.shadow && typeof saved.shadow === "object" ? saved.shadow : null, notes: String(saved.notes || "")};
   }
 } catch(e){}
 var lastLocalState = null;
@@ -2055,14 +2173,15 @@ function renderAll(withTable = true){
 }
 
 /* ---------- Ansichten (oben auswählbar) ---------- */
-const VIEWS = ["aufstellung","analyse","taktik","kader","transfers","datenbank","bericht"];
+const VIEWS = ["aufstellung","analyse","taktik","kader","schatten","transfers","datenbank","bericht"];
 function showView(name, scroll = true){
   if (!VIEWS.includes(name) || (name === "bericht" && $("#nav-bericht").hidden)) name = "aufstellung";
   document.querySelectorAll(".view").forEach(v => v.hidden = v.dataset.view !== name);
   document.querySelectorAll("[data-nav]").forEach(a => a.setAttribute("aria-selected", a.dataset.nav === name));
   document.querySelector(`[data-nav="${name}"]`)?.scrollIntoView({block: "nearest", inline: "nearest"});
   if (name === "kader" && !$("#pane-db").hidden && typeof renderQdb === "function") renderQdb();
-  if (scroll) window.scrollTo({top: 0});
+  if (scroll){ window.scrollTo({top: 0}); const bd = document.getElementById("binder"); if (bd) bd.scrollTop = 0; }
+  if (name === "schatten" && typeof renderShadow === "function") renderShadow();
 }
 function reveal(sel, opts){
   const el = $(sel); if (!el) return;
@@ -2078,6 +2197,7 @@ function renderNav(A){
   $("#nb-db").textContent = typeof DB !== "undefined" && DB.length ? DB.length : "";
   $("#navsum").innerHTML = `${esc(state.formation)} · Gesamt <b>${r1(A.overall)}</b> · Synergie <b>${r0(A.syn)}</b>`;
   if (typeof renderCmd === "function") try { renderCmd(); } catch(e){}
+  if (typeof renderDesk === "function") try { renderDesk(); if (!$("#v-schatten").hidden) renderShadow(); } catch(e){}
   const g = [...A.points.cons.slice(0, 3).map(x => ({...x, k: "bad", l: "Minus"})), ...A.points.pros.slice(0, 2).map(x => ({...x, k: "good", l: "Plus"}))];
   $("#glance").innerHTML = g.length ? g.map(x => `<li><span class="pill ${x.k}">${x.l}</span><div><strong>${esc(x.t)}</strong><span class="t">${esc(x.d)}</span></div></li>`).join("")
     : `<li><span class="pill warn">–</span><div><span class="t">Noch keine Auffälligkeiten.</span></div></li>`;
@@ -3909,7 +4029,9 @@ Hinweise des Assistenten: ${[...T.warn, ...roleRules(last, last.xi.map((s, i) =>
 function applyStored(st, dbArr){
   if (st && Array.isArray(st.players)){
     state = {players: st.players.map(normalizePlayer), formation: FORMATIONS[st.formation] ? st.formation : "4-3-3", overrides: st.overrides || {}, isSample: !!st.isSample,
-      useDyn: st.useDyn !== false, roles: st.roles && typeof st.roles === "object" ? st.roles : {}, style: st.style || "auto"};
+      useDyn: st.useDyn !== false, roles: st.roles && typeof st.roles === "object" ? st.roles : {}, style: st.style || "auto",
+      shadow: st.shadow && typeof st.shadow === "object" ? st.shadow : null, notes: String(st.notes || "")};
+    try { const ne = document.getElementById("notes"); if (ne && document.activeElement !== ne) ne.value = state.notes || ""; } catch(e){}
   }
   if (Array.isArray(dbArr)) DB = dbArr.filter(x => x && x.name).map(x => ({...normalizePlayer(x), club: x.club || "", value: x.value ?? null, league: x.league || ""}));
   try { localStorage.setItem(KEY, JSON.stringify(state)); localStorage.setItem(DBKEY, JSON.stringify(DB)); } catch(e){}
@@ -4178,7 +4300,7 @@ $("#calc-results").addEventListener("click", e => {
 renderShortlist();
 
 /* ---------- Statusleiste und Vereinskarte ---------- */
-const VIEW_T = {aufstellung: "Matchplan", analyse: "Kaderanalyse", taktik: "Taktik", kader: "Kader", transfers: "Scouting", datenbank: "Spielerdatenbank", bericht: "Scoutbericht"};
+const VIEW_T = {schatten: "Schattenkader", aufstellung: "Matchplan", analyse: "Kaderanalyse", taktik: "Taktik", kader: "Kader", transfers: "Scouting", datenbank: "Spielerdatenbank", bericht: "Scoutbericht"};
 function renderCmd(){
   if (!last) return;
   let club = "", gd = null;
@@ -4198,6 +4320,185 @@ function renderCmd(){
 }
 window.addEventListener("hashchange", renderCmd);
 renderCmd();
+
+/* ---------- Schattenkader: Planung für kommende Saisons ---------- */
+const POS_LONG = {GK:"Torwart",CB:"Innenverteidiger",LB:"Linker Verteidiger",RB:"Rechter Verteidiger",LWB:"Linker Außenverteidiger",RWB:"Rechter Außenverteidiger",CDM:"Defensives Mittelfeld",CM:"Zentrales Mittelfeld",CAM:"Offensives Mittelfeld",LM:"Linkes Mittelfeld",RM:"Rechtes Mittelfeld",LW:"Linker Flügel",RW:"Rechter Flügel",CF:"Hängende Spitze",ST:"Stürmer"};
+let shSel = null;
+function gameDateObj(){ let gd = null; try { gd = fcGameDate || localStorage.getItem("kaderlabor.fcdate"); } catch(e){} const d = gd ? new Date(gd) : new Date(); return isNaN(d) ? new Date() : d; }
+const seasonYear = off => { const d = gameDateObj(); return (d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1) + off; };
+const seasonLabel = y => `${y}/${String(y + 1).slice(2)}`;
+function shState(){
+  if (!state.shadow || typeof state.shadow !== "object") state.shadow = {off: 1, formation: state.formation, slots: []};
+  const sh = state.shadow;
+  if (!FORMATIONS[sh.formation]) sh.formation = FORMATIONS[state.formation] ? state.formation : "4-3-3";
+  const n = FORMATIONS[sh.formation].length;
+  if (!Array.isArray(sh.slots)) sh.slots = [];
+  sh.slots = sh.slots.slice(0, n).map(a => Array.isArray(a) ? a.filter(c => c && c.id).slice(0, 3) : []);
+  while (sh.slots.length < n) sh.slots.push([]);
+  sh.off = clamp(toInt(sh.off) ?? 1, 1, 3);
+  return sh;
+}
+function shResolve(c){
+  if (c.src === "own"){ const p = state.players.find(x => x.id === c.id); return p ? {p, own: true, price: 0} : null; }
+  if (!c.snap) return null;
+  return {p: normalizePlayer({...c.snap, id: "sx-" + c.id}), own: false, price: c.snap.price ?? null, club: c.snap.club || ""};
+}
+function shProj(p, pos, off){ const o = projOvr(p, off); return {age: p.age + off, ovr: o, fit: Math.round(fitAt(p, pos) + (o - p.ovr))}; }
+function shSnap(e){ const t = transferPrice(e, null); return {...e, price: t.price, sl: slHas(e.id)}; }
+function shCand(src, e){ return src === "own" ? {src, id: e.id} : {src, id: e.id, snap: shSnap(e)}; }
+function shRisks(r, Y){
+  const out = [];
+  if (r.own && r.p.contract && r.p.contract <= Y) out.push(`Vertrag endet ${r.p.contract}`);
+  if (r.p.age + state.shadow.off >= 32) out.push(`dann ${r.p.age + state.shadow.off} Jahre`);
+  return out;
+}
+function renderShadow(){
+  if (!last || !$("#sh-pitch")) return;
+  const sh = shState(), F = FORMATIONS[sh.formation], Y = seasonYear(sh.off);
+  $("#sh-season").innerHTML = [1, 2, 3].map(o => `<option value="${o}" ${o === sh.off ? "selected" : ""}>${seasonLabel(seasonYear(o))} (in ${o} ${o === 1 ? "Saison" : "Saisons"})</option>`).join("");
+  $("#sh-form").innerHTML = FORMATION_GROUPS.map(([g, fn]) => `<optgroup label="${g}">${Object.keys(FORMATIONS).filter(fn).map(f => `<option ${f === sh.formation ? "selected" : ""}>${f}</option>`).join("")}</optgroup>`).join("");
+  const marks = `<svg viewBox="0 0 68 100" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="var(--chalk)" stroke-width=".35"><rect x="2" y="2" width="64" height="96"/><line x1="2" y1="50" x2="66" y2="50"/><circle cx="34" cy="50" r="8.5"/><rect x="15" y="2" width="38" height="15"/><rect x="15" y="83" width="38" height="15"/></g></svg>`;
+  const first = sh.slots.map((arr, i) => { for (const c of arr){ const r = shResolve(c); if (r) return {...r, c, pr: shProj(r.p, F[i][0], sh.off)}; } return null; });
+  $("#sh-pitch").innerHTML = marks + F.map(([pos, x, y], i) => {
+    const f = first[i], n = sh.slots[i].length, selc = shSel === i ? " sel" : "";
+    if (!f) return `<button type="button" class="chip pc empty${selc}" data-shslot="${i}" style="left:${x}%;top:${PY(y)}%" aria-label="${DE[pos]} planen"><span class="pc-av">+</span><span class="pc-nm"><i>${DE[pos]}</i>offen</span></button>`;
+    const risk = shRisks(f, Y).length ? " warn" : "", ext = f.own ? "" : " ext";
+    return `<button type="button" class="chip pc${risk}${ext}${selc}" data-shslot="${i}" style="left:${x}%;top:${PY(y)}%" title="${esc(f.p.name)} · ${seasonLabel(Y)}: GES ${f.pr.fit} mit ${f.pr.age} Jahren" aria-label="${DE[pos]}: ${esc(f.p.name)}, bearbeiten">
+      <span class="pc-av">${esc(initials(f.p.name))}<b class="pc-ovr num">${f.pr.fit}</b></span><span class="pc-nm"><i>${DE[pos]}</i>${esc(f.p.name.split(" ").slice(-1)[0])}${n > 1 ? ` <em>+${n - 1}</em>` : ""}</span></button>`;
+  }).join("");
+  // Zusammenfassung
+  const filled = first.filter(Boolean), gaps = F.length - filled.length;
+  const strength = filled.length ? avg(filled, f => f.pr.fit) : null, age = filled.length ? avg(filled, f => f.pr.age) : null;
+  const ext = filled.filter(f => !f.own), cost = ext.reduce((t, f) => t + (f.price || 0), 0);
+  const risks = []; first.forEach((f, i) => { if (f) shRisks(f, Y).forEach(t => risks.push(`${DE[F[i][0]]} ${f.p.name}: ${t}`)); else risks.push(`${DE[F[i][0]]}: noch keine Lösung`); });
+  const d = strength != null ? strength - last.overall : null;
+  const k = [["Startelf-Prognose", strength != null ? r1(strength).replace(".", ",") : "–", d != null ? `${d >= 0 ? "+" : ""}${r1(d).replace(".", ",")} ggü. heute` : ""],
+    ["Ø Alter", age != null ? r1(age).replace(".", ",") : "–", seasonLabel(Y)], ["Zugänge", ext.length, ext.length ? `${fmtMio(Math.round(cost * 10) / 10)} Ablöse` : "nur eigener Kader"],
+    ["Offene Positionen", gaps, gaps ? "planen" : "alle besetzt"], ["Risiken", risks.length - gaps, "Verträge, Alter"]];
+  $("#sh-sum").innerHTML = k.map(([l, v, sub]) => `<div class="kpi"><span>${l}</span><b class="num">${v}</b><small>${esc(sub)}</small></div>`).join("");
+  $("#sh-risk").innerHTML = risks.length ? `<div class="eyebrow" style="margin-top:16px">Offene Punkte für ${seasonLabel(Y)}</div><ul class="plan-list">${risks.map(t => `<li>${esc(t)}</li>`).join("")}</ul>` : "";
+  renderShEdit();
+}
+function shSuggest(pos, q){
+  const sh = shState(), off = sh.off, Y = seasonYear(off), used = new Set(sh.slots[shSel].map(c => c.id));
+  const out = [];
+  const add = (src, e) => { if (used.has(e.id)) return; const pr = shProj(e, pos, off); out.push({src, e, pr}); };
+  const ql = q.trim().toLowerCase();
+  state.players.forEach(p => { if (!ql || p.name.toLowerCase().includes(ql)) add("own", p); });
+  if (typeof DB !== "undefined"){
+    const slIds = new Set(SL.map(x => x.id));
+    const own = new Set(state.players.map(p => p.name.toLowerCase()));
+    const B = parseFloat($("#tf-budget").value) || 40;
+    let pool = DB.filter(e => !own.has(e.name.toLowerCase()) && !/^Spieler \d+$/.test(e.name) && (ql ? e.name.toLowerCase().includes(ql) : (slIds.has(e.id) || (e.age + off <= 30 && fitAt(e, pos) >= e.ovr - 3))));
+    if (!ql) pool = pool.map(e => ({e, f: shProj(e, pos, off).fit - transferPrice(e, null).price / Math.max(B, 1) * 6 + (slIds.has(e.id) ? 4 : 0)})).sort((a, b) => b.f - a.f).slice(0, 8).map(x => x.e);
+    pool.slice(0, ql ? 12 : 8).forEach(e => add(slIds.has(e.id) ? "sl" : "db", e));
+  }
+  return out.sort((a, b) => (a.src === "own" ? -1 : 0) - (b.src === "own" ? -1 : 0) || b.pr.fit - a.pr.fit).slice(0, ql ? 14 : 10);
+}
+function renderShEdit(){
+  const box = $("#sh-edit"); if (!box) return;
+  const sh = shState(), F = FORMATIONS[sh.formation];
+  if (shSel == null || shSel >= F.length){ box.innerHTML = `<div class="sh-hint"><b>Position wählen</b><p class="small muted">Klick auf eine Position auf dem Feld. Dort legst du die Wunschlösung und bis zu zwei Alternativen fest. Oder lass das Labor mit „Automatisch planen“ einen Entwurf erstellen.</p></div>`; return; }
+  const pos = F[shSel][0], Y = seasonYear(sh.off), arr = sh.slots[shSel];
+  const SRC = {own: "Kader", sl: "Shortlist", db: "Datenbank"};
+  const rows = arr.map((c, k) => { const r = shResolve(c); if (!r) return `<li class="shc gone"><span class="rk num">${k + 1}</span><div><b>nicht mehr verfügbar</b></div><button type="button" class="btn sm" data-shdel="${k}">Entfernen</button></li>`;
+    const pr = shProj(r.p, pos, sh.off), rk = shRisks(r, Y);
+    return `<li class="shc"><span class="rk num">${k + 1}</span><div style="min-width:0"><b>${esc(r.p.name)}</b> <span class="srctag ${c.src}">${SRC[c.src] || ""}</span>
+      <small>${seasonLabel(Y)}: GES ${pr.fit} auf ${DE[pos]} · ${pr.age} J.${r.own ? "" : " · " + (r.price > 0 ? "≈ " + fmtMio(r.price) : "ablösefrei")}${r.club ? " · " + esc(r.club) : ""}${rk.length ? ` · <span class="risk">${esc(rk.join(", "))}</span>` : ""}</small></div>
+      <span class="shc-a">${k ? `<button type="button" class="btn sm" data-shup="${k}" aria-label="nach oben">↑</button>` : '<span class="wish">Wunsch</span>'}<button type="button" class="btn sm" data-shdel="${k}" aria-label="entfernen">×</button></span></li>`; }).join("");
+  box.innerHTML = `<div class="sh-eh"><div><div class="eyebrow">${seasonLabel(Y)}</div><h4>${DE[pos]} · ${POS_LONG[pos] || ""}</h4></div><button type="button" class="btn sm" id="sh-close">Fertig</button></div>
+    <ol class="shlist">${rows || '<li class="muted small" style="padding:8px 0">Noch kein Kandidat.</li>'}</ol>
+    ${arr.length < 3 ? `<label class="fld" for="sh-q" style="margin-top:12px">Kandidat hinzufügen<input id="sh-q" type="search" placeholder="Name aus Kader, Shortlist oder Datenbank" autocomplete="off"></label><ul class="shres" id="sh-res"></ul>` : '<p class="small muted">Drei Kandidaten geplant. Entferne einen, um zu tauschen.</p>'}`;
+  if (arr.length < 3) renderShRes("");
+}
+function renderShRes(q){
+  const ul = $("#sh-res"); if (!ul) return;
+  const pos = FORMATIONS[shState().formation][shSel][0];
+  const SRC = {own: "Kader", sl: "Shortlist", db: "Datenbank"};
+  const res = shSuggest(pos, q);
+  ul.innerHTML = (q ? "" : '<li class="small muted shres-h">Vorschläge für diese Position</li>') + (res.length ? res.map(x => `<li><button type="button" data-shadd="${x.src}|${esc(x.e.id)}"><span><b>${esc(x.e.name)}</b> <span class="srctag ${x.src}">${SRC[x.src]}</span><small>${DE[x.e.pos]} · heute ${x.e.age} J., GES ${x.e.ovr}${x.src !== "own" ? " · " + esc(x.e.club || "") : ""}</small></span><span class="num shres-f">${x.pr.fit}</span></button></li>`).join("") : '<li class="small muted">Nichts gefunden.</li>');
+}
+function shAuto(){
+  const sh = shState(), F = FORMATIONS[sh.formation], off = sh.off, Y = seasonYear(off);
+  const B = parseFloat($("#tf-budget").value) || 40;
+  const own = state.players.filter(p => !(p.contract && p.contract <= Y) && p.age + off <= 34);
+  const pairs = [];
+  F.forEach(([pos], i) => own.forEach(p => pairs.push({i, p, f: shProj(p, pos, off).fit})));
+  pairs.sort((a, b) => b.f - a.f);
+  const slots = F.map(() => []), usedP = new Set(), firstFit = [];
+  for (const x of pairs){ if (slots[x.i].length || usedP.has(x.p.id)) continue; slots[x.i].push(shCand("own", x.p)); usedP.add(x.p.id); firstFit[x.i] = x.f; }
+  // Alternativen aus dem eigenen Kader
+  F.forEach(([pos], i) => { const alt = own.filter(p => !usedP.has(p.id)).map(p => ({p, f: shProj(p, pos, off).fit})).sort((a, b) => b.f - a.f)[0]; if (alt && alt.f >= (firstFit[i] ?? 0) - 6) slots[i].push(shCand("own", alt.p)); });
+  // Verstärkung von außen: nur wo sie die Zielsaison klar verbessert
+  const target = (last.overall || 70) + 1, ownNames = new Set(state.players.map(p => p.name.toLowerCase())), slIds = new Set(SL.map(x => x.id)), takenExt = new Set();
+  let spent = 0;
+  F.map(([pos], i) => ({pos, i, f: firstFit[i] ?? 0})).sort((a, b) => a.f - b.f).forEach(({pos, i, f}) => {
+    if (f >= target + 2 || typeof DB === "undefined") return;
+    let best = null;
+    for (const e of DB){
+      if (ownNames.has(e.name.toLowerCase()) || takenExt.has(e.id) || e.age + off > 29 || /^Spieler \d+$/.test(e.name) || fitAt(e, pos) < e.ovr - 3) continue;
+      const pr = transferPrice(e, null).price; if (spent + pr > B) continue;
+      const pf = shProj(e, pos, off).fit; if (pf < Math.max(f + 2, target - 1)) continue;
+      const sc = pf - pr / Math.max(B, 1) * 6 + (slIds.has(e.id) ? 4 : 0) + nationFit(e.nat, homeNation("")).n * 3;
+      if (!best || sc > best.sc) best = {e, sc, pr, pf};
+    }
+    if (best){ takenExt.add(best.e.id); spent += best.pr; slots[i].splice(best.pf > f ? 0 : 1, 0, shCand(slIds.has(best.e.id) ? "sl" : "db", best.e)); slots[i] = slots[i].slice(0, 3); }
+  });
+  sh.slots = slots; save(); renderShadow(); renderDock();
+}
+$("#v-schatten").addEventListener("click", e => {
+  const sh = shState();
+  const slot = e.target.closest("[data-shslot]"); if (slot){ shSel = +slot.dataset.shslot; renderShadow(); const q = $("#sh-q"); if (q && matchMedia("(pointer:fine)").matches) q.focus(); return; }
+  if (e.target.closest("#sh-close")){ shSel = null; renderShadow(); return; }
+  const addb = e.target.closest("[data-shadd]");
+  if (addb && shSel != null){ const [src, id] = addb.dataset.shadd.split("|"); const ent = src === "own" ? state.players.find(p => p.id === id) : DB.find(x => x.id === id);
+    if (ent && sh.slots[shSel].length < 3){ sh.slots[shSel].push(shCand(src, ent)); save(); renderShadow(); renderDock(); } return; }
+  const up = e.target.closest("[data-shup]"); if (up){ const k = +up.dataset.shup, a = sh.slots[shSel]; [a[k - 1], a[k]] = [a[k], a[k - 1]]; save(); renderShadow(); return; }
+  const del = e.target.closest("[data-shdel]"); if (del){ sh.slots[shSel].splice(+del.dataset.shdel, 1); save(); renderShadow(); renderDock(); return; }
+});
+$("#v-schatten").addEventListener("input", e => { if (e.target.id === "sh-q") renderShRes(e.target.value); });
+$("#sh-season").addEventListener("change", e => { shState().off = +e.target.value; save(); renderShadow(); renderDock(); });
+$("#sh-form").addEventListener("change", e => {
+  const sh = shState(), oldF = FORMATIONS[sh.formation], newF = FORMATIONS[e.target.value];
+  // Kandidaten nach Position übernehmen, soweit sie in der neuen Formation vorkommt
+  const byPos = {}; oldF.forEach(([pos], i) => (byPos[pos] ||= []).push(sh.slots[i]));
+  sh.formation = e.target.value; sh.slots = newF.map(([pos]) => (byPos[pos] && byPos[pos].length) ? byPos[pos].shift() : []);
+  shSel = null; save(); renderShadow(); renderDock();
+});
+$("#sh-auto").addEventListener("click", shAuto);
+let shClearArmed = false;
+$("#sh-clear").addEventListener("click", e => {
+  if (!shClearArmed){ shClearArmed = true; e.target.textContent = "Wirklich leeren?"; setTimeout(() => { shClearArmed = false; e.target.textContent = "Leeren"; }, 3000); return; }
+  shClearArmed = false; e.target.textContent = "Leeren"; const sh = shState(); sh.slots = sh.slots.map(() => []); shSel = null; save(); renderShadow(); renderDock();
+});
+
+/* ---------- Schreibtisch: Kalender, Baustellen, Notizblock, Statusleiste ---------- */
+function renderDesk(){
+  if (!last) return;
+  const d = gameDateObj(); let gd = null; try { gd = fcGameDate || localStorage.getItem("kaderlabor.fcdate"); } catch(e){}
+  $("#wcal-wd").textContent = gd ? d.toLocaleDateString("de-DE", {weekday: "long"}) : "Kalender";
+  $("#wcal-day").textContent = gd ? d.getDate() : "–";
+  $("#wcal-m").textContent = gd ? d.toLocaleDateString("de-DE", {month: "long", year: "numeric"}) : "Spielstand abgleichen";
+  $("#wcal-s").textContent = gd ? "Saison " + seasonLabel(seasonYear(0)) : "";
+  const iss = [...last.points.cons.map(c => c.t), ...last.plan.needs.map(n => `Transferbedarf ${DE[n.pos]}`)].slice(0, 5);
+  $("#w-issues-list").innerHTML = iss.length ? iss.map(t => `<li><a href="#analyse">${esc(t)}</a></li>`).join("") : '<li class="muted">Keine offenen Baustellen.</li>';
+  renderDock();
+}
+function renderDock(){
+  const dk = $("#dock"); if (!dk || !last) return;
+  let shv = "–"; try { if (state.shadow){ const sh = shState(), F = FORMATIONS[sh.formation]; const fs = sh.slots.map((a, i) => { for (const c of a){ const r = shResolve(c); if (r) return shProj(r.p, F[i][0], sh.off).fit; } return null; }).filter(v => v != null); if (fs.length) shv = r1(avg(fs)).replace(".", ","); } } catch(e){}
+  const w = [["Teamstärke", r1(last.overall).replace(".", ","), last.overall, 60, 90], ["Synergie", r0(last.syn), last.syn, 0, 100], ["Kadertiefe", r0(last.depth), last.depth, 0, 100],
+    ["Ø Alter", state.players.length ? r1(avg(state.players, p => p.age)).replace(".", ",") : "–", null], ["Kader", state.players.length, null],
+    ["Schattenkader", shv, null], ["Shortlist", SL.length, null], ["Datenbank", typeof DB !== "undefined" && DB.length ? DB.length.toLocaleString("de-DE") : "–", null]];
+  dk.innerHTML = w.map(([l, v, raw, a, b]) => `<div class="dw"><span>${l}</span><b class="num">${v}</b>${raw != null ? `<i><u style="width:${clamp((raw - a) / (b - a) * 100, 0, 100)}%"></u></i>` : ""}</div>`).join("");
+}
+const notesEl = $("#notes");
+notesEl.value = state.notes || "";
+let notesT = null;
+notesEl.addEventListener("input", () => { state.notes = notesEl.value.slice(0, 20000); clearTimeout(notesT); notesT = setTimeout(() => { save(); $("#np-f").textContent = "Gespeichert."; }, 600); $("#np-f").textContent = "…"; });
+function npToggle(open){ const np = $("#notepad"); open = open ?? !np.classList.contains("open"); np.classList.toggle("open", open); $("#np-toggle").setAttribute("aria-expanded", open); if (open && matchMedia("(pointer:fine)").matches) notesEl.focus(); }
+$("#np-toggle").addEventListener("click", () => npToggle());
+$("#np-close").addEventListener("click", () => npToggle(false));
 
 $("#use-dyn").checked = state.useDyn !== false;
 showView(location.hash.slice(1) || "aufstellung", false);

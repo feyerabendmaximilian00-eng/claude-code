@@ -1,8 +1,8 @@
 {
-  "version": "1.7.1",
+  "version": "1.8.0",
   "minLauncher": "1",
-  "released": "2026-11-15T03:28:27.950Z",
-  "notes": "Alter wird mit dem Spieldatum aktualisiert (Geburtsdatum aus dem Spielstand); Farben des 1. FCN; Schreibtisch-Hintergrund",
+  "released": "2026-11-15T03:37:12.203Z",
+  "notes": "Schattenkader für kommende Saisons; Schreibtisch mit Ordner, Registern, Kalender, Baustellen, Notizblock und Statusleiste",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "aef3ef26777ac72a2d538d5ff5a880248856384eaef6044862310bf64a411a87",
-      "size": 326409
+      "sha256": "b19b76fdfd45a88dec32116dd4883b477dc26c5072620691edddc4e6d92a34f1",
+      "size": 354824
     },
     {
       "path": "app/settings.html",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "ee273de9a6b73e604d9ee1dfbcb24c134418bcba71a00da6c460b7390a4813d5",
+      "sha256": "5c5c922803471976147fd019a9c2cefec821a5229da80295ff6ed62efe092781",
       "size": 23
     }
   ]
