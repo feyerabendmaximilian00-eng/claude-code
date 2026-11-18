@@ -150,6 +150,9 @@ function readSave(file, names, opts = {}) {
   const ltl = pick(t => t.has("aQrQ") && t.has("mCXg") && t.has("PSlV"));
   const tpl = pick(t => t.has("ykFq") && t.has("mCXg") && t.has("JMld"));
   const dateT = pick(t => t.has("GHrs"));
+  // dein Verein im Karrieremodus: einzeilige Karriere-Tabelle mit der Vereins-ID (z. B. „1. FC NÜRNBERG Stand.“)
+  const userT = tables.filter(t => t.nvalid === 1 && t.has("mCXg") && t.fields.length > 50).sort((a, b) => b.fields.length - a.fields.length)[0];
+  const userTeamId = userT ? userT.get(0, "mCXg") : null;
 
   const teams = new Map(), leagues = new Map(), teamLeague = new Map(), links = new Map();
   if (teamsT) for (let i = 0; i < teamsT.nvalid; i++) teams.set(teamsT.get(i, "mCXg"), teamsT.get(i, "AUsv"));
@@ -214,7 +217,8 @@ function readSave(file, names, opts = {}) {
   rows.forEach(r => { const k = r.name + "|" + r.club; dup.set(k, (dup.get(k) || 0) + 1); });
   rows.forEach(r => { if (dup.get(r.name + "|" + r.club) > 1) r.name = `${r.name} (${r.pos}, ${r.age})`; });
   const named = rows.filter(r => !/^Spieler \d+$/.test(r.name)).length;
-  return { rows, meta: { file: path.basename(file), saved: fs.statSync(file).mtime.toISOString(), gameDate: ref.toISOString().slice(0, 10), players: rows.length, named } };
+  const userClub = userTeamId != null ? (teams.get(userTeamId) || "") : "";
+  return { rows, meta: { userTeamId, userClub, file: path.basename(file), saved: fs.statSync(file).mtime.toISOString(), gameDate: ref.toISOString().slice(0, 10), players: rows.length, named } };
 }
 
 function loadNames(file) {

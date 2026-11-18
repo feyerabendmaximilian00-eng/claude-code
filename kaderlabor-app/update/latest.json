@@ -1,8 +1,8 @@
 {
-  "version": "1.9.8",
+  "version": "1.9.9",
   "minLauncher": "1",
-  "released": "2026-11-15T13:09:43.967Z",
-  "notes": "Spielerprofile je Position; Torhüter mit echten Torwartwerten (Reflexe, Hechtsprung, Fangen, Stellungsspiel, Abschlag)",
+  "released": "2026-11-18T15:17:24.729Z",
+  "notes": "Kader wird beim Abgleich automatisch übernommen: Neuzugänge kommen dazu, verkaufte und verliehene Spieler fallen raus",
   "files": [
     {
       "path": "app/claude-shim.js",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/index.html",
-      "sha256": "f78145633ba6092725a7bb2bc07a69b3fa213a17a80339c6f4d367425e5e52e4",
-      "size": 571232
+      "sha256": "a866af46d773f65ffd477d517a7d246a22d473d9c84fcbf76c2a9310a896f7f1",
+      "size": 573778
     },
     {
       "path": "app/settings.html",
@@ -31,13 +31,13 @@
     },
     {
       "path": "app-main.js",
-      "sha256": "49fbc29bbc95ffe42a86db97e7168b88bafd1ef443ccc6d1e185848f4e980937",
+      "sha256": "061da9655467d397b00407ff4f5e46f07af09862dac86d15001563b5155e2ebc",
       "size": 26271
     },
     {
       "path": "fcsave.js",
-      "sha256": "ce1da2f7a7379861d76dab4440bd2e039dc167d863237ef4a1673d1f6b9d5a37",
-      "size": 15357
+      "sha256": "f954e16a4fd914cc4d675c4a89340d3c8bccd403d534494170cd8a26f12f9ac9",
+      "size": 15778
     },
     {
       "path": "preload.js",
@@ -56,7 +56,7 @@
     },
     {
       "path": "version.json",
-      "sha256": "5ef852b59e874a2f4aefa08988431ad20ce625e893513f14578ba0811cb907d4",
+      "sha256": "4a6313d8d01725fc002cac47eb695685f5ad54d7517e9debb36c321ca06399c6",
       "size": 23
     }
   ]
