@@ -1,2 +1,5 @@
 .DS_Store
 
+
+# Lokale Importdateien aus dem Spielstand (nicht veröffentlichen)
+kaderlabor-import/

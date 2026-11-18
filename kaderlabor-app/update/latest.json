@@ -1,0 +1,63 @@
+{
+  "version": "1.9.9",
+  "minLauncher": "1",
+  "released": "2026-11-18T15:17:24.729Z",
+  "notes": "Kader wird beim Abgleich automatisch übernommen: Neuzugänge kommen dazu, verkaufte und verliehene Spieler fallen raus",
+  "files": [
+    {
+      "path": "app/claude-shim.js",
+      "sha256": "b12b04d6e0e2e5571b5131e1190ae05cf90b3c644e3b83dc7c1118a6b9972bfa",
+      "size": 2979
+    },
+    {
+      "path": "app/icon.ico",
+      "sha256": "dab22d3be277b168ddd32f03ff4e1ad7dee832d01b9d2148d355e310637228ee",
+      "size": 68143
+    },
+    {
+      "path": "app/icon.png",
+      "sha256": "da4cb5a0c14de10b25c06bd68211bf0c96010b8d548c0ed857ac7375d8215227",
+      "size": 34098
+    },
+    {
+      "path": "app/index.html",
+      "sha256": "a866af46d773f65ffd477d517a7d246a22d473d9c84fcbf76c2a9310a896f7f1",
+      "size": 573778
+    },
+    {
+      "path": "app/settings.html",
+      "sha256": "af25f3c12fc25b5754ea13d27714008c3daa6fbb506965f3e15471ef970b914f",
+      "size": 3304
+    },
+    {
+      "path": "app-main.js",
+      "sha256": "061da9655467d397b00407ff4f5e46f07af09862dac86d15001563b5155e2ebc",
+      "size": 26271
+    },
+    {
+      "path": "fcsave.js",
+      "sha256": "f954e16a4fd914cc4d675c4a89340d3c8bccd403d534494170cd8a26f12f9ac9",
+      "size": 15778
+    },
+    {
+      "path": "preload.js",
+      "sha256": "cd9696cde4d3ae94ec9f37f206b237729e4d850153f525e9a698941cb07e5609",
+      "size": 1419
+    },
+    {
+      "path": "vendor/fzstd-LICENSE.txt",
+      "sha256": "62249119bb7df6e54300f37a37145c26a6d4420410aac8881a119c5b427cf751",
+      "size": 1069
+    },
+    {
+      "path": "vendor/fzstd.js",
+      "sha256": "0405645033c87f066af0f5d549016660f422a60a7a1abd0fc116f2dc66dee95d",
+      "size": 24454
+    },
+    {
+      "path": "version.json",
+      "sha256": "4a6313d8d01725fc002cac47eb695685f5ad54d7517e9debb36c321ca06399c6",
+      "size": 23
+    }
+  ]
+}
